@@ -60,6 +60,8 @@ class ViT(nn.Module):
             x = layer(x)
 
         x = self.norm(x)
+
         cls_token_output = x[:, 0]
+
         return self.head(cls_token_output)
 
