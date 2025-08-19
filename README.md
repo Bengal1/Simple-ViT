@@ -1,5 +1,6 @@
 # Simple ViT
 This repository presents a [*Vision Tranformer (ViT)*](https://en.wikipedia.org/wiki/Vision_transformer) implementation.
+
 For more information about Transformer Model I recommend [Simple Transformer](https://github.com/Bengal1/Simple-Transformer).
 
 ## Requirements
