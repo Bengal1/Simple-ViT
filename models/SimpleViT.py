@@ -44,9 +44,7 @@ class SimpleViT(nn.Module):
         self.norm = nn.LayerNorm(embed_dim, eps=norm_eps)
 
         # Classification Projection
-        self.head = MLP(in_features=embed_dim,
-                        hidden_features=4096,
-                        out_features=num_classes)
+        self.head = nn.Linear(embed_dim, num_classes)
 
 
     def forward(self, x):
