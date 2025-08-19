@@ -1,5 +1,5 @@
 # Simple ViT
-This repository presents a [*Vision Tranformer*](https://en.wikipedia.org/wiki/Vision_transformer) implementation.
+This repository presents a [*Vision Tranformer (ViT)*](https://en.wikipedia.org/wiki/Vision_transformer) implementation.
 
 ## Vision Transformer
 
