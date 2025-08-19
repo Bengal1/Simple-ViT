@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from SimpleViT import SimpleViT
+from models.SimpleViT import SimpleViT
 from utils import *
 from train import *
 from torch.utils.data import DataLoader, random_split
@@ -68,6 +68,7 @@ def _setup_model_for_training(
 
     return model, loss_function, optimizer, device
 
+# --- Main Entry Point ---
 def main():
     # Initialize model, loss function and optimizer
     vit, loss_fn, optimizer, device = _setup_model_for_training(10, 1e-4)

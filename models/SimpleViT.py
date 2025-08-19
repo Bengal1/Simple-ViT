@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
-from PatchEmbedding import PatchEmbedding
-from PositionalEncoding import LearnablePositionalEncoding
+from models.layers.PatchEmbedding import PatchEmbedding
+from models.layers.PositionalEncoding import LearnablePositionalEncoding
 
 
 class SimpleViT(nn.Module):
