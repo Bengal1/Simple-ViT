@@ -12,16 +12,23 @@ Since Transformers process input sequences without any inherent notion of order,
 
 ### Transformer Encoder
 
+
 #### Attention
+
 
 #### Feed Forward
 
+
 #### Layer Normalization
+
 
 ### ViT vs CNN
 
+
 ## Data
 
+
 ## Evaluation
+
 
 ## Reference
