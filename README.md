@@ -30,7 +30,10 @@ The Transformer encoder is a fundamental component of the Vision Transformer (Vi
 #### Layer Normalization
 
 
-### ViT vs CNN
+## Traing and Optimization
+
+
+## ViT vs CNN
 
 
 ## Data
