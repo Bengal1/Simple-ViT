@@ -16,6 +16,8 @@ The Vision Transformer (ViT) is a deep learning architecture that adapts the Tra
 
 #### Layer Normalization
 
+### ViT vs CNN
+
 ## Data
 
 ## Evaluation
