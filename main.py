@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from ViT import ViT
+from SimpleViT import SimpleViT
+from utils import *
 from train import *
 from torch.utils.data import DataLoader, random_split
 from torchvision import datasets, transforms
@@ -54,11 +55,10 @@ def _setup_model_for_training(
 ) -> tuple[nn.Module, nn.modules.loss, torch.optim.Optimizer, torch.device]:
 
     # Set device (GPU/CPU)
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(f"Using device: {device}\n")
+    device = get_device()
 
     # Instantiate the SimpleCNN model
-    model = ViT(num_classes=num_classes).to(device)
+    model = SimpleViT(num_classes=num_classes).to(device)
 
     # Initialize the Cross-Entropy Loss function
     loss_function = nn.CrossEntropyLoss().to(device)
@@ -72,11 +72,22 @@ def main():
     # Initialize model, loss function and optimizer
     vit, loss_fn, optimizer, device = _setup_model_for_training(10, 1e-4)
 
-    train_loader, validation_loader, test_loader = _get_cifar10_dataloaders(
+    train_loader, val_loader, test_loader = _get_cifar10_dataloaders(
         32, 0.2)
 
     # Train & Validation
+    loss_records = train_model(
+        model=vit,
+        loss_fn=loss_fn,
+        optimizer=optimizer,
+        training_loader=train_loader,
+        validation_loader=val_loader,
+        device=device,
+        num_epochs=10)
 
-    #Test
+    # Test
+    test_accuracy, test_loss = evaluate_model(vit, test_loader, loss_fn, device)
+    print(f"\nTest Loss: {test_loss:.3f}, Test Accuracy: {test_accuracy:.3f}%")
 
     # Plot Loss
+    plot_losses(loss_records)

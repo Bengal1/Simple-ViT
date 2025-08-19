@@ -4,7 +4,7 @@ from PatchEmbedding import PatchEmbedding
 from PositionalEncoding import LearnablePositionalEncoding
 
 
-class ViT(nn.Module):
+class SimpleViT(nn.Module):
 
     def __init__(self,
                  num_classes: int,

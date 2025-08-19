@@ -11,36 +11,45 @@ __all__ = [
 ]
 
 
-def evaluate_model(model: torch.nn.Module,
-                   data_loader: torch.utils.data.DataLoader,
-                   loss_fn: torch.nn.modules.loss,
-                   device: torch.device) -> float:
+def evaluate_model(model: nn.Module,
+                   criterion: nn.modules.loss,
+                   data_loader: DataLoader,
+                   device: torch.device) -> tuple[float, float]:
+    """
+    Evaluates the model on a validation or test set.
 
-    model.eval()
-    total_loss = 0.0
-    num_batches = 0
+    Args:
+        model (nn.Module): The neural network model.
+        criterion (nn.modules.loss._Loss): The loss function.
+        data_loader (DataLoader): DataLoader for validation/test data.
+        device (torch.device): The computational device (CPU or GPU).
+
+    Returns:
+        tuple[float, float]: Tuple containing evaluation accuracy (%) and average loss.
+    """
+    model.eval()  # Evaluation mode
+    total_eval_loss, correct_eval, total_eval = 0, 0, 0
 
     with torch.no_grad():
-        for src, trg in data_loader:
-            src, trg = src.to(device), trg.to(device)
-            # Forward pass
-            output = model(src, trg[:, :-1])
+        for inputs, labels in data_loader:
+            inputs, labels = inputs.to(device), labels.to(device)
+            logits = model(inputs)
+            loss = criterion(logits, labels)
 
-            # Flatten the tensors for loss computation
-            logits = output.view(-1, output.size(-1))
-            targets = trg[:, 1:].contiguous().view(-1)
+            # Accuracy calculation
+            total_eval_loss += loss.item()
+            _, predicted = logits.max(1)
+            correct_eval += predicted.eq(labels).sum().item()
+            total_eval += labels.size(0)
 
-            # Compute loss
-            loss = loss_fn(logits, targets)
-            total_loss += loss.item()
+    eval_accuracy = 100 * correct_eval / total_eval
+    eval_loss = total_eval_loss / len(data_loader)
 
-            num_batches += 1
-
-    return total_loss / num_batches if num_batches > 0 else float('inf')
+    return eval_accuracy, eval_loss
 
 
 def train_model(model: nn.Module,
-                criterion: nn.modules.loss,
+                loss_fn: nn.modules.loss,
                 optimizer: torch.optim,
                 training_loader: DataLoader,
                 validation_loader: DataLoader,
@@ -51,14 +60,14 @@ def train_model(model: nn.Module,
 
     for epoch in range(num_epochs):
         train_accuracy, train_loss = _train_epoch(model,
-                                                  criterion,
+                                                  loss_fn,
                                                   optimizer,
                                                   training_loader,
                                                   device)
         loss_record['train'].append(train_loss)
 
         validation_accuracy, validation_loss = evaluate_model(model,
-                                                              criterion,
+                                                              loss_fn,
                                                               validation_loader,
                                                               device)
         loss_record['validation'].append(validation_loss)
@@ -75,7 +84,7 @@ def train_model(model: nn.Module,
 
  #--- Training Helper Functions ---
 def _train_epoch(model: nn.Module,
-                criterion: nn.modules.loss,
+                loss_fn: nn.modules.loss,
                 optimizer: torch.optim,
                 data_loader: DataLoader,
                 device: torch.device) -> tuple[float, float]:
@@ -92,7 +101,7 @@ def _train_epoch(model: nn.Module,
         outputs = model(images)
 
         # Compute loss
-        loss = criterion(outputs, labels)
+        loss = loss_fn(outputs, labels)
 
         # Backpropagation
         loss.backward()
