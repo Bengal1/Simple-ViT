@@ -51,14 +51,17 @@ def _get_cifar10_dataloaders(
 
 def _setup_model_for_training(
         num_classes: int,
-        lr: float
+        lr: float,
+        img_size: int | tuple[int, int] | None = None,
 ) -> tuple[nn.Module, nn.modules.loss, torch.optim.Optimizer, torch.device]:
 
     # Set device (GPU/CPU)
     device = get_device()
 
     # Instantiate the SimpleCNN model
-    model = SimpleViT(num_classes=num_classes).to(device)
+    model = SimpleViT(patch_size=16,
+                      num_classes=num_classes,
+                      img_size=img_size).to(device)
 
     # Initialize the Cross-Entropy Loss function
     loss_function = nn.CrossEntropyLoss().to(device)
@@ -70,11 +73,15 @@ def _setup_model_for_training(
 
 # --- Main Entry Point ---
 def main():
-    # Initialize model, loss function and optimizer
-    vit, loss_fn, optimizer, device = _setup_model_for_training(10, 1e-4)
-
+    # Initialize data loaders
     train_loader, val_loader, test_loader = _get_cifar10_dataloaders(
         32, 0.2)
+    img_size = tuple(next(iter(train_loader))[0].shape[2:])
+
+    # Initialize model, loss function and optimizer
+    vit, loss_fn, optimizer, device = _setup_model_for_training(10,
+                                                                1e-4,
+                                                                img_size)
 
     # Train & Validation
     loss_records = train_model(
@@ -92,3 +99,6 @@ def main():
 
     # Plot Loss
     plot_losses(loss_records)
+
+if __name__ == "__main__":
+    main()

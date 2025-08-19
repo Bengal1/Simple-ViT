@@ -58,7 +58,7 @@ def train_model(model: nn.Module,
 
     loss_record = {'train': [], 'validation': []}
 
-    for epoch in range(num_epochs):
+    for epoch in range(1, num_epochs + 1):
         train_accuracy, train_loss = _train_epoch(model,
                                                   loss_fn,
                                                   optimizer,
@@ -72,7 +72,7 @@ def train_model(model: nn.Module,
                                                               device)
         loss_record['validation'].append(validation_loss)
 
-        print(f"Epoch {epoch + 1}: Train Loss: {train_loss:.4f}, "
+        print(f"Epoch {epoch}: Train Loss: {train_loss:.4f}, "
               f"Train Accuracy: {train_accuracy:.2f}% | Validation Loss:"
               f" {validation_loss:.4f}, Validation Accuracy:"
               f" {validation_accuracy:.2f}%")

@@ -3,88 +3,184 @@ import torch.nn as nn
 
 class PatchEmbedding(nn.Module):
     """
-    Image to Patch Embedding for Vision Transformer (ViT).
+    Minimal Patch Embedding layer for Vision Transformers.
 
-    This module splits the input image into patches, flattens each patch,
-    and projects it into a fixed embedding dimension.
+    Splits an input image into patches and projects each patch into a
+    vector of size `embed_dim` using a linear layer.
 
     Attributes:
-        image_size (tuple): Height and width of the input image.
-        patch_size (int): Size of each square patch.
-        embedding_dim (int): Output embedding dimension for each patch.
-        num_patches (int): Total number of patches (H/P * W/P).
-        projection (nn.Linear): Linear layer projecting flattened patches to embedding_dim.
+        patch_height (int): Height of each patch.
+        patch_width (int): Width of each patch.
+        embed_dim (int): Output embedding dimension for each patch.
+        img_height (int | None): Height of input image (if known at init).
+        img_width (int | None): Width of input image (if known at init).
+        n_patches (int | None): Total number of patches per image.
+        patch_projection (nn.Linear | None): Linear layer to project flattened patches.
     """
-    def __init__(
-        self,
-        image_size: tuple[int, int],
-        patch_size: int,
-        embedding_dim: int,
-        in_channels: int
-    ):
-        super().__init__()
 
-        self.image_height, self.image_width = image_size
-        self.patch_size = patch_size
-        self.embedding_dim = embedding_dim
-        self.in_channels = in_channels
-
-        # Validate image size
-        if (self.image_height % patch_size != 0
-            or self.image_width % patch_size != 0):
-            raise ValueError(
-                f"Image dimensions ({self.image_height}, {self.image_width}) "
-                f"must be divisible by patch size {patch_size}."
-            )
-
-        # Number of patches
-        self.num_patches_height = self.image_height // patch_size
-        self.num_patches_width = self.image_width // patch_size
-        self.num_patches = self.num_patches_height * self.num_patches_width
-
-        # Linear projection for flattened patches
-        self.projection = nn.Linear(
-            in_channels * patch_size * patch_size,
-            embedding_dim
-        )
-        nn.init.trunc_normal_(self.projection.weight, std=0.02)
-        if self.projection.bias is not None:
-            nn.init.zeros_(self.projection.bias)
-
-    def forward(self, images: torch.Tensor) -> torch.Tensor:
+    def __init__(self,
+                 patch_size: int | tuple[int, int],
+                 embed_dim: int = 768,
+                 img_size: int | tuple[int, int] | None = None):
         """
-        Forward pass to convert images into patch embeddings.
+        Initialize PatchEmbedding.
 
         Args:
-            images (torch.Tensor): Input tensor of shape (B, C, H, W)
+            patch_size (int | tuple[int, int]): Size of each patch (height, width).
+                                                If int, patch is square.
+            embed_dim (int): Output embedding dimension of each patch.
+            img_size (int | tuple[int, int] | None): Optional image size for pre-initialization.
+                                                     If None, will infer from input on first forward.
+
+        Raises:
+            ValueError: If `patch_size` or `img_size` does not have 1 or 2 dimensions.
+        """
+        super().__init__()
+
+        # --- Patch size ---
+        if isinstance(patch_size, int):
+            self.patch_height = self.patch_width = patch_size
+        elif isinstance(patch_size, (tuple, list)) and len(patch_size) == 2:
+            self.patch_height, self.patch_width = patch_size
+        else:
+            raise ValueError("Patch size must be one or two dimensional")
+
+        self.embed_dim = embed_dim
+
+        # --- Image size ---
+        if img_size is not None:
+            if isinstance(img_size, int):
+                self.img_height = self.img_width = img_size
+            elif isinstance(img_size, (tuple, list)) and len(img_size) == 2:
+                self.img_height, self.img_width = img_size
+            else:
+                raise ValueError("Image size must be one or two dimensional")
+        else:
+            self.img_height = None
+            self.img_width = None
+
+        # --- Linear projection placeholder ---
+        self.n_patches = None
+        self.patch_projection = None
+
+
+    @staticmethod
+    def get_input_size(x: torch.Tensor) -> tuple[int, int, int, int]:
+        """
+        Ensure input is 4D: (B, C, H, W). Converts 2D or 3D inputs into 4D by adding
+        batch and/or channel dimensions.
+
+        Args:
+            x (torch.Tensor): Input tensor of shape 2D, 3D, or 4D.
 
         Returns:
-            torch.Tensor: Patch embeddings of shape (B, N, D)
+            tuple[int, int, int, int]: 4D tensor shape (B, C, H, W).
+
+        Raises:
+            ValueError: If input tensor has dimensions other than 2, 3, or 4.
         """
-        B, C, H, W = images.shape
+        if x.ndim == 4:
+            B, C, H, W = x.shape
+        elif x.ndim == 3:
+            C, H, W = x.shape
+            B = 1
+        elif x.ndim == 2:
+            H, W = x.shape
+            B, C = 1, 1
+        else:
+            raise ValueError(f"Expected 2D, 3D, or 4D input, got {x.ndim}D")
+        return B, C, H, W
 
-        if H != self.image_height or W != self.image_width:
+
+    def _initialize_projection(self, C: int, H: int, W: int) -> None:
+        """
+        Lazy initialization of the patch projection layer and related attributes.
+        Only runs if the projection layer has not been created yet.
+
+        Args:
+            C (int): Number of input channels.
+            H (int): Height of the input image.
+            W (int): Width of the input image.
+        """
+        if self.patch_projection is None:
+            # Set image dimensions if not previously set
+            if self.img_height is None:
+                self.img_height = H
+            if self.img_width is None:
+                self.img_width = W
+
+            # Compute number of patches
+            self.n_patches = (self.img_height // self.patch_height) * \
+                             (self.img_width // self.patch_width)
+
+            # Initialize linear projection using actual channels
+            patch_dim = C * self.patch_height * self.patch_width
+            self.patch_projection = nn.Linear(patch_dim, self.embed_dim)
+
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Forward pass: split image into patches, flatten, and project each patch.
+
+        Args:
+            x (torch.Tensor): Input tensor of shape (B, C, H, W) or convertible
+                              2D/3D tensor.
+
+        Returns:
+            torch.Tensor: Tensor of shape (B, n_patches, embed_dim) containing
+                          the patch embeddings.
+
+        Raises:
+            ValueError: If the input image size does not match the initialized size.
+        """
+        # --- Ensure input is 4D ---
+        B, C, H, W = self.get_input_size(x)
+
+        # --- Lazy initialize projection ---
+        self._initialize_projection(C, H, W)
+
+        # --- Check input image size ---
+        if H != self.img_height or W != self.img_width:
             raise ValueError(
-                f"Input image size ({H}, {W}) does not match expected "
-                f"size ({self.image_height}, {self.image_width})"
-            )
-        if C != self.in_channels:
-            raise ValueError(
-                f"Input channels ({C}) do not match expected channels "
-                f"({self.in_channels})"
+                f"Input image size ({H}x{W}) doesn't match the initialized size "
+                f"({self.img_height}x{self.img_width})"
             )
 
-        # Extract patches
-        patches = images.unfold(2, self.patch_size, self.patch_size) \
-                        .unfold(3, self.patch_size, self.patch_size)
-        # Shape: (B, C, H/P, W/P, P, P)
-        patches = patches.contiguous().view(
-            B, C, -1, self.patch_size, self.patch_size
-        )  # (B, C, N, P, P)
-        patches = patches.permute(0, 2, 1, 3, 4)  # (B, N, C, P, P)
-        patches = patches.reshape(B, self.num_patches, -1)  # Flatten -> (B, N, C*P*P)
+        # --- Extract patches ---
+        patches = x.unfold(2, self.patch_height, self.patch_height) \
+                   .unfold(3, self.patch_width, self.patch_width)
+        # Combine patch grid into a single dimension
+        patches = patches.contiguous().view(B, C, -1, self.patch_height, self.patch_width)
+        # Move patches to sequence dimension (B, n_patches, C, ph, pw)
+        patches = patches.permute(0, 2, 1, 3, 4).contiguous()
+        # Flatten each patch to vector (B, n_patches, C*ph*pw)
+        patches = patches.view(B, self.n_patches, -1)
 
-        # Project to embedding dimension
-        patch_embeddings = self.projection(patches)  # (B, N, D)
+        # --- Linear projection ---
+        embedded_patches = self.patch_projection(patches)
 
-        return patch_embeddings
+        return embedded_patches
+
+    def get_patches_num(self) -> int:
+        """
+        Return the number of patches per image.
+
+        Returns:
+            int: Total number of patches (n_patches).
+
+        Raises:
+            RuntimeError: If the number of patches is not yet initialized.
+        """
+        if self.n_patches is not None:
+            return self.n_patches
+
+        # If image size is known but projection not yet initialized, compute n_patches
+        if self.img_height is not None and self.img_width is not None:
+            return (self.img_height // self.patch_height) * (
+                        self.img_width // self.patch_width)
+
+        raise RuntimeError(
+            "Number of patches not initialized. "
+            "Pass an input through the layer or provide img_size at initialization."
+        )
+
