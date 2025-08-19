@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from models.layers.MLP import MLP
 from models.layers.PatchEmbedding import PatchEmbedding
 from models.layers.PositionalEncoding import LearnablePositionalEncoding
 
@@ -43,7 +44,9 @@ class SimpleViT(nn.Module):
         self.norm = nn.LayerNorm(embed_dim, eps=norm_eps)
 
         # Classification Projection
-        self.head = nn.Linear(embed_dim, num_classes)
+        self.head = MLP(in_features=embed_dim,
+                        hidden_features=4096,
+                        out_features=num_classes)
 
 
     def forward(self, x):
