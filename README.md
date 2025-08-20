@@ -11,7 +11,7 @@ For more information about Transformer Model I recommend [Simple Transformer](ht
 The Vision Transformer (ViT) is a deep learning architecture that adapts the Transformer, originally developed for natural language processing, to image recognition tasks. Introduced by Dosovitskiy et al. in “An Image is Worth 16x16 Words” (2020), ViT replaces traditional convolutional feature extractors with a sequence of image patches processed by self-attention. This approach demonstrated that, with sufficient data and compute, Transformers can outperform convolutional neural networks (CNNs) in computer vision benchmarks, paving the way for a broad family of vision transformer models.
 
 ### Patch Embedding
-<img align="right" width="380" alt="patch_embedding_data" src="https://github.com/user-attachments/assets/f3d1a1cd-b3c8-4604-a23b-087f2caaadd4" />
+<img align="right" width="420" alt="patch_embedding_data" src="https://github.com/user-attachments/assets/f3d1a1cd-b3c8-4604-a23b-087f2caaadd4" />
 
 A key step in the Vision Transformer (ViT) is the patch embedding stage, which transforms an image into a sequence suitable for a Transformer. Instead of processing pixels individually or relying on convolutional filters, the input image is divided into fixed-size patches (for example, 16×16 pixels). Each patch is then flattened into a vector and projected through a linear layer to a chosen embedding space. The result is a sequence of patch embeddings that can be treated similarly to word tokens in natural language processing, allowing the Transformer to apply self-attention mechanisms across the entire image.<br/>
 
