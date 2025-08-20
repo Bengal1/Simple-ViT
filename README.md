@@ -91,7 +91,7 @@ Then apply scaling (gamma) and shifting (beta) parameters (trainable):
 ⇨  y = γ·\hat{x} + β
 ```
 
-## Traing and Optimization
+## Training and Optimization
 ### Adam Optimizer
 The Adam optimization algorithm is an extension to stochastic gradient descent (SGD). Unlike SGD, The method computes individual adaptive learning rates for different parameters from estimates of first and second moments of the gradients Adam combines the benefits of two other methods: momentum and RMSProp.
 
