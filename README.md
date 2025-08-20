@@ -48,7 +48,7 @@ MultiHead-Attention = Concat(head_1,...,head_h)·W_{O}
 ```
 * Multiple attention heads allow the model to capture different types of interactions.
 * $`W_{O} ∈ℝ^{hd×D}`$ projects concatenated outputs back to the embedding dimension.
-<br/>
+
 For more details information about *Attention Mechanism* see [Simple Transformer](https://github.com/Bengal1/Simple-Transformer).
 
 #### Feed Forward
