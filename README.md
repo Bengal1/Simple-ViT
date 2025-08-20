@@ -84,6 +84,63 @@ Then apply scaling (gamma) and shifting (beta) parameters (trainable):
 ```
 
 ## Traing and Optimization
+### Adam Optimizer
+The Adam optimization algorithm<sup>[<a href="#ref2">2</a>]</sup> is an extension to stochastic gradient descent (SGD). Unlike SGD, The method computes individual adaptive learning rates for different parameters from estimates of first and second moments of the gradients Adam combines the benefits of two other methods: momentum and RMSProp.
+
+#### Adam Algorithm:
+* $`\theta_t`$​ : parameters at time step *t*.
+* $`\beta_1,\beta_2​`$: exponential decay rates for moments estimation.
+* $`\alpha`$ : learning rate.
+* $`\epsilon`$ : small constant to prevent division by zero.
+* $`\lambda`$ : weight decay coefficient. <br/>
+
+1. Compute gradients:
+
+$$
+g_t = \nabla_{\theta} J(\theta_t)
+$$
+
+2. Update first moment estimate (mean):
+
+$$
+m_t = \beta_1 \cdot m_{t-1} + (1 - \beta_1) \cdot g_t
+$$
+
+3. Update second moment estimate (uncentered variance):
+
+$$
+v_t = \beta_2 \cdot v_{t-1} + (1 - \beta_2) \cdot g_t^2
+$$
+
+4. Bias correction:
+
+$$
+\hat{v}_t = \frac{v_t}{1 - \beta_2^t} \quad ; \quad \hat{m}_t = \frac{m_t}{1 - \beta_1^t}
+$$
+
+5. Update parameters:
+
+$$
+\theta_{t+1} = \theta_t - \alpha \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}
+$$
+
+* In our model *Weight decay* is applied:
+
+$$
+\theta_{t+1} = \theta_t - \alpha \cdot \Bigg( \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} + \lambda \cdot \theta_t \Bigg)
+$$
+
+### Cross-Entropy Loss Function
+This criterion computes the cross entropy loss between input logits and target. Loss function is a function that maps an event or values of one or more variables onto a real number intuitively representing some "loss" associated with the event. The Cross Enthropy Loss function is commonly used in classification tasks both in traditional ML and deep learning. It compares the predicted probability distribution over classes (logits) with the true class labels and penalizes incorrect or uncertain predictions.
+
+$$
+Loss = - \sum_{i=1}^{C} y_i \log(\hat{y}_i)
+$$
+
+Where:
+* $`C`$  is the number of classes.
+* $`y_i`$​  is the true probability for class *i* (usually 1 for the correct class and 0 for others).
+* $`\hat{y}_i`$  is the predicted probability for class *i*.
 
 
 ## ViT vs CNN
