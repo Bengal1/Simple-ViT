@@ -30,7 +30,22 @@ For more details information about *Attention Mechanism* see [Simple Transformer
 The feed-forward network (FFN) in the Vision Transformer (ViT) is a crucial component of each encoder block. It consists of two fully connected layers with a non-linear activation function, often GELU, applied between them. Unlike self-attention, which enables tokens to exchange information globally, the FFN operates on each token independently, refining and transforming its representation in a higher-dimensional space. This allows the model to capture more complex, non-linear relationships within the data. In ViT, the FFN complements self-attention by enhancing the expressive power of the patch embeddings, ensuring that both global context and token-wise transformations contribute to the learned image representation.
 
 #### Layer Normalization
+<img align="right" width="250"  src="https://github.com/user-attachments/assets/a1434118-a1d7-4a40-a35e-14b922ee0db4">
 
+*Layer Normalization* is used to stabilize and accelerate training by normalizing the inputs to each layer.<br/>
+For each input vector (for each token in a sequence), subtract the mean and divide by the standard deviation of the vector's values. This centers the data around 0 with unit variance:
+```math
+\hat{x} = \frac{(x - μ)}{\sqrt{σ^{2} + ε}}
+```
+where *μ* is the mean and *σ* is the standard deviation of the input vector.<br/><br/>
+Then apply scaling (gamma) and shifting (beta) parameters (trainable):
+
+* *γ* (scale): A parameter to scale the normalized output.<br/>
+* *β* (shift): A parameter to shift the normalized output.<br/>
+
+```math
+⇨  y = γ·\hat{x} + β
+```
 
 ## Traing and Optimization
 
