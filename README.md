@@ -25,7 +25,7 @@ The Transformer encoder is a fundamental component of the Vision Transformer (Vi
 #### Attention
 Attention is a core mechanism in transformers that allows the model to selectively focus on the most relevant parts of an input sequence when making predictions. Instead of processing information uniformly, attention assigns weights to different elements, enabling the network to capture both local and long-range dependencies. In the context of Vision Transformers (ViTs), self-attention is applied directly to image patches, treating them as a sequence of tokens similar to words in natural language processing. This mechanism allows each patch to attend to every other patch, capturing global spatial relationships across the image. Unlike convolutional operations, which have a fixed receptive field, self-attention provides a flexible and adaptive way of modeling dependencies, making it particularly powerful for understanding complex visual structures. In Vision Transformer we apply Multi-Head Self Attention
 Given an input sequence of tokens (patch embeddings) $`X∈ℝ^{N×D}`$ where $`N`$ is the number of patches and $`D`$ is the embedding dimension, self-attention computes interactions between all tokens as follows:
-1. Linear projections for queries, keys, and values:
+1. **Linear projections for queries, keys, and values:**
    
 $$
   X·W_{Q} = Q &ensp; ; &ensp; X·W_{K} = K &ensp; ; &ensp; X·W_{V} = V
@@ -33,7 +33,7 @@ $$
 
 where $`W_{Q}, W_{K}, W_{V} ∈ℝ^{D×d}`$ are learnable weight matrices, and $`d`$ is the attention head dimension.<br/>
 
-2. Scaled dot-product attention:
+2. **Scaled dot-product attention:**
 
 ```math
 Attention(Q,K,V) = Softmax \Bigg(\frac{Q K^{T}}{\sqrt{d}} \Bigg)·V
@@ -42,7 +42,7 @@ Attention(Q,K,V) = Softmax \Bigg(\frac{Q K^{T}}{\sqrt{d}} \Bigg)·V
 * $`\sqrt{d}`$ is a scaling factor to stabilize gradients.
 * The softmax converts similarities into attention weights.
   
-3. Multi-head attention (concatenation of the heads):
+3. **Multi-head attention (concatenation of the heads):**
 ```math
 MultiHead-Attention = Concat(head_1,...,head_h)·W_{O}
 ```
