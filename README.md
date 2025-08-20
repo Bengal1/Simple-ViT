@@ -44,7 +44,7 @@ Attention(Q,K,V) = Softmax \Bigg(\frac{Q K^{T}}{\sqrt{d}} \Bigg)·V
   
 3. Multi-head attention (concatenation of the heads):
 ```math
-MultiHead-Attention = Concat(head_1,...,head_h)·W_{out}
+MultiHead-Attention = Concat(head_1,...,head_h)·W_{O}
 ```
 * Multiple attention heads allow the model to capture different types of interactions.
 * $`W_{O} ∈ℝ^{hd×D}`$ projects concatenated outputs back to the embedding dimension.
