@@ -27,7 +27,7 @@ Attention is a core mechanism in transformers that allows the model to selective
 Given an input sequence of tokens (patch embeddings) $`X∈ℝ^{N×D}`$ where $`N`$ is the number of patches and $`D`$ is the embedding dimension, self-attention computes interactions between all tokens as follows:
 1. Linear projections for queries, keys, and values:
 $$
-X·W_{Q} = Q &ensp; ; &ensp; X·W_{K} = K &ensp; ; &ensp; X·W_{V} = V
+  X·W_{Q} = Q &ensp; ; &ensp; X·W_{K} = K &ensp; ; &ensp; X·W_{V} = V
 $$
 Where $`W_{Q}, W_{K}, W_{V} ∈ℝ^{D×d}`$ are learnable weight matrices, and $`d`$ is the attention head dimension.
 2. Scaled dot-product attention:
