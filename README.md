@@ -31,7 +31,7 @@ $$
   X·W_{Q} = Q &ensp; ; &ensp; X·W_{K} = K &ensp; ; &ensp; X·W_{V} = V
 $$
 
-Where $`W_{Q}, W_{K}, W_{V} ∈ℝ^{D×d}`$ are learnable weight matrices, and $`d`$ is the attention head dimension.
+Where $`W_{Q}, W_{K}, W_{V} ∈ℝ^{D×d}`$ are learnable weight matrices, and $`d`$ is the attention head dimension.<br/>
 2. Scaled dot-product attention:
 ```math
 Attention(Q,K,V) = Softmax \Bigg(\frac{Q K^{T}}{\sqrt{d}} \Bigg)·V
