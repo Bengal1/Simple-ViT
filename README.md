@@ -38,6 +38,10 @@ where $`W_{Q}, W_{K}, W_{V} ∈ℝ^{D×d}`$ are learnable weight matrices, and $
 ```math
 Attention(Q,K,V) = Softmax \Bigg(\frac{Q K^{T}}{\sqrt{d}} \Bigg)·V
 ```
+* $`Q K^{T}∈ℝ^{N×N}`$ computes similarity between every pair of tokens.
+* $`\sqrt{d}`$ is a scaling factor to stabilize gradients.
+* The softmax converts similarities into attention weights.
+  
 3. Multi-head attention (concatenation of the heads):
 ```math
 MultiHead-Attention = Concat(head_1,...,head_h)·W_{out}
