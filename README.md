@@ -44,5 +44,6 @@ The Transformer encoder is a fundamental component of the Vision Transformer (Vi
 
 
 ## Reference
+[BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/abs/1810.04805?utm_source=chatgpt.com)
 
-
+[An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929?utm_source=chatgpt.com)
