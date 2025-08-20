@@ -27,9 +27,18 @@ Attention is a core mechanism in transformers that allows the model to selective
 For more details information about *Attention Mechanism* see [Simple Transformer](https://github.com/Bengal1/Simple-Transformer).
 
 #### Feed Forward
-<img align="right" width="350"  src="https://github.com/user-attachments/assets/484983aa-a374-4d71-bca1-f94467502650">
+<img align="right" width="400"  src="https://github.com/user-attachments/assets/484983aa-a374-4d71-bca1-f94467502650">
 
-The feed-forward network (FFN) in the Vision Transformer (ViT) is a crucial component of each encoder block. It consists of two fully connected layers with a non-linear activation function, often GELU, applied between them. Unlike self-attention, which enables tokens to exchange information globally, the FFN operates on each token independently, refining and transforming its representation in a higher-dimensional space. This allows the model to capture more complex, non-linear relationships within the data. In ViT, the FFN complements self-attention by enhancing the expressive power of the patch embeddings, ensuring that both global context and token-wise transformations contribute to the learned image representation.
+The feed-forward network (FFN) in the Vision Transformer (ViT) is a crucial component of each encoder block. It consists of two fully connected layers with a non-linear activation function, often GELU (Gaussian Error Linear Unit), applied between them. Unlike self-attention, which enables tokens to exchange information globally, the FFN operates on each token independently, refining and transforming its representation in a higher-dimensional space. This allows the model to capture more complex, non-linear relationships within the data. In ViT, the FFN complements self-attention by enhancing the expressive power of the patch embeddings, ensuring that both global context and token-wise transformations contribute to the learned image representation.
+
+```math
+y = f(W_{1}·x+b_{1})·W_{2} + b_{2}
+```
+Where:
+* ***$`x`$*** is the input vector.
+* ***$`W_i`$*** is the weight matrix of layer *i*.
+* ***$`b_i`$*** is the bias vector of layer *i*.
+* ***$`f`$*** is the activation function - GeLU.
 
 #### Layer Normalization
 <img align="right" width="250"  src="https://github.com/user-attachments/assets/a1434118-a1d7-4a40-a35e-14b922ee0db4">
