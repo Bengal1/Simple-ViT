@@ -23,7 +23,8 @@ Since Transformers process input sequences without any inherent notion of order,
 The Transformer encoder is a fundamental component of the Vision Transformer (ViT), responsible for processing the sequence of patch embeddings and capturing relationships between them. Each encoder block contains a multi-head self-attention layer, which allows the model to weigh the importance of each patch relative to all others, followed by a feed-forward network (MLP) that transforms the representations. Residual connections and layer normalization are applied throughout to stabilize training and improve gradient flow. By stacking multiple encoder blocks, the Transformer encoder can build complex, high-level representations of the image, integrating both local and global information for downstream tasks such as classification.
 
 #### Attention
-
+Attention is a core mechanism in transformers that allows the model to selectively focus on the most relevant parts of an input sequence when making predictions. Instead of processing information uniformly, attention assigns weights to different elements, enabling the network to capture both local and long-range dependencies. In the context of Vision Transformers (ViTs), self-attention is applied directly to image patches, treating them as a sequence of tokens similar to words in natural language processing. This mechanism allows each patch to attend to every other patch, capturing global spatial relationships across the image. Unlike convolutional operations, which have a fixed receptive field, self-attention provides a flexible and adaptive way of modeling dependencies, making it particularly powerful for understanding complex visual structures.<br/>
+For more details information about *Attention Mechanism* see [Simple Transformer](https://github.com/Bengal1/Simple-Transformer).
 
 #### Feed Forward
 
