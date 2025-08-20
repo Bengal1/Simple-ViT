@@ -124,7 +124,7 @@ $$
 \theta_{t+1} = \theta_t - \alpha \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}
 $$
 
-* In our model *Weight decay* is applied:
+* In our model *Weight decay* is applied: (FIX TO AdamW!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!)
 
 $$
 \theta_{t+1} = \theta_t - \alpha \cdot \Bigg( \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} + \lambda \cdot \theta_t \Bigg)
