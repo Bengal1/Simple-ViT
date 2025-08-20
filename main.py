@@ -8,6 +8,32 @@ from torch.utils.data import DataLoader, random_split
 from torchvision import datasets, transforms
 
 
+# # ----------------------- Hyperparameters & Config ----------------------- #
+# # --- Model Architecture ---
+EMBED_DIM        = 512       # Embedding dimension
+NUM_HEADS        = 8         # Number of attention heads
+NUM_LAYERS       = 6         # Number of Encoder/Decoder layers
+PATCH_SIZE       = (16, 16)
+# # --- Training Process ---
+BATCH_SIZE       = 32        # Batch size
+EPOCHS           = 10        # Number of epochs
+NUM_CLASSES      = 10
+VALIDATION_SPLIT = 0.2
+# MAX_GRAD_CLIP   = 1.0       # Max norm gradient (for gradient clipping)
+# DROPOUT         = 0.1       # Dropout probability
+# LABEL_SMOOTHING = 0.1       # Label smoothing parameter
+# # --- Optimizer Settings (Adam) ---
+LEARNING_RATE   = 1e-5      # Initial learning rate
+# BETAS           = (0.9, 0.98) # Adam Optimizer beta coefficients
+# EPSILON         = 1e-9      # Optimizer's epsilon for numerical stability
+# WARMUP          = 50        # Scheduler warmup period (number of steps)
+# WEIGHT_DECAY    = 1e-5      # Weight decay parameter (L2 regularization)
+# # --- Application-Specific Settings ---
+# DATA_DEBUG_MODE = True      # Debug mode flag (enables/disables debug features)
+# LOGGING_LEVEL   = utils.LogLevel.WARNING # Initial logging verbosity level
+
+
+# --- Data Loader Initialization Helper Function ---
 def _get_cifar10_dataloaders(
         samples_per_batch: int,
         train_validation_split: float
@@ -53,8 +79,10 @@ def _get_cifar10_dataloaders(
     return train_loader, val_loader, test_loader
 
 
+# --- Model & training Component Setup Helper Function ---
 def _setup_model_for_training(
         num_classes: int,
+        patch_size: int | tuple[int, int],
         lr: float,
         img_size: int | tuple[int, int] | None = None,
 ) -> tuple[nn.Module, nn.modules.loss, torch.optim.Optimizer, torch.device]:
@@ -63,7 +91,7 @@ def _setup_model_for_training(
     device = get_device()
 
     # Instantiate the SimpleCNN model
-    model = SimpleViT(patch_size=16,
+    model = SimpleViT(patch_size=patch_size,
                       num_classes=num_classes,
                       img_size=img_size).to(device)
 
@@ -75,16 +103,18 @@ def _setup_model_for_training(
 
     return model, loss_function, optimizer, device
 
-# --- Main Entry Point ---
+
+# --- Main Function ---
 def main():
     # Initialize data loaders
     train_loader, val_loader, test_loader = _get_cifar10_dataloaders(
-        32, 0.2)
+        BATCH_SIZE, VALIDATION_SPLIT)
     img_size = tuple(next(iter(train_loader))[0].shape[2:])
 
     # Initialize model, loss function and optimizer
-    vit, loss_fn, optimizer, device = _setup_model_for_training(10,
-                                                                1e-4,
+    vit, loss_fn, optimizer, device = _setup_model_for_training(NUM_CLASSES,
+                                                                PATCH_SIZE,
+                                                                LEARNING_RATE,
                                                                 img_size)
 
     # Train & Validation
@@ -104,5 +134,6 @@ def main():
     # Plot Loss
     plot_losses(loss_records)
 
+# --- Main Entry Point ---
 if __name__ == "__main__":
     main()
