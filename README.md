@@ -38,7 +38,7 @@ Where:
 * ***$`x`$*** is the input vector.
 * ***$`W_i`$*** is the weight matrix of layer *i*.
 * ***$`b_i`$*** is the bias vector of layer *i*.
-* ***$`f`$*** is the activation function - GeLU.
+* ***$`f`$*** is the activation function - GELU.
 
 #### Layer Normalization
 <img align="right" width="250"  src="https://github.com/user-attachments/assets/a1434118-a1d7-4a40-a35e-14b922ee0db4">
