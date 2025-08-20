@@ -24,18 +24,22 @@ def _get_cifar10_dataloaders(
         tuple[DataLoader, DataLoader, DataLoader]: (train_loader, val_loader, test_loader)
     """
     # Transform: convert to tensor and normalize
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.4914, 0.4822, 0.4465),
-                             (0.2023, 0.1994, 0.2010))
-    ])
+    # transform = transforms.Compose([
+    #     transforms.ToTensor(),
+    #     transforms.Normalize((0.4914, 0.4822, 0.4465),
+    #                          (0.2023, 0.1994, 0.2010))
+    # ])
 
     # Load CIFAR-10 datasets
-    full_train_dataset = datasets.CIFAR10(root='./data', train=True,
-                                          download=True, transform=transform)
-    test_dataset = datasets.CIFAR10(root='./data', train=False,
-                                    download=True, transform=transform)
+    # full_train_dataset = datasets.CIFAR10(root='./data', train=True,
+    #                                       download=True, transform=transform)
+    # test_dataset = datasets.CIFAR10(root='./data', train=False,
+    #                                 download=True, transform=transform)
 
+    full_train_dataset = datasets.MNIST(root='./data', train=True,
+                                        download=True, transform=transforms.ToTensor())
+    test_dataset = datasets.MNIST(root='./data', train=False,
+                                  download=True, transform=transforms.ToTensor())
     # Split training dataset (train + validation)
     train_dataset, val_dataset = random_split(full_train_dataset,
                                               [1 - train_validation_split,
@@ -67,7 +71,7 @@ def _setup_model_for_training(
     loss_function = nn.CrossEntropyLoss().to(device)
 
     # Initialize the Adam optimizer
-    optimizer = optim.Adam(model.parameters(), lr=lr)
+    optimizer = optim.AdamW(model.parameters(), lr=lr)
 
     return model, loss_function, optimizer, device
 
