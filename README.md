@@ -156,10 +156,9 @@ Where:
 ## ViT vs CNN
 Convolutional Neural Networks (CNNs), first demonstrated in LeNet-5 (LeCun et al., 1998) and popularized by AlexNet (2012), dominated computer vision for decades. They rely on convolutional filters applied to local receptive fields, pooling for downsampling, and fully connected layers for classification. This design encodes strong inductive biases: locality (features are learned from neighboring pixels) and translation equivariance (patterns can be recognized regardless of position). Variants like VGG, ResNet, and DenseNet advanced CNNs by increasing depth and introducing innovations such as residual connections.<br/>
 To learn more about Convolutional Neural Networks (CNNs), I recommend [Simple CNN Guide](https://github.com/Bengal1/Simple-CNN-Guide).
-
+<img align="right" width="380" alt="CNN vs ViT - Receptive Field" src="https://github.com/user-attachments/assets/a81742f9-b714-4a54-b3d9-dc0130135be3" />
 The Vision Transformer (ViT), introduced by Dosovitskiy et al. (2020), replaces convolutions with a pure Transformer encoder. An image is split into fixed-size patches (e.g., 16×16), flattened, linearly projected into embeddings, and combined with positional encodings. These are processed by Multi-Head Self-Attention (MHSA), which models global dependencies between all patches in parallel, something CNNs only capture gradually via deeper layers. A special [CLS] token aggregates global features for classification.
 
-<img align="right" width="340" alt="CNN vs ViT - Receptive Field" src="https://github.com/user-attachments/assets/a81742f9-b714-4a54-b3d9-dc0130135be3" />
 In architecture, CNNs build hierarchical representations through stacked convolutions, while ViTs operate directly in patch-embedding space, with flexible receptive fields determined by attention. Practically, CNNs train well on moderate datasets due to their inductive biases, whereas ViTs usually require large-scale pretraining and strong regularization but can outperform CNNs when sufficient data is available.
 
 ## Data
