@@ -73,7 +73,8 @@ Where:
 * ***$`b_i`$*** is the bias vector of layer *i*.
 * ***$`f`$*** is the activation function - GELU.
 
-#### **Layer Normalization**
+
+#### Layer Normalization
 <img align="right" width="250"  src="https://github.com/user-attachments/assets/a1434118-a1d7-4a40-a35e-14b922ee0db4">
 
 *Layer Normalization* is used to stabilize and accelerate training by normalizing the inputs to each layer.<br/>
