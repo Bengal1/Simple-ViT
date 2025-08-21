@@ -8,14 +8,14 @@ For more information about Transformer Model I recommend [Simple Transformer](ht
 - [![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/) <br/>
 
 ## Vision Transformer
-<img align="right" width="300" alt="ViT Architecture" src="https://github.com/user-attachments/assets/fafbde82-d337-45ac-bdbc-31c6b6df3b62" />
+<img align="right" width="300" alt="ViT Architecture" src="https://github.com/user-attachments/assets/4c278012-d20a-4f92-83bf-566531d30eee" />
 
 The Vision Transformer (ViT) is a deep learning architecture that adapts the Transformer, originally developed for natural language processing, to image recognition tasks. Introduced by Dosovitskiy et al. in “An Image is Worth 16x16 Words” (2020), ViT replaces traditional convolutional feature extractors with a sequence of image patches processed by self-attention. This approach demonstrated that, with sufficient data and compute, Transformers can outperform convolutional neural networks (CNNs) in computer vision benchmarks, paving the way for a broad family of vision transformer models.<br/>
 
 In practice, ViT transforms an image into a sequence of smaller patches, which are then processed using the same self-attention mechanism that made Transformers successful in language tasks. By modeling relationships between patches directly, ViT captures both local details and long-range dependencies within an image, offering a flexible alternative to the strictly hierarchical representations of CNNs. Positional information is incorporated to maintain awareness of spatial structure, and a dedicated representation is used for classification. This design shifts the focus from handcrafted inductive biases toward a more data-driven approach, where the model learns to interpret visual structure primarily from large-scale training data.
 
 ### Patch Embedding
-<img align="right" width="400" alt="patch_embedding_data" src="https://github.com/user-attachments/assets/f3d1a1cd-b3c8-4604-a23b-087f2caaadd4" />
+<img align="right" width="400" alt="patch_embedding_data" src="https://github.com/user-attachments/assets/49aa0282-b19e-4fab-a494-de5e708b8478" />
 
 A key step in the Vision Transformer (ViT) is the patch embedding stage, which transforms an image into a sequence suitable for a Transformer. Instead of processing pixels individually or relying on convolutional filters, the input image is divided into fixed-size patches (for example, 16×16 pixels). Each patch is then flattened into a vector and projected through a linear layer to a chosen embedding space. The result is a sequence of patch embeddings that can be treated similarly to word tokens in natural language processing, allowing the Transformer to apply self-attention mechanisms across the entire image.<br/>
 
@@ -26,7 +26,7 @@ The [CLS] token is a learnable embedding prepended to the sequence of patch embe
 Since Transformers process input sequences without any inherent notion of order, it is necessary to provide information about the position of each patch in the image. In the Vision Transformer, this is achieved through positional encoding, which adds a vector to each patch embedding to indicate its location within the image. Unlike the fixed sinusoidal encodings used in the original Transformer for NLP, ViT often uses learnable positional embeddings, which are initialized randomly and updated during training. These learnable embeddings allow the model to adaptively encode spatial relationships between patches, helping the self-attention mechanism capture both local and global structure in the image.
 
 ### Transformer Encoder
-<img align="right" width="340" alt="Encoder" src="https://github.com/user-attachments/assets/a0b78aca-5f38-4a85-8708-9c3c3bb0e85e" />
+<img align="right" width="340" alt="Encoder" src="https://github.com/user-attachments/assets/ce78de70-696e-4968-bf7d-345d23c2bbc1" />
 
 The Transformer encoder is a fundamental component of the Vision Transformer (ViT), responsible for processing the sequence of patch embeddings and capturing relationships between them. Each encoder block contains a multi-head self-attention layer, which allows the model to weigh the importance of each patch relative to all others, followed by a feed-forward network (MLP) that transforms the representations. Residual connections and layer normalization are applied throughout to stabilize training and improve gradient flow. By stacking multiple encoder blocks, the Transformer encoder can build complex, high-level representations of the image, integrating both local and global information for downstream tasks such as classification.
 
@@ -159,6 +159,7 @@ To learn more about Convolutional Neural Networks (CNNs), I recommend [Simple CN
 
 The Vision Transformer (ViT), introduced by Dosovitskiy et al. (2020), replaces convolutions with a pure Transformer encoder. An image is split into fixed-size patches (e.g., 16×16), flattened, linearly projected into embeddings, and combined with positional encodings. These are processed by Multi-Head Self-Attention (MHSA), which models global dependencies between all patches in parallel, something CNNs only capture gradually via deeper layers. A special [CLS] token aggregates global features for classification.
 
+<img align="right" width="340" alt="CNN vs ViT - Receptive Field" src="https://github.com/user-attachments/assets/a81742f9-b714-4a54-b3d9-dc0130135be3" />
 In architecture, CNNs build hierarchical representations through stacked convolutions, while ViTs operate directly in patch-embedding space, with flexible receptive fields determined by attention. Practically, CNNs train well on moderate datasets due to their inductive biases, whereas ViTs usually require large-scale pretraining and strong regularization but can outperform CNNs when sufficient data is available.
 
 ## Data
