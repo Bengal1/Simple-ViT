@@ -161,6 +161,7 @@ class PatchEmbedding(nn.Module):
 
         return embedded_patches
 
+
     def get_patches_num(self) -> int:
         """
         Return the number of patches per image.

@@ -3,9 +3,6 @@ import torch.nn as nn
 from torch import Tensor
 
 
-import torch
-import torch.nn as nn
-
 class LearnablePositionalEncoding(nn.Module):
     """
     Learnable positional encoding for Vision Transformers (ViT).

@@ -1,3 +1,11 @@
+# ----------------------------------------------------------------------
+# Copyright (c) 2025, Bengal1
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+# ----------------------------------------------------------------------
+__author__="Bengal1"
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -27,7 +35,7 @@ LEARNING_RATE   = 1e-5      # Initial learning rate
 # BETAS           = (0.9, 0.98) # Adam Optimizer beta coefficients
 # EPSILON         = 1e-9      # Optimizer's epsilon for numerical stability
 # WARMUP          = 50        # Scheduler warmup period (number of steps)
-# WEIGHT_DECAY    = 1e-5      # Weight decay parameter (L2 regularization)
+WEIGHT_DECAY    = 1e-2      # Weight decay parameter (L2 regularization)
 # # --- Application-Specific Settings ---
 # DATA_DEBUG_MODE = True      # Debug mode flag (enables/disables debug features)
 # LOGGING_LEVEL   = utils.LogLevel.WARNING # Initial logging verbosity level
@@ -99,7 +107,7 @@ def _setup_model_for_training(
     loss_function = nn.CrossEntropyLoss().to(device)
 
     # Initialize the Adam optimizer
-    optimizer = optim.AdamW(model.parameters(), lr=lr)
+    optimizer = optim.AdamW(model.parameters(), lr=lr, weight_decay=WEIGHT_DECAY)
 
     return model, loss_function, optimizer, device
 
@@ -133,6 +141,7 @@ def main():
 
     # Plot Loss
     plot_losses(loss_records)
+
 
 # --- Main Entry Point ---
 if __name__ == "__main__":
