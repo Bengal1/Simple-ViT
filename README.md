@@ -142,7 +142,7 @@ Where:
 
 ### Training Pipeline
 ```ruby
-    for images, labels in data_loader:
+    for images, labels in train_loader:
 
         # Reset gradients
         optimizer.zero_grad()
