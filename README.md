@@ -97,12 +97,6 @@ Then apply scaling (gamma) and shifting (beta) parameters (trainable):
 The Adam optimization algorithm is an extension to stochastic gradient descent (SGD). Unlike SGD, The method computes individual adaptive learning rates for different parameters from estimates of first and second moments of the gradients Adam combines the benefits of two other methods: momentum and RMSProp.
 
 #### Adam Algorithm:
-* $`\theta_t`$​ : parameters at time step *t*.
-* $`\beta_1,\beta_2​`$: exponential decay rates for moments estimation.
-* $`\alpha`$ : learning rate.
-* $`\epsilon`$ : small constant to prevent division by zero.
-* $`\lambda`$ : weight decay coefficient. <br/>
-
 1. Compute gradients:
 
 $$
