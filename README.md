@@ -98,10 +98,7 @@ The Adam optimization algorithm is an extension to stochastic gradient descent (
 
 #### Adam Algorithm:
 1. Compute gradients:
-
-$$
-g_t = \nabla_{\theta} J(\theta_t)
-$$
+$`g_t = \nabla_{\theta} J(\theta_t)`$
 
 2. Update first moment estimate (mean):
 
