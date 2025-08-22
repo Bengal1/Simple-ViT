@@ -148,10 +148,10 @@ Where:
         optimizer.zero_grad()
 
         # Forward pass
-        outputs = model(images)
+        logits = model(images)
 
         # Compute loss
-        loss = loss_fn(outputs, labels)
+        loss = loss_fn(logits, labels)
 
         # Backpropagation
         loss.backward()
