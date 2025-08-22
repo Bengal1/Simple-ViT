@@ -99,10 +99,10 @@ def _train_epoch(model: nn.Module,
         optimizer.zero_grad()
 
         # Forward pass
-        outputs = model(images)
+        logits = model(images)
 
         # Compute loss
-        loss = loss_fn(outputs, labels)
+        loss = loss_fn(logits, labels)
 
         # Backpropagation
         loss.backward()
@@ -112,7 +112,7 @@ def _train_epoch(model: nn.Module,
 
         # Training accuracy calculation
         total_train_loss += loss.item()
-        _, predicted = outputs.max(1)
+        _, predicted = logits.max(1)
         correct_train += predicted.eq(labels).sum().item()
         total_train += labels.size(0)
 
