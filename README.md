@@ -97,19 +97,23 @@ Then apply scaling (gamma) and shifting (beta) parameters (trainable):
 The Adam optimization algorithm is an extension to stochastic gradient descent (SGD). Unlike SGD, The method computes individual adaptive learning rates for different parameters from estimates of first and second moments of the gradients Adam combines the benefits of two other methods: momentum and RMSProp.
 
 #### Adam Algorithm:
-1. Compute gradients: <br/>
-$`g_t = \nabla_{\theta} J(\theta_t)`$
+1. Compute gradients:
+
+$$
+g_t = \nabla_{\theta} J(\theta_t)
+$$
 
 2. Update first moment estimate (mean):
 
 $$
 m_t = \beta_1 \cdot m_{t-1} + (1 - \beta_1) \cdot g_t
+
+v_t = \beta_2 \cdot v_{t-1} + (1 - \beta_2) \cdot g_t^2
 $$
 
 3. Update second moment estimate (uncentered variance):
 
 $$
-v_t = \beta_2 \cdot v_{t-1} + (1 - \beta_2) \cdot g_t^2
 $$
 
 4. Bias correction:
