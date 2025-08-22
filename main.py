@@ -94,7 +94,29 @@ def _setup_model_for_training(
         lr: float,
         img_size: int | tuple[int, int] | None = None,
 ) -> tuple[nn.Module, nn.modules.loss, torch.optim.Optimizer, torch.device]:
+    """
+    Set up a Simple Vision Transformer (SimpleViT) model for training.
 
+    This function initializes the model, the loss function, the optimizer,
+    and selects the appropriate device (CPU or GPU) for training.
+
+    Args:
+        num_classes (int): Number of output classes for classification.
+        patch_size (int or tuple[int, int]): Size of each patch for the ViT.
+        lr (float): Learning rate for the optimizer.
+        img_size (int or tuple[int, int], optional): Input image size. 
+            If None, the model defaults to its internal configuration.
+
+    Returns:
+        tuple:
+            - model (nn.Module): The instantiated SimpleViT model on the 
+              selected device.
+            - loss_function (nn.modules.loss): Cross-Entropy loss function 
+              on the same device.
+            - optimizer (torch.optim.Optimizer): AdamW optimizer for model 
+              parameters.
+            - device (torch.device): The device used for training (CPU or GPU).
+    """
     # Set device (GPU/CPU)
     device = get_device()
 

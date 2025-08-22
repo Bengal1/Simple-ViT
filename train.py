@@ -55,7 +55,23 @@ def train_model(model: nn.Module,
                 validation_loader: DataLoader,
                 device: torch.device,
                 num_epochs: int) -> dict[str,list[float]]:
+    """
+    Train a PyTorch model for a specified number of epochs while evaluating
+    on a validation set after each epoch.
 
+    Args:
+        model (nn.Module): The neural network model to train.
+        loss_fn (nn.modules.loss): Loss function used for training.
+        optimizer (torch.optim): Optimizer for updating model parameters.
+        training_loader (DataLoader): DataLoader for the training dataset.
+        validation_loader (DataLoader): DataLoader for the validation dataset.
+        device (torch.device): Device to perform training on (CPU or GPU).
+        num_epochs (int): Maximum number of training epochs.
+
+    Returns:
+        dict[str, list[float]]: Dictionary containing lists of training and
+        validation losses for each epoch with keys 'train' and 'validation'.
+    """
     loss_record = {'train': [], 'validation': []}
 
     for epoch in range(1, num_epochs + 1):
@@ -89,7 +105,22 @@ def _train_epoch(model: nn.Module,
                 optimizer: torch.optim,
                 data_loader: DataLoader,
                 device: torch.device) -> tuple[float, float]:
+    """
+    Perform a single training epoch on the given model using the provided
+    data loader.
 
+    Args:
+        model (nn.Module): The neural network model to train.
+        loss_fn (nn.modules.loss): Loss function used for training.
+        optimizer (torch.optim): Optimizer for updating model parameters.
+        data_loader (DataLoader): DataLoader providing batches of training data.
+        device (torch.device): Device to perform training on (CPU or GPU).
+
+    Returns:
+        tuple[float, float]: A tuple containing:
+            - epoch_accuracy (float): Training accuracy for this epoch (percent).
+            - epoch_loss (float): Average training loss over the epoch.
+    """
     model.train()  # Training mode
     correct_train, total_train, total_train_loss = 0, 0, 0
 
