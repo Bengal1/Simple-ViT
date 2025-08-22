@@ -106,9 +106,7 @@ $$
 2. Update first moment estimate (mean):
 
 $$
-m_t = \beta_1 \cdot m_{t-1} + (1 - \beta_1) \cdot g_t
-
-v_t = \beta_2 \cdot v_{t-1} + (1 - \beta_2) \cdot g_t^2
+m_t = \beta_1 \cdot m_{t-1} + (1 - \beta_1) \cdot g_t \quad ; \quad v_t = \beta_2 \cdot v_{t-1} + (1 - \beta_2) \cdot g_t^2
 $$
 
 3. Update second moment estimate (uncentered variance):
