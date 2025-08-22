@@ -103,7 +103,7 @@ $$
 g_t = \nabla_{\theta} J(\theta_t)
 $$
 
-2. Update first and second moment estimate (mean):
+2. Update first and second moments estimate:
 
 $$
 m_t = \beta_1 \cdot m_{t-1} + (1 - \beta_1) \cdot g_t \quad ; \quad v_t = \beta_2 \cdot v_{t-1} + (1 - \beta_2) \cdot g_t^2
