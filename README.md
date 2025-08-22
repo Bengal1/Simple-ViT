@@ -140,7 +140,25 @@ Where:
 * $`y_i`$​  is the true probability for class *i* (usually 1 for the correct class and 0 for others).
 * $`\hat{y}_i`$  is the predicted probability for class *i*.
 
+### Training Pipeline
+```ruby
+    for images, labels in data_loader:
 
+        # Reset gradients
+        optimizer.zero_grad()
+
+        # Forward pass
+        outputs = model(images)
+
+        # Compute loss
+        loss = loss_fn(outputs, labels)
+
+        # Backpropagation
+        loss.backward()
+
+        # Update parameters
+        optimizer.step()
+```
 ## ViT vs CNN
 Convolutional Neural Networks (CNNs), first demonstrated in LeNet-5 (LeCun et al., 1998) and popularized by AlexNet (2012), dominated computer vision for decades. They rely on convolutional filters applied to local receptive fields, pooling for downsampling, and fully connected layers for classification. This design encodes strong inductive biases: locality (features are learned from neighboring pixels) and translation equivariance (patterns can be recognized regardless of position). Variants like VGG, ResNet, and DenseNet advanced CNNs by increasing depth and introducing innovations such as residual connections.<br/>
 To learn more about Convolutional Neural Networks (CNNs), I recommend [Simple CNN Guide](https://github.com/Bengal1/Simple-CNN-Guide).
