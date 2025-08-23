@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-from torch.nn import CrossEntropyLoss
 from torch.utils.data import DataLoader
 from typing import  Sequence
 
@@ -93,7 +92,8 @@ def train_model(model: nn.Module,
               f" {validation_loss:.4f}, Validation Accuracy:"
               f" {validation_accuracy:.2f}%")
 
-        if _early_stopping(loss_record['validation'], 5):
+        if _early_stopping(loss_record['validation'], patience=5, best_is_max=False):
+            print(f"Early stopping triggered at epoch {epoch}")
             break
 
     return loss_record
