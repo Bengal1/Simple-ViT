@@ -153,21 +153,19 @@ def _train_epoch(model: nn.Module,
     return epoch_accuracy, epoch_loss
 
 
-def early_stopping(
+def _early_stopping(
     metric_record: Sequence[float],
     patience: int = 5,
-    best_is_max: bool = True
-) -> bool:
+    best_is_max: bool = True) -> bool:
     """
     Checks if a metric has failed to improve within the last `patience`
     epochs.
 
     Args:
-        metric_record: Sequence of metric values (e.g., BLEU or validation
-            loss).
+        metric_record: Sequence of metric values (e.g., BLEU or validation loss).
         patience: Number of epochs to wait for improvement.
-        best_is_max: Whether higher metric values are better (e.g., BLEU)
-            or lower (e.g., loss).
+        best_is_max: Whether higher metric values are better (like BLEU)
+            or lower (like loss).
 
     Returns:
         should_stop (bool): True if metric did not improve in the last
