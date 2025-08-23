@@ -92,6 +92,15 @@ Then apply scaling (gamma) and shifting (beta) parameters (trainable):
 ⇨  y = γ·\hat{x} + β
 ```
 
+## ViT vs CNN
+Convolutional Neural Networks (CNNs), first demonstrated in LeNet-5 (LeCun et al., 1998) and popularized by AlexNet (2012), dominated computer vision for decades. They rely on convolutional filters applied to local receptive fields, pooling for downsampling, and fully connected layers for classification. This design encodes strong inductive biases: locality (features are learned from neighboring pixels) and translation equivariance (patterns can be recognized regardless of position). Variants like VGG, ResNet, and DenseNet advanced CNNs by increasing depth and introducing innovations such as residual connections.<br/>
+To learn more about Convolutional Neural Networks (CNNs), I recommend [Simple CNN Guide](https://github.com/Bengal1/Simple-CNN-Guide).
+
+The Vision Transformer (ViT), introduced by Dosovitskiy et al. (2020), replaces convolutions with a pure Transformer encoder. An image is split into fixed-size patches (e.g., 16×16), flattened, linearly projected into embeddings, and combined with positional encodings. These are processed by Multi-Head Self-Attention (MHSA), which models global dependencies between all patches in parallel, something CNNs only capture gradually via deeper layers. A special [CLS] token aggregates global features for classification.
+
+<img align="right" width="400" alt="CNN vs ViT - Receptive Field" src="https://github.com/user-attachments/assets/a81742f9-b714-4a54-b3d9-dc0130135be3" />
+In architecture, CNNs build hierarchical representations through stacked convolutions, gradually expanding their receptive fields and excelling at capturing local patterns such as edges and textures. ViTs, on the other hand, operate directly in patch-embedding space, where self-attention provides a global receptive field from the very first layer. This fundamental difference means CNNs have built-in biases for vision, making them data-efficient and effective on smaller datasets, while ViTs rely more heavily on large-scale data to learn spatial relationships that CNNs encode naturally. Consequently, CNNs tend to be more efficient and perform strongly when training data is limited, benefiting from their inductive biases, whereas ViTs scale more effectively with increased model size and dataset availability, often surpassing CNNs in accuracy and adaptability. Additionally, CNNs naturally form structured feature hierarchies that emphasize local detail and are relatively easy to interpret, making them well-suited for tasks like object detection or medical imaging. ViTs, by modeling long-range dependencies from the start, offer greater flexibility in capturing global context, which can lead to stronger performance in complex recognition challenges and transfer learning scenarios.
+
 ## Training and Optimization
 ### Adam Optimizer
 The Adam optimization algorithm is an extension to stochastic gradient descent (SGD). Unlike SGD, The method computes individual adaptive learning rates for different parameters from estimates of first and second moments of the gradients Adam combines the benefits of two other methods: momentum and RMSProp.
@@ -159,14 +168,7 @@ Where:
         # Update parameters
         optimizer.step()
 ```
-## ViT vs CNN
-Convolutional Neural Networks (CNNs), first demonstrated in LeNet-5 (LeCun et al., 1998) and popularized by AlexNet (2012), dominated computer vision for decades. They rely on convolutional filters applied to local receptive fields, pooling for downsampling, and fully connected layers for classification. This design encodes strong inductive biases: locality (features are learned from neighboring pixels) and translation equivariance (patterns can be recognized regardless of position). Variants like VGG, ResNet, and DenseNet advanced CNNs by increasing depth and introducing innovations such as residual connections.<br/>
-To learn more about Convolutional Neural Networks (CNNs), I recommend [Simple CNN Guide](https://github.com/Bengal1/Simple-CNN-Guide).
 
-The Vision Transformer (ViT), introduced by Dosovitskiy et al. (2020), replaces convolutions with a pure Transformer encoder. An image is split into fixed-size patches (e.g., 16×16), flattened, linearly projected into embeddings, and combined with positional encodings. These are processed by Multi-Head Self-Attention (MHSA), which models global dependencies between all patches in parallel, something CNNs only capture gradually via deeper layers. A special [CLS] token aggregates global features for classification.
-
-<img align="right" width="400" alt="CNN vs ViT - Receptive Field" src="https://github.com/user-attachments/assets/a81742f9-b714-4a54-b3d9-dc0130135be3" />
-In architecture, CNNs build hierarchical representations through stacked convolutions, gradually expanding their receptive fields and excelling at capturing local patterns such as edges and textures. ViTs, on the other hand, operate directly in patch-embedding space, where self-attention provides a global receptive field from the very first layer. This fundamental difference means CNNs have built-in biases for vision, making them data-efficient and effective on smaller datasets, while ViTs rely more heavily on large-scale data to learn spatial relationships that CNNs encode naturally. Consequently, CNNs tend to be more efficient and perform strongly when training data is limited, benefiting from their inductive biases, whereas ViTs scale more effectively with increased model size and dataset availability, often surpassing CNNs in accuracy and adaptability. Additionally, CNNs naturally form structured feature hierarchies that emphasize local detail and are relatively easy to interpret, making them well-suited for tasks like object detection or medical imaging. ViTs, by modeling long-range dependencies from the start, offer greater flexibility in capturing global context, which can lead to stronger performance in complex recognition challenges and transfer learning scenarios.
 
 ## Data
 
