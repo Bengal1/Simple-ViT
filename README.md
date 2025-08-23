@@ -169,7 +169,6 @@ Where:
         optimizer.step()
 ```
 
-
 ## Data
 
 
