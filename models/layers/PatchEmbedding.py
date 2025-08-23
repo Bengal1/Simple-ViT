@@ -18,10 +18,11 @@ class PatchEmbedding(nn.Module):
         patch_projection (nn.Linear | None): Linear layer to project flattened patches.
     """
 
-    def __init__(self,
-                 patch_size: int | tuple[int, int],
-                 embed_dim: int = 768,
-                 img_size: int | tuple[int, int] | None = None):
+    def __init__(
+            self,
+            patch_size: int | tuple[int, int],
+            embed_dim: int = 768,
+            img_size: int | tuple[int, int] | None = None):
         """
         Initialize PatchEmbedding.
 

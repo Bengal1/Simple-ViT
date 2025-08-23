@@ -22,16 +22,16 @@ class SimpleViT(nn.Module):
     """
 
     def __init__(
-        self,
-        patch_size: int | tuple[int, int],
-        num_classes: int,
-        img_size: int | tuple[int, int] | None = None,
-        embed_dim: int = 768,
-        num_heads: int = 12,
-        num_layers: int = 12,
-        dim_feedforward: int = 3072,
-        dropout: float = 0.0,
-        norm_eps: float = 1e-6,
+            self,
+            patch_size: int | tuple[int, int],
+            num_classes: int,
+            img_size: int | tuple[int, int] | None = None,
+            embed_dim: int = 768,
+            num_heads: int = 12,
+            num_layers: int = 12,
+            dim_feedforward: int = 3072,
+            dropout: float = 0.0,
+            norm_eps: float = 1e-6,
     ):
         """
         Initialize the SimpleViT model.

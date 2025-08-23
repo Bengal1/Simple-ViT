@@ -10,10 +10,11 @@ __all__ = [
 ]
 
 
-def evaluate_model(model: nn.Module,
-                   criterion: nn.modules.loss,
-                   data_loader: DataLoader,
-                   device: torch.device) -> tuple[float, float]:
+def evaluate_model(
+        model: nn.Module,
+        criterion: nn.modules.loss,
+        data_loader: DataLoader,
+        device: torch.device) -> tuple[float, float]:
     """
     Evaluates the model on a validation or test set.
 
@@ -47,13 +48,14 @@ def evaluate_model(model: nn.Module,
     return eval_accuracy, eval_loss
 
 
-def train_model(model: nn.Module,
-                loss_fn: nn.modules.loss,
-                optimizer: torch.optim,
-                training_loader: DataLoader,
-                validation_loader: DataLoader,
-                device: torch.device,
-                num_epochs: int) -> dict[str,list[float]]:
+def train_model(
+        model: nn.Module,
+        loss_fn: nn.modules.loss,
+        optimizer: torch.optim,
+        training_loader: DataLoader,
+        validation_loader: DataLoader,
+        device: torch.device,
+        num_epochs: int) -> dict[str,list[float]]:
     """
     Train a PyTorch model for a specified number of epochs while evaluating
     on a validation set after each epoch.
@@ -100,11 +102,12 @@ def train_model(model: nn.Module,
 
 
  #--- Training Helper Functions ---
-def _train_epoch(model: nn.Module,
-                loss_fn: nn.modules.loss,
-                optimizer: torch.optim,
-                data_loader: DataLoader,
-                device: torch.device) -> tuple[float, float]:
+def _train_epoch(
+        model: nn.Module,
+        loss_fn: nn.modules.loss,
+        optimizer: torch.optim,
+        data_loader: DataLoader,
+        device: torch.device) -> tuple[float, float]:
     """
     Perform a single training epoch on the given model using the provided
     data loader.
@@ -154,9 +157,9 @@ def _train_epoch(model: nn.Module,
 
 
 def _early_stopping(
-    metric_record: Sequence[float],
-    patience: int = 5,
-    best_is_max: bool = True) -> bool:
+        metric_record: Sequence[float],
+        patience: int = 5,
+        best_is_max: bool = True) -> bool:
     """
     Checks if a metric has failed to improve within the last `patience`
     epochs.
