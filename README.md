@@ -149,7 +149,7 @@ Where:
 * $`y_i`$​  is the true probability for class *i* (usually 1 for the correct class and 0 for others).
 * $`\hat{y}_i`$  is the predicted probability for class *i*.
 
-### Training Pipeline
+### Training Loop
 ```ruby
     for images, labels in train_loader:
 
