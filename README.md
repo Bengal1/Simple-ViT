@@ -1,5 +1,5 @@
 # Simple ViT
-This repository presents a [*Vision Tranformer (ViT)*](https://en.wikipedia.org/wiki/Vision_transformer) implementation.
+This repository presents a showcase of the [*Vision Tranformer (ViT)*](https://en.wikipedia.org/wiki/Vision_transformer), highlighting its core architectural ideas and training dynamics. ViTs mark a turning point in computer vision, leveraging self-attention to capture global relationships in images without relying on convolutional filters. The project provides an accessible yet thorough presentation of how ViTs operate, their advantages and limitations, and how they achieve state-of-the-art results on large-scale image recognition tasks. In addition, we include a comparison with Convolutional Neural Networks (CNNs) to illustrate their differences and relative strengths.
 
 For more information about Transformer Model I recommend [Simple Transformer](https://github.com/Bengal1/Simple-Transformer).
 
