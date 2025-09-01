@@ -107,39 +107,24 @@ The Adam optimization algorithm is an extension to stochastic gradient descent (
 
 #### Adam Algorithm:
 
-\begin{enumerate}
-  \item \textbf{Compute gradients}  
-  \[
-    g_t = \nabla_\theta J(\theta_t)
-  \]
+1. **Compute gradients**  
+   $$g_t = \nabla_\theta J(\theta_t)$$
 
-  \item \textbf{Update moment estimates}  
-  \[
-    m_t = \beta_1 m_{t-1} + (1 - \beta_1) g_t
-  \]
-  \[
-    v_t = \beta_2 v_{t-1} + (1 - \beta_2) g_t^2
-  \]
+2. **Update moment estimates**  
+   $$m_t = \beta_1 m_{t-1} + (1 - \beta_1) g_t$$  
+   $$v_t = \beta_2 v_{t-1} + (1 - \beta_2) g_t^2$$
 
-  \item \textbf{Bias correction}  
-  \[
-    \hat{m}_t = \frac{m_t}{1 - \beta_1^t}, 
-    \quad
-    \hat{v}_t = \frac{v_t}{1 - \beta_2^t}
-  \]
+3. **Bias correction**  
+   $$\hat{m}_t = \frac{m_t}{1 - \beta_1^t}, \quad
+     \hat{v}_t = \frac{v_t}{1 - \beta_2^t}$$
 
-  \item \textbf{Parameter update}  
-  \[
-    \theta_{t+1} = \theta_t 
-    - \alpha \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}
-  \]
+4. **Parameter update**  
+   $$\theta_{t+1} = \theta_t 
+     - \alpha \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$$
 
-  \item \textbf{Decoupled weight decay}  
-  \[
-    \theta_{t+1} \leftarrow \theta_{t+1} 
-    - \alpha \cdot \lambda \cdot \theta_t
-  \]
-\end{enumerate}
+5. **Decoupled weight decay**  
+   $$\theta_{t+1} \leftarrow \theta_{t+1} 
+     - \alpha \cdot \lambda \cdot \theta_t$$
 
 
 
