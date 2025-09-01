@@ -119,12 +119,10 @@ The Adam optimization algorithm is an extension to stochastic gradient descent (
      \hat{v}_t = \frac{v_t}{1 - \beta_2^t}$$
 
 4. **Parameter update**  
-   $$\theta_{t+1} = \theta_t 
-     - \alpha \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$$
+   $$\theta_{t+1} = \theta_t - \alpha \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$$
 
 5. **Decoupled weight decay**  
-   $$\theta_{t+1} \leftarrow \theta_{t+1} 
-     - \alpha \cdot \lambda \cdot \theta_t$$
+   $$\theta_{t+1} \leftarrow \theta_{t+1} - \alpha \cdot \lambda \cdot \theta_t$$
 
 
 
