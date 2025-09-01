@@ -106,6 +106,7 @@ In architecture, CNNs build hierarchical representations through stacked convolu
 The Adam optimization algorithm is an extension to stochastic gradient descent (SGD). Unlike SGD, The method computes individual adaptive learning rates for different parameters from estimates of first and second moments of the gradients Adam combines the benefits of two other methods: momentum and RMSProp.
 
 #### Adam Algorithm:
+
 \begin{enumerate}
   \item \textbf{Compute gradients}  
   \[
