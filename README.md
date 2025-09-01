@@ -107,23 +107,27 @@ The Adam optimization algorithm is an extension to stochastic gradient descent (
 
 #### Adam Algorithm:
 
-1. **Compute gradients**  
+1. Compute gradients  
    <div align="center">
    $$g_t = \nabla_\theta J(\theta_t)$$
    </div>
 
-2. **Update moment estimates**  
+2. Update moment estimates  
+   <div align="center">
    $$m_t = \beta_1 m_{t-1} + (1 - \beta_1) g_t$$  
    $$v_t = \beta_2 v_{t-1} + (1 - \beta_2) g_t^2$$
-
-3. **Bias correction**  
+   </div>
+   
+4. **Bias correction**  
+   <div align="center">
    $$\hat{m}_t = \frac{m_t}{1 - \beta_1^t}, \quad
      \hat{v}_t = \frac{v_t}{1 - \beta_2^t}$$
-
-4. **Parameter update**  
+   </div>
+   
+6. **Parameter update**  
    $$\theta_{t+1} = \theta_t - \alpha \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$$
 
-5. **Decoupled weight decay**  
+7. **Decoupled weight decay**  
    $$\theta_{t+1} \leftarrow \theta_{t+1} - \alpha \cdot \lambda \cdot \theta_t$$
 
 
