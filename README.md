@@ -108,7 +108,9 @@ The Adam optimization algorithm is an extension to stochastic gradient descent (
 #### Adam Algorithm:
 
 1. **Compute gradients**  
+   <div align="center">
    $$g_t = \nabla_\theta J(\theta_t)$$
+   </div>
 
 2. **Update moment estimates**  
    $$m_t = \beta_1 m_{t-1} + (1 - \beta_1) g_t$$  
