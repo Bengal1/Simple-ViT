@@ -125,39 +125,6 @@ The Adam optimization algorithm is an extension to stochastic gradient descent (
    $$\theta_{t+1} \leftarrow \theta_{t+1} - \alpha \cdot \lambda \cdot \theta_t$$
 
 
-
-
-1. Compute gradients:
-
-$$
-g_t = \nabla_{\theta} J(\theta_t)
-$$
-
-2. Update first and second moments estimate:
-
-$$
-m_t = \beta_1 \cdot m_{t-1} + (1 - \beta_1) \cdot g_t \quad ; \quad v_t = \beta_2 \cdot v_{t-1} + (1 - \beta_2) \cdot g_t^2
-$$
-
-3. Bias correction:
-
-$$
-\hat{m}_t = \frac{m_t}{1 - \beta_1^t} \quad ; \quad \hat{v}_t = \frac{v_t}{1 - \beta_2^t}
-$$
-
-4. Update parameters:
-
-$$
-\theta_{t+1} = \theta_t - \alpha \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}
-$$
-
-* In our model *Weight decay* is applied (decoupled):
-
-$$
-\theta_{t+1} ← \theta_{t+1} - \alpha \cdot \lambda \cdot \theta_t 
-$$
-
-
 ### Cross-Entropy Loss Function
 This criterion computes the cross entropy loss between input logits and target. Loss function is a function that maps an event or values of one or more variables onto a real number intuitively representing some "loss" associated with the event. The Cross Enthropy Loss function is commonly used in classification tasks both in traditional ML and deep learning. It compares the predicted probability distribution over classes (logits) with the true class labels and penalizes incorrect or uncertain predictions.
 
