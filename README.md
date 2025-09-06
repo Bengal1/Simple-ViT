@@ -8,7 +8,7 @@ For more information about Transformer Model I recommend [Simple Transformer](ht
 - [![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/) <br/>
 
 ## Vision Transformer
-<img align="right" width="300" alt="ViT Architecture" src="https://github.com/user-attachments/assets/4c278012-d20a-4f92-83bf-566531d30eee" />
+<img align="right" width="300" alt="ViT Architecture" src="https://github.com/user-attachments/assets/41934e26-ecd0-4aec-89a3-b78fee241ebb" />
 
 The Vision Transformer (ViT) is a deep learning architecture that adapts the Transformer, originally developed for natural language processing, to image recognition tasks. Introduced by Dosovitskiy et al. in “An Image is Worth 16x16 Words” (2020), ViT replaces traditional convolutional feature extractors with a sequence of image patches processed by self-attention. This approach demonstrated that, with sufficient data and compute, Transformers can outperform convolutional neural networks (CNNs) in computer vision benchmarks, paving the way for a broad family of vision transformer models.<br/>
 
