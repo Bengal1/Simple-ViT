@@ -59,7 +59,7 @@ MultiHead-Attention = Concat(head_1,...,head_h)·W_{O}
 
 For more details information about *Attention Mechanism* see [Simple Transformer](https://github.com/Bengal1/Simple-Transformer).
 
-#### Feed Forward
+#### Feed-Forward Network
 <img align="right" width="400" alt="feedforward_vit" src="https://github.com/user-attachments/assets/e7862e3b-9039-46bb-a428-1bcebbd8bad0" />
 
 The *Feed-Forward Network* (FFN) in the Vision Transformer (ViT) is a crucial component of each encoder block. It consists of two fully connected layers with a non-linear activation function, often GELU (Gaussian Error Linear Unit), applied between them. Unlike self-attention, which enables tokens to exchange information globally, the FFN operates on each token independently, refining and transforming its representation in a higher-dimensional space. This allows the model to capture more complex, non-linear relationships within the data. In ViT, the FFN complements self-attention by enhancing the expressive power of the patch embeddings, ensuring that both global context and token-wise transformations contribute to the learned image representation.
