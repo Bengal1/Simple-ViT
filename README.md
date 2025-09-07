@@ -8,7 +8,7 @@ For more information about Transformer Model I recommend [Simple Transformer](ht
 - [![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/) <br/>
 
 ## Vision Transformer
-<img align="right" width="300" alt="ViT Architecture" src="https://github.com/user-attachments/assets/4c278012-d20a-4f92-83bf-566531d30eee" />
+<img align="right" width="300" alt="ViT Architecture" src="https://github.com/user-attachments/assets/41934e26-ecd0-4aec-89a3-b78fee241ebb" />
 
 The Vision Transformer (ViT) is a deep learning architecture that adapts the Transformer, originally developed for natural language processing, to image recognition tasks. Introduced by Dosovitskiy et al. in “An Image is Worth 16x16 Words” (2020), ViT replaces traditional convolutional feature extractors with a sequence of image patches processed by self-attention. This approach demonstrated that, with sufficient data and compute, Transformers can outperform convolutional neural networks (CNNs) in computer vision benchmarks, paving the way for a broad family of vision transformer models.<br/>
 
@@ -59,8 +59,8 @@ MultiHead-Attention = Concat(head_1,...,head_h)·W_{O}
 
 For more details information about *Attention Mechanism* see [Simple Transformer](https://github.com/Bengal1/Simple-Transformer).
 
-#### Feed Forward
-<img align="right" width="400"  src="https://github.com/user-attachments/assets/484983aa-a374-4d71-bca1-f94467502650">
+#### Feed-Forward Network
+<img align="right" width="400" alt="feedforward_vit" src="https://github.com/user-attachments/assets/e7862e3b-9039-46bb-a428-1bcebbd8bad0" />
 
 The *Feed-Forward Network* (FFN) in the Vision Transformer (ViT) is a crucial component of each encoder block. It consists of two fully connected layers with a non-linear activation function, often GELU (Gaussian Error Linear Unit), applied between them. Unlike self-attention, which enables tokens to exchange information globally, the FFN operates on each token independently, refining and transforming its representation in a higher-dimensional space. This allows the model to capture more complex, non-linear relationships within the data. In ViT, the FFN complements self-attention by enhancing the expressive power of the patch embeddings, ensuring that both global context and token-wise transformations contribute to the learned image representation.
 
@@ -106,48 +106,41 @@ In architecture, CNNs build hierarchical representations through stacked convolu
 The Adam optimization algorithm is an extension to stochastic gradient descent (SGD). Unlike SGD, The method computes individual adaptive learning rates for different parameters from estimates of first and second moments of the gradients Adam combines the benefits of two other methods: momentum and RMSProp.
 
 #### Adam Algorithm:
+
 1. Compute gradients:
+   <div align="center">
+   $$g_t = \nabla_\theta J(\theta_t)$$
+   </div>
+
+2. Update moment estimates:
+   <div align="center">
+   $$m_t = \beta_1 m_{t-1} + (1 - \beta_1) g_t \quad;\quad v_t = \beta_2 v_{t-1} + (1 - \beta_2) g_t^2$$
+   </div>
+   
+3. Bias correction: 
+   <div align="center">
+   $$\hat{m}_t = \frac{m_t}{1 - \beta_1^t} \quad;\quad \hat{v}_t = \frac{v_t}{1 - \beta_2^t}$$
+   </div>
+   
+4. Parameter update: 
+   <div align="center">
+   $$\theta_{t+1} = \theta_t - \alpha \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$$
+   </div>
+   
+5. Decoupled weight decay:  
+   <div align="center">
+   $$\theta_{t+1} \leftarrow \theta_{t+1} - \alpha \cdot \lambda \cdot \theta_t$$
+   </div>
+
+### Cross Entropy Loss Function
+The Cross Entropy Loss Function is widely used for classification tasks, as it measures the difference between the predicted probability distribution and the true distribution. Given a predicted probability vector **$\hat{y}$** and a one-hot encoded target vector **$y$**, the loss for a single example is defined as:
 
 $$
-g_t = \nabla_{\theta} J(\theta_t)
+\mathcal{L}_{CE} = - \sum_{i} y_i \log \hat{y}_i
 $$
 
-2. Update first and second moments estimate:
+This loss penalizes confident incorrect predictions more heavily than less certain ones, encouraging the model to assign higher probabilities to the correct classes. Minimizing cross-entropy effectively maximizes the likelihood of the correct labels under the model’s predicted distribution.
 
-$$
-m_t = \beta_1 \cdot m_{t-1} + (1 - \beta_1) \cdot g_t \quad ; \quad v_t = \beta_2 \cdot v_{t-1} + (1 - \beta_2) \cdot g_t^2
-$$
-
-3. Bias correction:
-
-$$
-\hat{m}_t = \frac{m_t}{1 - \beta_1^t} \quad ; \quad \hat{v}_t = \frac{v_t}{1 - \beta_2^t}
-$$
-
-4. Update parameters:
-
-$$
-\theta_{t+1} = \theta_t - \alpha \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}
-$$
-
-* In our model *Weight decay* is applied (decoupled):
-
-$$
-\theta_{t+1} ← \theta_{t+1} - \alpha \cdot \lambda \cdot \theta_t 
-$$
-
-
-### Cross-Entropy Loss Function
-This criterion computes the cross entropy loss between input logits and target. Loss function is a function that maps an event or values of one or more variables onto a real number intuitively representing some "loss" associated with the event. The Cross Enthropy Loss function is commonly used in classification tasks both in traditional ML and deep learning. It compares the predicted probability distribution over classes (logits) with the true class labels and penalizes incorrect or uncertain predictions.
-
-$$
-Loss = - \sum_{i=1}^{C} y_i \log(\hat{y}_i)
-$$
-
-Where:
-* $`C`$  is the number of classes.
-* $`y_i`$​  is the true probability for class *i* (usually 1 for the correct class and 0 for others).
-* $`\hat{y}_i`$  is the predicted probability for class *i*.
 
 ### Training Loop
 ```ruby
