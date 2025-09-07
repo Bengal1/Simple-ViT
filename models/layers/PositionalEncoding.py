@@ -31,21 +31,38 @@ class LearnablePositionalEncoding(nn.Module):
             has_cls_token (bool): If True, includes an extra position for a CLS token.
         """
         super().__init__()
-        self.num_patches = num_patches
+        if num_patches is not None:
+            self.num_patches = num_patches + 1 if has_cls_token else num_patches
+        else:
+            self.num_patches = None
         self.embed_dim = embed_dim
         self.has_cls_token = has_cls_token
 
         # Placeholder for lazy initialization
-        self.pos_embedding: nn.Parameter | None = None
+        if self.num_patches is not None:
+            self.pos_embedding = nn.Parameter(torch.empty(1, num_patches, self.embed_dim))
+            # Initialize using truncated normal (ViT default)
+            nn.init.trunc_normal_(self.pos_embedding, std=0.02)
+        else:
+            self.pos_embedding: nn.Parameter | None = None
 
-    def _initialize_pos_embedding(self, seq_len: int) -> None:
+    def _initialize_pos_embedding(self, patches: int, device: torch.device) -> None:
         """
         Lazy initialization of positional embeddings based on actual sequence length.
 
         Args:
-            seq_len (int): Number of tokens (patches + optional CLS) in input.
+            patches (int): Number of tokens (patches + optional CLS) in input.
         """
-        self.pos_embedding = nn.Parameter(torch.empty(1, seq_len, self.embed_dim))
+        if self.num_patches is None:
+            self.num_patches = patches
+        else:
+            if self.num_patches != patches:
+                raise ValueError(
+                    f"Expected {self.num_patches} number of patches, got {patches}"
+                )
+
+        self.pos_embedding = nn.Parameter(torch.empty(1, self.num_patches,
+                                                      self.embed_dim)).to(device)
         # Initialize using truncated normal (ViT default)
         nn.init.trunc_normal_(self.pos_embedding, std=0.02)
 
@@ -74,18 +91,18 @@ class LearnablePositionalEncoding(nn.Module):
 
         patches_num = x.size(1)
 
-        # --- Lazy initialization ---
+        # If None -> Lazy initialization
         if self.pos_embedding is None:
-            self._initialize_pos_embedding(patches_num)
+            self._initialize_pos_embedding(patches_num, x.device)
 
         # Ensure number of patches matches positional embeddings
-        if patches_num != self.pos_embedding.size(1):
+        if patches_num != self.num_patches:
             raise ValueError(
-                f"Expected sequence length {self.pos_embedding.size(1)}, got {patches_num}"
+                f"Expected sequence length {self.num_patches}, got {patches_num}"
             )
 
         # --- Add positional embeddings ---
-        return x + self.pos_embedding.to(x.device)
+        return x + self.pos_embedding
 
 
 
