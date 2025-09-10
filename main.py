@@ -21,20 +21,19 @@ from torchvision import datasets, transforms
 EMBED_DIM        = 512       # Embedding dimension
 NUM_HEADS        = 8         # Number of attention heads
 NUM_LAYERS       = 6         # Number of Encoder/Decoder layers
-PATCH_SIZE       = (16, 16)
+PATCH_SIZE       = 4 #(16, 16)
 # # --- Training Process ---
 BATCH_SIZE       = 32        # Batch size
 EPOCHS           = 10        # Number of epochs
 NUM_CLASSES      = 10
 VALIDATION_SPLIT = 0.2
 # MAX_GRAD_CLIP   = 1.0       # Max norm gradient (for gradient clipping)
-# DROPOUT         = 0.1       # Dropout probability
+DROPOUT         = 0.1       # Dropout probability
 # LABEL_SMOOTHING = 0.1       # Label smoothing parameter
 # # --- Optimizer Settings (Adam) ---
 LEARNING_RATE   = 1e-5      # Initial learning rate
 # BETAS           = (0.9, 0.98) # Adam Optimizer beta coefficients
 # EPSILON         = 1e-9      # Optimizer's epsilon for numerical stability
-# WARMUP          = 50        # Scheduler warmup period (number of steps)
 WEIGHT_DECAY    = 1e-2      # Weight decay parameter (L2 regularization)
 # # --- Application-Specific Settings ---
 # DATA_DEBUG_MODE = True      # Debug mode flag (enables/disables debug features)
@@ -45,7 +44,11 @@ WEIGHT_DECAY    = 1e-2      # Weight decay parameter (L2 regularization)
 def _get_cifar10_dataloaders(
         samples_per_batch: int,
         train_validation_split: float
-) -> tuple[DataLoader, DataLoader, DataLoader]:
+) -> tuple[
+    DataLoader,
+    DataLoader,
+    DataLoader,
+    tuple[int, int, int]]:
     """
     Loads the CIFAR-10 dataset and creates DataLoader objects for training,
     validation, and testing.
@@ -55,7 +58,8 @@ def _get_cifar10_dataloaders(
         train_validation_split (float): Fraction of training data for validation.
 
     Returns:
-        tuple[DataLoader, DataLoader, DataLoader]: (train_loader, val_loader, test_loader)
+        tuple[DataLoader, DataLoader, DataLoader, tuple]:
+                                (train_loader, val_loader, test_loader, image_size)
     """
     # Transform: convert to tensor and normalize
     # transform = transforms.Compose([
@@ -84,7 +88,10 @@ def _get_cifar10_dataloaders(
     val_loader = DataLoader(val_dataset, batch_size=samples_per_batch, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=samples_per_batch, shuffle=False)
 
-    return train_loader, val_loader, test_loader
+    # Get image size
+    image_size = next(iter(train_loader))[0].shape[1:]
+
+    return train_loader, val_loader, test_loader, image_size
 
 
 # --- Model & training Component Setup Helper Function ---
@@ -92,8 +99,12 @@ def _setup_model_for_training(
         num_classes: int,
         patch_size: int | tuple[int, int],
         lr: float,
-        img_size: int | tuple[int, int] | None = None,
-) -> tuple[nn.Module, nn.modules.loss, torch.optim.Optimizer, torch.device]:
+        img_size: int | tuple[int, int, int] | None = None,
+) -> tuple[
+    nn.Module,
+    nn.modules.loss,
+    torch.optim.Optimizer,
+    torch.device]:
     """
     Set up a Simple Vision Transformer (SimpleViT) model for training.
 
@@ -104,8 +115,7 @@ def _setup_model_for_training(
         num_classes (int): Number of output classes for classification.
         patch_size (int or tuple[int, int]): Size of each patch for the ViT.
         lr (float): Learning rate for the optimizer.
-        img_size (int or tuple[int, int], optional): Input image size. 
-            If None, the model defaults to its internal configuration.
+        img_size (tuple[int, int, int]): Input image size.
 
     Returns:
         tuple:
@@ -123,7 +133,9 @@ def _setup_model_for_training(
     # Instantiate the SimpleCNN model
     model = SimpleViT(patch_size=patch_size,
                       num_classes=num_classes,
-                      img_size=img_size).to(device)
+                      img_size=img_size,
+                      dropout=DROPOUT
+                      ).to(device)
 
     # Initialize the Cross-Entropy Loss function
     loss_function = nn.CrossEntropyLoss().to(device)
@@ -136,10 +148,11 @@ def _setup_model_for_training(
 
 # --- Main Function ---
 def main():
+    set_seed()
+
     # Initialize data loaders
-    train_loader, val_loader, test_loader = _get_cifar10_dataloaders(
+    train_loader, val_loader, test_loader, img_size = _get_cifar10_dataloaders(
         BATCH_SIZE, VALIDATION_SPLIT)
-    img_size = tuple(next(iter(train_loader))[0].shape[2:])
 
     # Initialize model, loss function and optimizer
     vit, loss_fn, optimizer, device = _setup_model_for_training(NUM_CLASSES,

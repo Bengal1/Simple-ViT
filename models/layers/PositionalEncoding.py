@@ -40,7 +40,7 @@ class LearnablePositionalEncoding(nn.Module):
 
         # Placeholder for lazy initialization
         if self.num_patches is not None:
-            self.pos_embedding = nn.Parameter(torch.empty(1, num_patches, self.embed_dim))
+            self.pos_embedding = nn.Parameter(torch.empty(1, self.num_patches, self.embed_dim))
             # Initialize using truncated normal (ViT default)
             nn.init.trunc_normal_(self.pos_embedding, std=0.02)
         else:

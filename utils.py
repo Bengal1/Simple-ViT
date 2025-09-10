@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+# --- Public API ---
 __all__ = [
     "get_device",
     "set_seed",
@@ -38,7 +39,7 @@ def get_device() -> torch.device:
     return device
 
 
-def set_seed(seed_value: int = 73) -> None:
+def set_seed(seed_value: int = 1755900008) -> None:
     """
     Sets the random seed for reproducibility across multiple libraries.
 
@@ -50,7 +51,7 @@ def set_seed(seed_value: int = 73) -> None:
     and dropout) will yield the same results every time the code is run.
 
     Args:
-        seed_value (int): The integer value to use as the seed. Defaults to 73.
+        seed_value (int): The integer value to use as the seed. Defaults to 1755900008.
     """
     random.seed(seed_value)
     np.random.seed(seed_value)

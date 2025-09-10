@@ -21,17 +21,19 @@ class PatchEmbedding(nn.Module):
     def __init__(
             self,
             patch_size: int | tuple[int, int],
-            embed_dim: int = 768,
-            img_size: int | tuple[int, int] | None = None):
+            num_patches: int,
+            img_size: tuple[int, int, int],
+            embed_dim: int = 768):
         """
         Initialize PatchEmbedding.
 
         Args:
             patch_size (int | tuple[int, int]): Size of each patch (height, width).
                                                 If int, patch is square.
-            embed_dim (int): Output embedding dimension of each patch.
-            img_size (int | tuple[int, int] | None): Optional image size for pre-initialization.
-                                                     If None, will infer from input on first forward.
+            num_patches (int):
+            img_size (tuple[int, int, int]): Optional image size for pre-initialization.
+                                                If None, will infer from input on first forward.
+            embed_dim (int): Output embedding dimension of each patch. Default is ***.
 
         Raises:
             ValueError: If `patch_size` or `img_size` does not have 1 or 2 dimensions.
@@ -47,26 +49,21 @@ class PatchEmbedding(nn.Module):
             raise ValueError("Patch size must be one or two dimensional")
 
         self.embed_dim = embed_dim
+        self.n_patches = num_patches
 
         # --- Image size ---
-        if img_size is not None:
-            if isinstance(img_size, int):
-                self.img_height = self.img_width = img_size
-            elif isinstance(img_size, (tuple, list)) and len(img_size) == 2:
-                self.img_height, self.img_width = img_size
-            else:
-                raise ValueError("Image size must be one or two dimensional")
+        if isinstance(img_size, (tuple, list)) and len(img_size) == 3:
+             C, self.img_height, self.img_width = img_size
         else:
-            self.img_height = None
-            self.img_width = None
+            raise ValueError("Image size must be a tuple/list of (C, H, W)")
 
         # --- Linear projection placeholder ---
-        self.n_patches = None
-        self.patch_projection = None
+        patch_dim =  C * self.patch_height * self.patch_width
+        self.patch_projection =  nn.Linear(patch_dim, self.embed_dim)
 
 
     @staticmethod
-    def get_input_size(x: torch.Tensor) -> tuple[int, int, int, int]:
+    def _get_input_size(x: torch.Tensor) -> tuple[int, int, int, int]:
         """
         Ensure input is 4D: (B, C, H, W). Converts 2D or 3D inputs into 4D by adding
         batch and/or channel dimensions.
@@ -93,30 +90,32 @@ class PatchEmbedding(nn.Module):
         return B, C, H, W
 
 
-    def _initialize_projection(self, C: int, H: int, W: int) -> None:
-        """
-        Lazy initialization of the patch projection layer and related attributes.
-        Only runs if the projection layer has not been created yet.
-
-        Args:
-            C (int): Number of input channels.
-            H (int): Height of the input image.
-            W (int): Width of the input image.
-        """
-        if self.patch_projection is None:
-            # Set image dimensions if not previously set
-            if self.img_height is None:
-                self.img_height = H
-            if self.img_width is None:
-                self.img_width = W
-
-            # Compute number of patches
-            self.n_patches = (self.img_height // self.patch_height) * \
-                             (self.img_width // self.patch_width)
-
-            # Initialize linear projection using actual channels
-            patch_dim = C * self.patch_height * self.patch_width
-            self.patch_projection = nn.Linear(patch_dim, self.embed_dim)
+    # def _initialize_projection(self, C: int, H: int, W: int,
+    #                            device: torch.device) -> None:
+    #     """
+    #     Lazy initialization of the patch projection layer and related attributes.
+    #     Only runs if the projection layer has not been created yet.
+    #
+    #     Args:
+    #         C (int): Number of input channels.
+    #         H (int): Height of the input image.
+    #         W (int): Width of the input image.
+    #         device (torch.device): Target device for lazy initialization.
+    #     """
+    #     if self.patch_projection is None:
+    #         # Set image dimensions if not previously set
+    #         if self.img_height is None:
+    #             self.img_height = H
+    #         if self.img_width is None:
+    #             self.img_width = W
+    #
+    #         # Compute number of patches
+    #         self.n_patches = (self.img_height // self.patch_height) * \
+    #                          (self.img_width // self.patch_width)
+    #
+    #         # Initialize linear projection using actual channels
+    #         patch_dim = C * self.patch_height * self.patch_width
+    #         self.patch_projection = nn.Linear(patch_dim, self.embed_dim).to(device)
 
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -135,10 +134,10 @@ class PatchEmbedding(nn.Module):
             ValueError: If the input image size does not match the initialized size.
         """
         # --- Ensure input is 4D ---
-        B, C, H, W = self.get_input_size(x)
+        B, C, H, W = self._get_input_size(x)
 
         # --- Lazy initialize projection ---
-        self._initialize_projection(C, H, W)
+        # self._initialize_projection(C, H, W, x.device)
 
         # --- Check input image size ---
         if H != self.img_height or W != self.img_width:
@@ -163,26 +162,26 @@ class PatchEmbedding(nn.Module):
         return embedded_patches
 
 
-    def get_patches_num(self) -> int:
-        """
-        Return the number of patches per image.
-
-        Returns:
-            int: Total number of patches (n_patches).
-
-        Raises:
-            RuntimeError: If the number of patches is not yet initialized.
-        """
-        if self.n_patches is not None:
-            return self.n_patches
-
-        # If image size is known but projection not yet initialized, compute n_patches
-        if self.img_height is not None and self.img_width is not None:
-            return (self.img_height // self.patch_height) * (
-                        self.img_width // self.patch_width)
-
-        raise RuntimeError(
-            "Number of patches not initialized. "
-            "Pass an input through the layer or provide img_size at initialization."
-        )
+    # def get_patches_num(self) -> int:
+    #     """
+    #     Return the number of patches per image.
+    #
+    #     Returns:
+    #         int: Total number of patches (n_patches).
+    #
+    #     Raises:
+    #         RuntimeError: If the number of patches is not yet initialized.
+    #     """
+    #     if self.n_patches is not None:
+    #         return self.n_patches
+    #
+    #     # If image size is known but projection not yet initialized, compute n_patches
+    #     if self.img_height is not None and self.img_width is not None:
+    #         return (self.img_height // self.patch_height) * (
+    #                     self.img_width // self.patch_width)
+    #
+    #     raise RuntimeError(
+    #         "Number of patches not initialized. "
+    #         "Pass an input through the layer or provide img_size at initialization."
+    #     )
 

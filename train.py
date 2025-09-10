@@ -4,6 +4,7 @@ from torch.utils.data import DataLoader
 from typing import  Sequence
 
 
+# --- Public API ---
 __all__ = [
     "evaluate_model",
     "train_model"
@@ -12,16 +13,16 @@ __all__ = [
 
 def evaluate_model(
         model: nn.Module,
-        criterion: nn.modules.loss,
         data_loader: DataLoader,
+        criterion: nn.modules.loss,
         device: torch.device) -> tuple[float, float]:
     """
     Evaluates the model on a validation or test set.
 
     Args:
         model (nn.Module): The neural network model.
-        criterion (nn.modules.loss._Loss): The loss function.
         data_loader (DataLoader): DataLoader for validation/test data.
+        criterion (nn.modules.loss._Loss): The loss function.
         device (torch.device): The computational device (CPU or GPU).
 
     Returns:
@@ -84,8 +85,8 @@ def train_model(
         loss_record['train'].append(train_loss)
 
         validation_accuracy, validation_loss = evaluate_model(model,
-                                                              loss_fn,
                                                               validation_loader,
+                                                              loss_fn,
                                                               device)
         loss_record['validation'].append(validation_loss)
 
@@ -94,7 +95,7 @@ def train_model(
               f" {validation_loss:.4f}, Validation Accuracy:"
               f" {validation_accuracy:.2f}%")
 
-        if _early_stopping(loss_record['validation'], patience=5, best_is_max=False):
+        if _early_stopping(loss_record['validation'], patience=7, best_is_max=False):
             print(f"Early stopping triggered at epoch {epoch}")
             break
 
@@ -107,7 +108,8 @@ def _train_epoch(
         loss_fn: nn.modules.loss,
         optimizer: torch.optim,
         data_loader: DataLoader,
-        device: torch.device) -> tuple[float, float]:
+        device: torch.device
+) -> tuple[float, float]:
     """
     Perform a single training epoch on the given model using the provided
     data loader.
@@ -229,77 +231,34 @@ def _train_epoch(
 #     # Return average batch loss over the epoch
 #     return running_loss / len(train_loader)
 
-def _train_epoch(
-        model: nn.Module,
-        loss_fn: nn.modules.loss,
-        optimizer: torch.optim,
-        data_loader: DataLoader,
-        device: torch.device) -> tuple[float, float]:
-    """
-    Perform a single training epoch on the given model using the provided
-    data loader.
-
-    Args:
-        model (nn.Module): The neural network model to train.
-        loss_fn (nn.modules.loss): Loss function used for training.
-        optimizer (torch.optim): Optimizer for updating model parameters.
-        data_loader (DataLoader): DataLoader providing batches of training data.
-        device (torch.device): Device to perform training on (CPU or GPU).
-
-    Returns:
-        tuple[float, float]: A tuple containing:
-            - epoch_accuracy (float): Training accuracy for this epoch (percent).
-            - epoch_loss (float): Average training loss over the epoch.
-    """
-    model.train()  # Training mode
-    correct_train, total_train, total_train_loss = 0, 0, 0
-
-    for images, labels in data_loader:
-        images, labels = images.to(device), labels.to(device)
-        # Reset gradients
-        optimizer.zero_grad()
-
-        # Forward pass
-        logits = model(images)
-
-        # Compute loss
-        loss = loss_fn(logits, labels)
-
-        # Backpropagation
-        loss.backward()
-
-        # Update parameters
-        optimizer.step()
-
-        # Training accuracy calculation
-        total_train_loss += loss.item()
-        _, predicted = logits.max(1)
-        correct_train += predicted.eq(labels).sum().item()
-        total_train += labels.size(0)
-
-    epoch_accuracy = 100 * correct_train / total_train
-    epoch_loss = total_train_loss / len(data_loader)
-
-    return epoch_accuracy, epoch_loss
-
 
 def _early_stopping(
-        metric_record: Sequence[float],
-        patience: int = 5,
-        best_is_max: bool = True) -> bool:
+    metric_record: Sequence[float],
+    patience: int = 5,
+    delta: float = 1e-5,
+    best_is_max: bool = True
+) -> bool:
     """
-    Checks if a metric has failed to improve within the last `patience`
-    epochs.
+    Determine whether training should stop early based on a metric's recent performance.
+
+    This function checks if the monitored metric has failed to improve
+    within the last `patience` epochs, considering a minimum improvement
+    threshold `delta`.
 
     Args:
-        metric_record: Sequence of metric values (e.g., BLEU or validation loss).
-        patience: Number of epochs to wait for improvement.
-        best_is_max: Whether higher metric values are better (like BLEU)
-            or lower (like loss).
+        metric_record (Sequence[float]): Sequence of metric values
+            (e.g., BLEU score or validation loss).
+        patience (int, optional): Number of epochs to wait for improvement
+            before suggesting early stopping. Must be positive. Default is 5.
+        delta (float, optional): Minimum change in the metric to qualify as an
+            improvement. Default is 1e-5.
+        best_is_max (bool, optional): If True, higher metric values are better
+            (e.g., BLEU). If False, lower metric values are better (e.g., loss).
+            Default is True.
 
     Returns:
-        should_stop (bool): True if metric did not improve in the last
-            `patience` epochs.
+        bool: True if the metric did not improve sufficiently within the
+            last `patience` epochs, indicating that training should stop.
 
     Raises:
         ValueError: If `patience` is not a positive integer.
@@ -313,8 +272,8 @@ def _early_stopping(
     if best_is_max:
         best_so_far = max(metric_record[:-patience])
         recent_best = max(metric_record[-patience:])
-        return recent_best <= best_so_far
+        return recent_best <= best_so_far - delta
     else:
         best_so_far = min(metric_record[:-patience])
         recent_best = min(metric_record[-patience:])
-        return recent_best >= best_so_far
+        return recent_best >= best_so_far + delta
