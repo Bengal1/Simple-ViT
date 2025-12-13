@@ -151,13 +151,13 @@ def vit_forward_pass(x):
     """
 
     # Patch embedding
-    X = patch_embedding(x)              # (B, N, D)
+    X = patch_embedding(x)                 # (B, N, D)
 
     # Prepend CLS token
-    X = [CLS] + X                       # (B, N + 1, D)
+    X = concat([CLS], X, dim="sequence")   # (B, N + 1, D)
 
     # Positional encoding
-    X = X + positional_encoding         # (B, N + 1, D)
+    X = X + positional_encoding            # (B, N + 1, D)
 
     # Transformer encoder
     for encoder_layer in encoder_layers:
@@ -167,7 +167,7 @@ def vit_forward_pass(x):
     X = layer_norm(X)
 
     # Classification head (CLS token only)
-    logits = head(X[:, 0])               # (B, num_classes)
+    logits = head(X[:, 0])                 # (B, num_classes)
 
     return logits
 ```
