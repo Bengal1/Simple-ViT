@@ -142,24 +142,33 @@ $$
 This loss penalizes confident incorrect predictions more heavily than less certain ones, encouraging the model to assign higher probabilities to the correct classes. Minimizing cross-entropy effectively maximizes the likelihood of the correct labels under the model’s predicted distribution.
 
 
-### Training Loop
+### ViT Forward-Pass (Pseudo-Code)
 ```ruby
-    for images, labels in train_loader:
+def vit_forward_pass(x):
+    """
+    x : Tensor of shape (B, C, H, W)
+    returns: Tensor of shape (B, num_classes)
+    """
+    # Patch embedding
+    X = patch_embedding(x)              # (B, N, D)
 
-        # Reset gradients
-        optimizer.zero_grad()
+    # Prepend CLS token
+    X = [CLS] + X                       # (B, N + 1, D)
 
-        # Forward pass
-        logits = model(images)
+    # Positional encoding
+    X = X + positional_encoding         # (B, N + 1, D)
 
-        # Compute loss
-        loss = loss_fn(logits, labels)
+    # Transformer encoder
+    for encoder_layer in encoder_layers:
+        X = encoder_layer(X)
 
-        # Backpropagation
-        loss.backward()
+    # inal normalization
+    X = layer_norm(X)
 
-        # Update parameters
-        optimizer.step()
+    # Classification head (CLS token only)
+    logits = head(X[:, 0])               # (B, num_classes)
+
+    return logits
 ```
 
 ## Data
