@@ -2,7 +2,6 @@ from collections.abc import Sequence
 
 import torch
 import torch.nn as nn
-from typing import Optional
 from models.layers.PatchEmbedding import PatchEmbedding
 from models.layers.PositionalEncoding import LearnablePositionalEncoding
 
@@ -46,18 +45,17 @@ class SimpleViT(nn.Module):
             num_heads (int, optional): Number of attention heads. Default: 12.
             num_layers (int, optional): Number of Transformer encoder layers. Default: 12.
             dim_feedforward (int, optional): Hidden size of feedforward layers. Default: 3072.
-            dropout (float, optional): Dropout rate. Default: 0.0.
+            dropout (float, optional): Dropout rate. Default: 0.1.
             norm_eps (float, optional): LayerNorm epsilon. Default: 1e-6.
         """
         super().__init__()
         # Set image size as C, H, W format.
-        self.img_dim = self._set_input_dimensions(img_size)
+        self.img_size = self._set_input_dimensions(img_size)
         # Validate image patch size relations
-        self.n_patches = self._get_number_of_patches(self.img_dim[1:], patch_size)
+        self.n_patches = self._get_number_of_patches(self.img_size[1:], patch_size)
 
         # --- Patch embedding ---
-        self.patch_embed = PatchEmbedding(patch_size, self.n_patches,
-                                          self.img_dim, embed_dim)
+        self.patch_embed = PatchEmbedding(patch_size, self.img_size, embed_dim)
 
         # --- CLS token (learnable) ---
         self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dim))
@@ -74,7 +72,7 @@ class SimpleViT(nn.Module):
                 dropout=dropout,
                 activation="gelu",
                 batch_first=True,  # input shape: (B, N, D)
-                norm_first=True    # PreNorm like ViT
+                norm_first=True
             )
             for _ in range(num_layers)
         ])
@@ -84,6 +82,7 @@ class SimpleViT(nn.Module):
 
         # --- Classification head ---
         self.head = nn.Linear(embed_dim, num_classes)
+
 
     @staticmethod
     def _set_input_dimensions(input_dim: int | Sequence[int]) -> tuple[int, int, int]:
@@ -109,16 +108,20 @@ class SimpleViT(nn.Module):
             if input_dim <= 0:
                 raise ValueError("dimension must be a positive integer")
             return 1, input_dim, input_dim
+
         elif isinstance(input_dim, (tuple, list)) and len(input_dim) == 2:
             if input_dim[0] <= 0 or input_dim[1] <= 0:
                 raise ValueError("all dimensions must be positive")
             return 1, input_dim[0], input_dim[1]
+
         elif isinstance(input_dim, (tuple, list)) and len(input_dim) == 3:
             if input_dim[0] <= 0 or input_dim[1] <= 0 or input_dim[2] <= 0:
                 raise ValueError("all dimensions must be positive")
             return input_dim[0], input_dim[1], input_dim[2]
+
         else:
             raise ValueError("input size must be one, two, or three dimensional")
+
 
     @staticmethod
     def _get_number_of_patches(image_size, patch_size):

@@ -74,6 +74,7 @@ def _get_cifar10_dataloaders(
     # test_dataset = datasets.CIFAR10(root='./data', train=False,
     #                                 download=True, transform=transform)
 
+    ## DEBUG - MNIST ##
     full_train_dataset = datasets.MNIST(root='./data', train=True,
                                         download=True, transform=transforms.ToTensor())
     test_dataset = datasets.MNIST(root='./data', train=False,
@@ -82,6 +83,7 @@ def _get_cifar10_dataloaders(
     train_dataset, val_dataset = random_split(full_train_dataset,
                                               [1 - train_validation_split,
                                                train_validation_split])
+    ## END OF DEBUG ##
 
     # Create DataLoaders
     train_loader = DataLoader(train_dataset, batch_size=samples_per_batch, shuffle=True)
@@ -152,7 +154,8 @@ def main():
 
     # Initialize data loaders
     train_loader, val_loader, test_loader, img_size = _get_cifar10_dataloaders(
-        BATCH_SIZE, VALIDATION_SPLIT)
+        BATCH_SIZE,
+        VALIDATION_SPLIT)
 
     # Initialize model, loss function and optimizer
     vit, loss_fn, optimizer, device = _setup_model_for_training(NUM_CLASSES,
