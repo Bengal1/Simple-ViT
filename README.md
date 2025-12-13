@@ -149,6 +149,7 @@ def vit_forward_pass(x):
     x : Tensor of shape (B, C, H, W)
     returns: Tensor of shape (B, num_classes)
     """
+
     # Patch embedding
     X = patch_embedding(x)              # (B, N, D)
 
