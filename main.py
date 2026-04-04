@@ -9,11 +9,12 @@ __author__="Bengal1"
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from models.SimpleViT import SimpleViT
-from utils import *
-from train import *
-from torch.utils.data import DataLoader, random_split
-from torchvision import datasets, transforms
+
+from models import SimpleViT
+from loaders import get_dataloaders
+from train import train_model, evaluate_model
+from utils import get_device, plot_losses, set_seed
+
 
 
 # # ----------------------- Hyperparameters & Config ----------------------- #
@@ -38,62 +39,6 @@ WEIGHT_DECAY    = 1e-2      # Weight decay parameter (L2 regularization)
 # # --- Application-Specific Settings ---
 # DATA_DEBUG_MODE = True      # Debug mode flag (enables/disables debug features)
 # LOGGING_LEVEL   = utils.LogLevel.WARNING # Initial logging verbosity level
-
-
-# --- Data Loader Initialization Helper Function ---
-def _get_cifar10_dataloaders(
-        samples_per_batch: int,
-        train_validation_split: float
-) -> tuple[
-    DataLoader,
-    DataLoader,
-    DataLoader,
-    tuple[int, int, int]]:
-    """
-    Loads the CIFAR-10 dataset and creates DataLoader objects for training,
-    validation, and testing.
-
-    Args:
-        samples_per_batch (int): The batch size for DataLoaders.
-        train_validation_split (float): Fraction of training data for validation.
-
-    Returns:
-        tuple[DataLoader, DataLoader, DataLoader, tuple]:
-                                (train_loader, val_loader, test_loader, image_size)
-    """
-    # Transform: convert to tensor and normalize
-    # transform = transforms.Compose([
-    #     transforms.ToTensor(),
-    #     transforms.Normalize((0.4914, 0.4822, 0.4465),
-    #                          (0.2023, 0.1994, 0.2010))
-    # ])
-
-    # Load CIFAR-10 datasets
-    # full_train_dataset = datasets.CIFAR10(root='./data', train=True,
-    #                                       download=True, transform=transform)
-    # test_dataset = datasets.CIFAR10(root='./data', train=False,
-    #                                 download=True, transform=transform)
-
-    ## DEBUG - MNIST ##
-    full_train_dataset = datasets.MNIST(root='./data', train=True,
-                                        download=True, transform=transforms.ToTensor())
-    test_dataset = datasets.MNIST(root='./data', train=False,
-                                  download=True, transform=transforms.ToTensor())
-    # Split training dataset (train + validation)
-    train_dataset, val_dataset = random_split(full_train_dataset,
-                                              [1 - train_validation_split,
-                                               train_validation_split])
-    ## END OF DEBUG ##
-
-    # Create DataLoaders
-    train_loader = DataLoader(train_dataset, batch_size=samples_per_batch, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=samples_per_batch, shuffle=False)
-    test_loader = DataLoader(test_dataset, batch_size=samples_per_batch, shuffle=False)
-
-    # Get image size
-    image_size = next(iter(train_loader))[0].shape[1:]
-
-    return train_loader, val_loader, test_loader, image_size
 
 
 # --- Model & training Component Setup Helper Function ---
@@ -132,7 +77,7 @@ def _setup_model_for_training(
     # Set device (GPU/CPU)
     device = get_device()
 
-    # Instantiate the SimpleCNN model
+    # Instantiate the SimpleViT model
     model = SimpleViT(patch_size=patch_size,
                       num_classes=num_classes,
                       img_size=img_size,
@@ -153,7 +98,8 @@ def main():
     set_seed()
 
     # Initialize data loaders
-    train_loader, val_loader, test_loader, img_size = _get_cifar10_dataloaders(
+    train_loader, val_loader, test_loader, img_size = get_dataloaders(
+        "mnist",
         BATCH_SIZE,
         VALIDATION_SPLIT)
 

@@ -2,8 +2,7 @@ from collections.abc import Sequence
 
 import torch
 import torch.nn as nn
-from models.layers.PatchEmbedding import PatchEmbedding
-from models.layers.PositionalEncoding import LearnablePositionalEncoding
+from .layers import PatchEmbedding, LearnablePositionalEncoding
 
 
 class SimpleViT(nn.Module):
@@ -40,7 +39,8 @@ class SimpleViT(nn.Module):
         Args:
             patch_size (int | tuple[int, int]): Size of each image patch.
             num_classes (int): Number of output classes for classification.
-            img_size (tuple[int, int, int]): Image height and width.
+            img_size (int | tuple[int, int] | tuple[int, int, int]):
+                Input image size as H, W or C, H, W.
             embed_dim (int, optional): Dimensionality of patch embeddings. Default: 768.
             num_heads (int, optional): Number of attention heads. Default: 12.
             num_layers (int, optional): Number of Transformer encoder layers. Default: 12.
@@ -52,7 +52,7 @@ class SimpleViT(nn.Module):
         # Set image size as C, H, W format.
         self.img_size = self._set_input_dimensions(img_size)
         # Validate image patch size relations
-        self.n_patches = self._get_number_of_patches(self.img_size[1:], patch_size)
+        self.n_patches = self._get_number_of_patches(self.img_size, patch_size)
 
         # --- Patch embedding ---
         self.patch_embed = PatchEmbedding(patch_size, self.img_size, embed_dim)
@@ -85,7 +85,9 @@ class SimpleViT(nn.Module):
 
 
     @staticmethod
-    def _set_input_dimensions(input_dim: int | Sequence[int]) -> tuple[int, int, int]:
+    def _set_input_dimensions(
+            input_dim: int | Sequence[int]
+    ) -> tuple[int, int, int]:
         """
         Normalize the input dimensions into a 3-tuple of positive integers.
 
@@ -102,7 +104,7 @@ class SimpleViT(nn.Module):
 
         Raises:
             ValueError: If any dimension is non-positive, or if the input
-                        is not one, two, or three dimensional.
+                        is not one, two, or three-dimensional.
         """
         if isinstance(input_dim, int):
             if input_dim <= 0:
@@ -124,9 +126,13 @@ class SimpleViT(nn.Module):
 
 
     @staticmethod
-    def _get_number_of_patches(image_size, patch_size):
+    def _get_number_of_patches(
+            image_size: tuple[int, int, int],
+            patch_size: int | tuple[int, int]
+    ) -> int:
         # Convert ints to tuples
-        H, W = (image_size, image_size) if isinstance(image_size, int) else image_size
+        # H, W = (image_size, image_size) if isinstance(image_size, int) else image_size
+        H, W =  image_size[1:]
         patch_h, patch_w = (patch_size, patch_size) if isinstance(patch_size, int) else patch_size
 
         # Check patch smaller than image
@@ -144,6 +150,7 @@ class SimpleViT(nn.Module):
         n_patches = (H // patch_h) * (W // patch_w)
 
         return n_patches
+
 
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
