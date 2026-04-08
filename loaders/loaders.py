@@ -11,7 +11,7 @@ from datasets import TinyImageNetDataset
 def _get_mnist_dataloaders(
     batch_size: int,
     train_validation_split: float,
-) -> tuple[DataLoader, DataLoader, DataLoader, tuple[int, int, int]]:
+) -> tuple[DataLoader, DataLoader, DataLoader, tuple[int, int, int], int]:
     """
     Create DataLoaders for MNIST.
 
@@ -61,7 +61,7 @@ def _get_mnist_dataloaders(
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-    return train_loader, val_loader, test_loader, (1, 28, 28)
+    return train_loader, val_loader, test_loader, (1, 28, 28), 10
 
 
 # ============================================================
@@ -71,7 +71,7 @@ def _get_mnist_dataloaders(
 def _get_cifar10_dataloaders(
     batch_size: int,
     train_validation_split: float,
-) -> tuple[DataLoader, DataLoader, DataLoader, tuple[int, int, int]]:
+) -> tuple[DataLoader, DataLoader, DataLoader, tuple[int, int, int], int]:
     """
     Create DataLoaders for CIFAR-10.
 
@@ -124,7 +124,7 @@ def _get_cifar10_dataloaders(
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-    return train_loader, val_loader, test_loader, (3, 32, 32)
+    return train_loader, val_loader, test_loader, (3, 32, 32), 10
 
 
 # ============================================================
@@ -134,7 +134,7 @@ def _get_cifar10_dataloaders(
 def _get_tiny_imagenet_dataloaders(
     batch_size: int,
     train_validation_split: float,
-) -> tuple[DataLoader, DataLoader, DataLoader, tuple[int, int, int]]:
+) -> tuple[DataLoader, DataLoader, DataLoader, tuple[int, int, int], int]:
     """
     Create DataLoaders for Tiny ImageNet.
 
@@ -185,7 +185,7 @@ def _get_tiny_imagenet_dataloaders(
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-    return train_loader, val_loader, test_loader, (3, 64, 64)
+    return train_loader, val_loader, test_loader, (3, 64, 64), 200
 
 
 # ============================================================
@@ -196,7 +196,7 @@ def get_dataloaders(
     dataset: str = "mnist",
     batch_size: int = 128,
     train_validation_split: float = 0.2,
-) -> tuple[DataLoader, DataLoader, DataLoader, tuple[int, int, int]]:
+) -> tuple[DataLoader, DataLoader, DataLoader, tuple[int, int, int], int]:
     """
     Return DataLoaders for the selected dataset.
 

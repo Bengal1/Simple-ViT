@@ -4,6 +4,19 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 # ----------------------------------------------------------------------
+"""
+Main training entry point.
+
+Handles:
+    - CLI argument parsing (dataset, model selection)
+    - Data loading
+    - Model initialization (ViT or CNN)
+    - Training and validation loop
+    - Final evaluation and loss visualization
+
+The configuration is managed via a centralized dataclass-based system (`config`),
+which can be partially overridden through CLI arguments.
+"""
 __author__="Bengal1"
 
 import torch
@@ -11,40 +24,21 @@ import torch.nn as nn
 import torch.optim as optim
 import argparse
 
-from models import SimpleViT
+from models import SimpleViT, SimpleCNN
 from loaders import get_dataloaders
 from train import train_model, evaluate_model
 from utils import get_device, plot_losses, set_seed
-from SimpleCNN import SimpleCNN
+from config import config as cfg, Config
 
-
-# # ----------------------- Hyperparameters & Config ----------------------- #
-# # --- Model Architecture ---
-EMBED_DIM        = 512       # Embedding dimension
-NUM_HEADS        = 8         # Number of attention heads
-NUM_LAYERS       = 6         # Number of Encoder/Decoder layers
-PATCH_SIZE       = 4 #(16, 16)
-# # --- Training Process ---
-BATCH_SIZE       = 32        # Batch size
-EPOCHS           = 100        # Number of epochs
-NUM_CLASSES      = 10
-VALIDATION_SPLIT = 0.2
-MAX_GRAD_CLIP    = 1.0       # Max norm gradient (for gradient clipping)
-DROPOUT          = 0.1       # Dropout probability
-LABEL_SMOOTHING  = 0.1       # Label smoothing parameter
-# # --- Optimizer Settings (Adam) ---
-LEARNING_RATE    = 1e-5      # Initial learning rate
-BETAS            = (0.9, 0.98) # Adam Optimizer beta coefficients
-EPSILON          = 1e-9      # Optimizer's epsilon for numerical stability
-WEIGHT_DECAY     = 1e-2      # Weight decay parameter (L2 regularization)
-# # --- Application-Specific Settings ---
-# DATA_DEBUG_MODE  = True      # Debug mode flag (enables/disables debug features)
-# LOGGING_LEVEL    = utils.LogLevel.WARNING # Initial logging verbosity level
-
-DATASET         = "mnist"
 
 
 def parse_args() -> argparse.Namespace:
+    """
+    Parse command-line arguments for dataset and model selection.
+
+    Returns:
+        argparse.Namespace: Parsed arguments.
+    """
     parser = argparse.ArgumentParser(description="Train image classification models.")
 
     parser.add_argument(
@@ -68,11 +62,10 @@ def parse_args() -> argparse.Namespace:
 
 # --- Model & training Component Setup Helper Function ---
 def _setup_model_for_training(
+        config: Config,
         num_classes: int,
-        patch_size: int | tuple[int, int],
-        lr: float,
         img_size: int | tuple[int, int, int],
-        model: str = "vit"
+        model_name: str
 ) -> tuple[
     nn.Module,
     nn.modules.loss,
@@ -80,51 +73,59 @@ def _setup_model_for_training(
     torch.device
 ]:
     """
-    Set up a Simple Vision Transformer (SimpleViT) model for training.
+    Initialize model, loss function, optimizer, and device.
 
-    This function initializes the model, the loss function, the optimizer,
-    and selects the appropriate device (CPU or GPU) for training.
+    Supports multiple model architectures (e.g., ViT, CNN) based on
+    the provided configuration and model name.
 
     Args:
-        num_classes (int): Number of output classes for classification.
-        patch_size (int or tuple[int, int]): Size of each patch for the ViT.
-        lr (float): Learning rate for the optimizer.
-        img_size (tuple[int, int, int]): Input image size.
+        config (Config): Global configuration object.
+        num_classes (int): Number of output classes.
+        img_size (tuple[int, int, int]): Input image size (C, H, W).
+        model_name (str): Model type to instantiate ("vit" or "cnn").
 
     Returns:
         tuple:
-            - model (nn.Module): The instantiated SimpleViT model on the 
-              selected device.
-            - loss_function (nn.modules.loss): Cross-Entropy loss function 
-              on the same device.
-            - optimizer (torch.optim.Optimizer): AdamW optimizer for model 
-              parameters.
-            - device (torch.device): The device used for training (CPU or GPU).
+            - model (nn.Module): Initialized model on target device.
+            - loss_function (nn.Module): Cross-entropy loss function.
+            - optimizer (torch.optim.Optimizer): Configured optimizer.
+            - device (torch.device): Selected computation device.
+
+    Raises:
+        ValueError: If an unsupported model name is provided.
     """
     # Set device (GPU/CPU)
     device = get_device()
 
-    # Instantiate the SimpleViT model
-    if model == "vit":
+    # Instantiate the Selected model
+    if model_name == "vit":
         model = SimpleViT(
-            patch_size=patch_size,
+            cfg=cfg.vit,
             num_classes=num_classes,
             img_size=img_size,
-            dropout=DROPOUT
         ).to(device)
-    elif model == "cnn":
-        model = SimpleCNN()
+    elif model_name == "cnn":
+        model = SimpleCNN(
+            input_shape=img_size,
+            num_classes=num_classes,
+            cfg=cfg.cnn
+        ).to(device)
+    else:
+        raise ValueError(f"Unsupported model '{model_name}'")
+
 
     # Initialize the Cross-Entropy Loss function
-    loss_function = nn.CrossEntropyLoss(label_smoothing=LABEL_SMOOTHING).to(device)
+    loss_function = nn.CrossEntropyLoss(
+        label_smoothing=cfg.training.label_smooth
+    ).to(device)
 
     # Initialize the Adam optimizer
     optimizer = optim.AdamW(
         model.parameters(),
-        lr=lr,
-        betas=BETAS,
-        eps=EPSILON,
-        weight_decay=WEIGHT_DECAY
+        lr=config.optim.learning_rate,
+        betas=config.optim.betas,
+        eps=config.optim.eps,
+        weight_decay=config.optim.weight_decay
     )
 
     return model, loss_function, optimizer, device
@@ -133,36 +134,39 @@ def _setup_model_for_training(
 # --- Main Function ---
 def main():
     set_seed()
+    args = parse_args()
+    cfg.dataset = args.dataset
+    cfg.model_name = args.model
 
     # Initialize data loaders
-    train_loader, val_loader, test_loader, img_size = get_dataloaders(
-        dataset="mnist",
-        batch_size=BATCH_SIZE,
-        train_validation_split=VALIDATION_SPLIT
+    train_loader, val_loader, test_loader, img_size, num_classes = get_dataloaders(
+        dataset=cfg.dataset,
+        batch_size=cfg.training.batch_size,
+        train_validation_split=cfg.training.validation_split
     )
 
     # Initialize model, loss function and optimizer
-    vit, loss_fn, optimizer, device = _setup_model_for_training(
-        num_classes=NUM_CLASSES,
-        patch_size=PATCH_SIZE,
-        lr=LEARNING_RATE,
-        img_size=img_size
+    model, loss_fn, optimizer, device = _setup_model_for_training(
+        config=cfg,
+        num_classes=num_classes,
+        img_size=img_size,
+        model_name=cfg.model_name
     )
 
     # Train & Validation
     loss_records = train_model(
-        model=vit,
+        model=model,
         loss_fn=loss_fn,
         optimizer=optimizer,
         training_loader=train_loader,
         validation_loader=val_loader,
         device=device,
-        num_epochs=EPOCHS
+        num_epochs=cfg.training.epochs
     )
 
     # Test
     test_accuracy, test_loss = evaluate_model(
-        model=vit,
+        model=model,
         data_loader=test_loader,
         criterion=loss_fn,
         device=device

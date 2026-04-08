@@ -26,6 +26,7 @@ import torch.nn as nn
 from collections.abc import Sequence
 
 from .layers import PatchEmbedding, LearnablePositionalEncoding
+from ..config import ViTConfig
 
 
 class SimpleViT(nn.Module):
@@ -46,30 +47,19 @@ class SimpleViT(nn.Module):
 
     def __init__(
             self,
-            patch_size: int | tuple[int, int],
+            cfg: ViTConfig,
             num_classes: int,
             img_size: int | tuple[int, int] | tuple[int, int, int],
-            embed_dim: int = 768,
-            num_heads: int = 12,
-            num_layers: int = 12,
-            dim_feedforward: int = 3072,
-            dropout: float = 0.1,
-            norm_eps: float = 1e-6,
+
     ):
         """
         Initialize the SimpleViT model.
 
         Args:
-            patch_size (int | tuple[int, int]): Size of each image patch.
-            num_classes (int): Number of output classes for classification.
+            cfg (ViTConfig): Configuration object containing model hyperparameters.
+            num_classes (int): Number of output classes.
             img_size (int | tuple[int, int] | tuple[int, int, int]):
-                Input image size as H, W or C, H, W.
-            embed_dim (int, optional): Dimensionality of patch embeddings. Default: 768.
-            num_heads (int, optional): Number of attention heads. Default: 12.
-            num_layers (int, optional): Number of Transformer encoder layers. Default: 12.
-            dim_feedforward (int, optional): Hidden size of feedforward layers. Default: 3072.
-            dropout (float, optional): Dropout rate. Default: 0.1.
-            norm_eps (float, optional): LayerNorm epsilon. Default: 1e-6.
+                                                Input image size as H, W or C, H, W.
         """
         super().__init__()
         # --- Validate model configuration ---
@@ -78,59 +68,59 @@ class SimpleViT(nn.Module):
                 f"num_classes must be a positive integer, but got {num_classes}"
             )
 
-        if embed_dim <= 0:
+        if cfg.embed_dim <= 0:
             raise ValueError(
-                f"embed_dim must be a positive integer, but got {embed_dim}"
+                f"embed_dim must be a positive integer, but got {cfg.embed_dim}"
             )
 
-        if num_heads <= 0:
+        if cfg.num_heads <= 0:
             raise ValueError(
-                f"num_heads must be a positive integer, but got {num_heads}"
+                f"num_heads must be a positive integer, but got {cfg.num_heads}"
             )
 
-        if num_layers <= 0:
+        if cfg.num_layers <= 0:
             raise ValueError(
-                f"num_layers must be a positive integer, but got {num_layers}"
+                f"num_layers must be a positive integer, but got {cfg.num_layers}"
             )
 
-        if dim_feedforward <= 0:
+        if cfg.dim_feedforward <= 0:
             raise ValueError(
-                f"dim_feedforward must be a positive integer, but got {dim_feedforward}"
+                f"dim_feedforward must be a positive integer, but got {cfg.dim_feedforward}"
             )
 
-        if not 0.0 <= dropout < 1.0:
+        if not 0.0 <= cfg.dropout < 1.0:
             raise ValueError(
-                f"dropout must be in the range [0, 1), but got {dropout}"
+                f"dropout must be in the range [0, 1), but got {cfg.dropout}"
             )
 
-        if norm_eps <= 0:
+        if cfg.norm_eps <= 0:
             raise ValueError(
-                f"norm_eps must be a positive number, but got {norm_eps}"
+                f"norm_eps must be a positive number, but got {cfg.norm_eps}"
             )
 
-        if embed_dim % num_heads != 0:
+        if cfg.embed_dim % cfg.num_heads != 0:
             raise ValueError(
-                f"embed_dim ({embed_dim}) must be divisible by num_heads ({num_heads})"
+                f"embed_dim ({cfg.embed_dim}) must be divisible by num_heads ({cfg.num_heads})"
             )
 
         # Set image size as C, H, W format.
         self.img_size = self._set_input_dimensions(img_size)
         # Validate image patch size relations
-        self.n_patches = self._get_number_of_patches(self.img_size, patch_size)
+        self.n_patches = self._get_number_of_patches(self.img_size, cfg.patch_size)
 
         # --- Patch embedding ---
         self.patch_embed = PatchEmbedding(
-            patch_size,
+            cfg.patch_size,
             self.img_size,
-            embed_dim
+            cfg.embed_dim
         )
 
         # --- CLS token (learnable) ---
-        self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dim))
+        self.cls_token = nn.Parameter(torch.zeros(1, 1, cfg.embed_dim))
 
         # --- Positional encoding ---
         self.pos_encode = LearnablePositionalEncoding(
-            embed_dim,
+            cfg.embed_dim,
             num_patches=self.n_patches,
             has_cls_token=True
         )
@@ -138,22 +128,22 @@ class SimpleViT(nn.Module):
         # --- Transformer encoder layers ---
         self.encoder_layers = nn.ModuleList([
             nn.TransformerEncoderLayer(
-                d_model=embed_dim,
-                nhead=num_heads,
-                dim_feedforward=dim_feedforward,
-                dropout=dropout,
+                d_model=cfg.embed_dim,
+                nhead=cfg.num_heads,
+                dim_feedforward=cfg.dim_feedforward,
+                dropout=cfg.dropout,
                 activation="gelu",
                 batch_first=True,  # input shape: (B, N, D)
                 norm_first=True
             )
-            for _ in range(num_layers)
+            for _ in range(cfg.num_layers)
         ])
 
         # --- Layer normalization ---
-        self.norm = nn.LayerNorm(embed_dim, eps=norm_eps)
+        self.norm = nn.LayerNorm(cfg.embed_dim, eps=cfg.norm_eps)
 
         # --- Classification head ---
-        self.head = nn.Linear(embed_dim, num_classes)
+        self.head = nn.Linear(cfg.embed_dim, num_classes)
 
 
     @staticmethod
@@ -202,8 +192,7 @@ class SimpleViT(nn.Module):
             image_size: tuple[int, int, int],
             patch_size: int | tuple[int, int]
     ) -> int:
-        # Convert ints to tuples
-        # H, W = (image_size, image_size) if isinstance(image_size, int) else image_size
+
         H, W =  image_size[1:]
         patch_h, patch_w = (patch_size, patch_size) if isinstance(patch_size, int) else patch_size
 
