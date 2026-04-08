@@ -173,7 +173,14 @@ def vit_forward_pass(x):
 ```
 
 ## Data
+### MNIST
+MNIST is a grayscale image dataset of handwritten digits (0–9), where each image has a resolution of 28×28 pixels. It contains 60,000 training samples and 10,000 test samples, with relatively low variability and simple patterns. Due to its simplicity and strong local features, it is well-suited for benchmarking basic models and is typically dominated by convolutional neural networks.
 
+### CIFAR-10
+CIFAR-10 is a dataset of 32×32 RGB images across 10 object classes such as animals and vehicles. It consists of 50,000 training samples and 10,000 test samples, with moderate variability and more complex visual structure than MNIST. While still relatively small in resolution, it provides a more realistic benchmark for image classification and highlights the limitations of models that rely only on local features.
+
+### Tiny ImageNet
+Tiny ImageNet is a scaled-down version of ImageNet, containing 64×64 RGB images across 200 classes, with 100,000 training samples and 10,000 validation samples. It introduces higher resolution, greater class diversity, and increased semantic complexity compared to CIFAR-10. This makes it a more challenging dataset where models that capture global context, such as Vision Transformers, begin to show advantages.
 
 ## Evaluation
 
