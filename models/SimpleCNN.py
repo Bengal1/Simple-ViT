@@ -30,25 +30,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ..config import CNNConfig
-# from dataclasses import dataclass
-
-
-# @dataclass
-# class CNNConfig:
-#     """
-#     Configuration for SimpleCNN architecture.
-#
-#     Defines convolution, pooling, fully connected dimensions,
-#     and regularization parameters.
-#     """
-#     conv1_out_channels: int = 32
-#     conv2_out_channels: int = 64
-#     conv_kernel_size: int = 3
-#     pool_kernel_size: int = 2
-#     pool_stride: int = 2
-#     fc2_in = 512
-#     dropout1_rate: float = 0.35
-#     dropout2_rate: float = 0.25
 
 
 #--------------- Model Definition ---------------#
