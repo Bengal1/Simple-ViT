@@ -174,17 +174,17 @@ def vit_forward_pass(x):
 
 ## Data
 ### MNIST
+<img align="right" width="150" alt="mnist" src="https://github.com/user-attachments/assets/5616cd75-337d-4ff1-aa47-98e4af773208" />
 MNIST is a grayscale image dataset of handwritten digits (0–9), where each image has a resolution of 28×28 pixels. It contains 60,000 training samples and 10,000 test samples, with relatively low variability and simple patterns. Due to its simplicity and strong local features, it is well-suited for benchmarking basic models and is typically dominated by convolutional neural networks.
-<img align="right" width="100" alt="mnist" src="https://github.com/user-attachments/assets/5616cd75-337d-4ff1-aa47-98e4af773208" />
 
 ### CIFAR-10
+<img align="right" width="150" alt="cifar10" src="https://github.com/user-attachments/assets/9693d488-70f7-4222-a2ea-c11783294d3a" />
 CIFAR-10 is a dataset of 32×32 RGB images across 10 object classes such as animals and vehicles. It consists of 50,000 training samples and 10,000 test samples, with moderate variability and more complex visual structure than MNIST. While still relatively small in resolution, it provides a more realistic benchmark for image classification and highlights the limitations of models that rely only on local features.
-<img align="right" width="100" alt="cifar10" src="https://github.com/user-attachments/assets/9693d488-70f7-4222-a2ea-c11783294d3a" />
 
 
 ### Tiny ImageNet
+<img align="right" width="150" alt="tiny_imagenet" src="https://github.com/user-attachments/assets/26f7eb66-2596-4aaf-8434-f1c5c1bc4788" />
 Tiny ImageNet is a scaled-down version of ImageNet, containing 64×64 RGB images across 200 classes, with 100,000 training samples and 10,000 validation samples. It introduces higher resolution, greater class diversity, and increased semantic complexity compared to CIFAR-10. This makes it a more challenging dataset where models that capture global context, such as Vision Transformers, begin to show advantages.
-<img align="right" width="100" alt="tiny_imagenet" src="https://github.com/user-attachments/assets/26f7eb66-2596-4aaf-8434-f1c5c1bc4788" />
 
 
 ## Evaluation
