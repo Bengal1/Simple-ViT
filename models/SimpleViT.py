@@ -20,6 +20,7 @@ Outputs raw logits and is intended for use with
 """
 __author__="Bengal1"
 
+
 import torch
 import torch.nn as nn
 from collections.abc import Sequence
