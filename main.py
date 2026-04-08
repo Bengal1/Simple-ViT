@@ -9,12 +9,13 @@ __author__="Bengal1"
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import argparse
 
 from models import SimpleViT
 from loaders import get_dataloaders
 from train import train_model, evaluate_model
 from utils import get_device, plot_losses, set_seed
-
+from SimpleCNN import SimpleCNN
 
 
 # # ----------------------- Hyperparameters & Config ----------------------- #
@@ -25,20 +26,44 @@ NUM_LAYERS       = 6         # Number of Encoder/Decoder layers
 PATCH_SIZE       = 4 #(16, 16)
 # # --- Training Process ---
 BATCH_SIZE       = 32        # Batch size
-EPOCHS           = 10        # Number of epochs
+EPOCHS           = 100        # Number of epochs
 NUM_CLASSES      = 10
 VALIDATION_SPLIT = 0.2
-# MAX_GRAD_CLIP   = 1.0       # Max norm gradient (for gradient clipping)
-DROPOUT         = 0.1       # Dropout probability
-# LABEL_SMOOTHING = 0.1       # Label smoothing parameter
+MAX_GRAD_CLIP    = 1.0       # Max norm gradient (for gradient clipping)
+DROPOUT          = 0.1       # Dropout probability
+LABEL_SMOOTHING  = 0.1       # Label smoothing parameter
 # # --- Optimizer Settings (Adam) ---
-LEARNING_RATE   = 1e-5      # Initial learning rate
-# BETAS           = (0.9, 0.98) # Adam Optimizer beta coefficients
-# EPSILON         = 1e-9      # Optimizer's epsilon for numerical stability
-WEIGHT_DECAY    = 1e-2      # Weight decay parameter (L2 regularization)
+LEARNING_RATE    = 1e-5      # Initial learning rate
+BETAS            = (0.9, 0.98) # Adam Optimizer beta coefficients
+EPSILON          = 1e-9      # Optimizer's epsilon for numerical stability
+WEIGHT_DECAY     = 1e-2      # Weight decay parameter (L2 regularization)
 # # --- Application-Specific Settings ---
-# DATA_DEBUG_MODE = True      # Debug mode flag (enables/disables debug features)
-# LOGGING_LEVEL   = utils.LogLevel.WARNING # Initial logging verbosity level
+# DATA_DEBUG_MODE  = True      # Debug mode flag (enables/disables debug features)
+# LOGGING_LEVEL    = utils.LogLevel.WARNING # Initial logging verbosity level
+
+DATASET         = "mnist"
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Train image classification models.")
+
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        default="mnist",
+        choices=["mnist", "cifar10", "tiny_imagenet"],
+        help="Dataset to use for training.",
+    )
+
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="vit",
+        choices=["vit", "cnn"],
+        help="Model architecture to train.",
+    )
+
+    return parser.parse_args()
 
 
 # --- Model & training Component Setup Helper Function ---
@@ -46,12 +71,14 @@ def _setup_model_for_training(
         num_classes: int,
         patch_size: int | tuple[int, int],
         lr: float,
-        img_size: int | tuple[int, int, int] | None = None,
+        img_size: int | tuple[int, int, int],
+        model: str = "vit"
 ) -> tuple[
     nn.Module,
     nn.modules.loss,
     torch.optim.Optimizer,
-    torch.device]:
+    torch.device
+]:
     """
     Set up a Simple Vision Transformer (SimpleViT) model for training.
 
@@ -78,17 +105,27 @@ def _setup_model_for_training(
     device = get_device()
 
     # Instantiate the SimpleViT model
-    model = SimpleViT(patch_size=patch_size,
-                      num_classes=num_classes,
-                      img_size=img_size,
-                      dropout=DROPOUT
-                      ).to(device)
+    if model == "vit":
+        model = SimpleViT(
+            patch_size=patch_size,
+            num_classes=num_classes,
+            img_size=img_size,
+            dropout=DROPOUT
+        ).to(device)
+    elif model == "cnn":
+        model = SimpleCNN()
 
     # Initialize the Cross-Entropy Loss function
-    loss_function = nn.CrossEntropyLoss().to(device)
+    loss_function = nn.CrossEntropyLoss(label_smoothing=LABEL_SMOOTHING).to(device)
 
     # Initialize the Adam optimizer
-    optimizer = optim.AdamW(model.parameters(), lr=lr, weight_decay=WEIGHT_DECAY)
+    optimizer = optim.AdamW(
+        model.parameters(),
+        lr=lr,
+        betas=BETAS,
+        eps=EPSILON,
+        weight_decay=WEIGHT_DECAY
+    )
 
     return model, loss_function, optimizer, device
 
@@ -99,15 +136,18 @@ def main():
 
     # Initialize data loaders
     train_loader, val_loader, test_loader, img_size = get_dataloaders(
-        "mnist",
-        BATCH_SIZE,
-        VALIDATION_SPLIT)
+        dataset="mnist",
+        batch_size=BATCH_SIZE,
+        train_validation_split=VALIDATION_SPLIT
+    )
 
     # Initialize model, loss function and optimizer
-    vit, loss_fn, optimizer, device = _setup_model_for_training(NUM_CLASSES,
-                                                                PATCH_SIZE,
-                                                                LEARNING_RATE,
-                                                                img_size)
+    vit, loss_fn, optimizer, device = _setup_model_for_training(
+        num_classes=NUM_CLASSES,
+        patch_size=PATCH_SIZE,
+        lr=LEARNING_RATE,
+        img_size=img_size
+    )
 
     # Train & Validation
     loss_records = train_model(
@@ -117,10 +157,16 @@ def main():
         training_loader=train_loader,
         validation_loader=val_loader,
         device=device,
-        num_epochs=10)
+        num_epochs=EPOCHS
+    )
 
     # Test
-    test_accuracy, test_loss = evaluate_model(vit, test_loader, loss_fn, device)
+    test_accuracy, test_loss = evaluate_model(
+        model=vit,
+        data_loader=test_loader,
+        criterion=loss_fn,
+        device=device
+    )
     print(f"\nTest Loss: {test_loss:.3f}, Test Accuracy: {test_accuracy:.3f}%")
 
     # Plot Loss

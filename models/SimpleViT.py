@@ -1,7 +1,29 @@
-from collections.abc import Sequence
+"""
+===========================
+         SimpleViT
+===========================
+
+A lightweight Vision Transformer for image classification.
+
+Architecture:
+    - Patch embedding layer (image → sequence of patches)
+    - Learnable positional encoding
+    - Stacked Transformer encoder blocks (Multi-head Self-Attention + MLP)
+    - Classification head (CLS token or pooled representation)
+
+The model is dataset-agnostic and accepts inputs of shape (C, H, W).
+Images are split into fixed-size patches, projected into an embedding
+space, and processed using self-attention.
+
+Outputs raw logits and is intended for use with
+`torch.nn.CrossEntropyLoss`.
+"""
+__author__="Bengal1"
 
 import torch
 import torch.nn as nn
+from collections.abc import Sequence
+
 from .layers import PatchEmbedding, LearnablePositionalEncoding
 
 
@@ -49,19 +71,68 @@ class SimpleViT(nn.Module):
             norm_eps (float, optional): LayerNorm epsilon. Default: 1e-6.
         """
         super().__init__()
+        # --- Validate model configuration ---
+        if num_classes <= 0:
+            raise ValueError(
+                f"num_classes must be a positive integer, but got {num_classes}"
+            )
+
+        if embed_dim <= 0:
+            raise ValueError(
+                f"embed_dim must be a positive integer, but got {embed_dim}"
+            )
+
+        if num_heads <= 0:
+            raise ValueError(
+                f"num_heads must be a positive integer, but got {num_heads}"
+            )
+
+        if num_layers <= 0:
+            raise ValueError(
+                f"num_layers must be a positive integer, but got {num_layers}"
+            )
+
+        if dim_feedforward <= 0:
+            raise ValueError(
+                f"dim_feedforward must be a positive integer, but got {dim_feedforward}"
+            )
+
+        if not 0.0 <= dropout < 1.0:
+            raise ValueError(
+                f"dropout must be in the range [0, 1), but got {dropout}"
+            )
+
+        if norm_eps <= 0:
+            raise ValueError(
+                f"norm_eps must be a positive number, but got {norm_eps}"
+            )
+
+        if embed_dim % num_heads != 0:
+            raise ValueError(
+                f"embed_dim ({embed_dim}) must be divisible by num_heads ({num_heads})"
+            )
+
         # Set image size as C, H, W format.
         self.img_size = self._set_input_dimensions(img_size)
         # Validate image patch size relations
         self.n_patches = self._get_number_of_patches(self.img_size, patch_size)
 
         # --- Patch embedding ---
-        self.patch_embed = PatchEmbedding(patch_size, self.img_size, embed_dim)
+        self.patch_embed = PatchEmbedding(
+            patch_size,
+            self.img_size,
+            embed_dim
+        )
 
         # --- CLS token (learnable) ---
         self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dim))
 
-        # --- Positional encoding (lazy initialization) ---
-        self.pos_encode = LearnablePositionalEncoding(embed_dim)
+        # --- Positional encoding ---
+        self.pos_encode = LearnablePositionalEncoding(
+            embed_dim,
+            num_patches=self.n_patches,
+            has_cls_token=True
+        )
 
         # --- Transformer encoder layers ---
         self.encoder_layers = nn.ModuleList([
@@ -135,11 +206,15 @@ class SimpleViT(nn.Module):
         H, W =  image_size[1:]
         patch_h, patch_w = (patch_size, patch_size) if isinstance(patch_size, int) else patch_size
 
+        # Check patch size positive
+        if patch_h <= 0 or patch_w <= 0:
+            raise ValueError(
+                f"patch_size dimensions must be positive, but got ({patch_h}, {patch_w})"
+            )
         # Check patch smaller than image
         if patch_h > H or patch_w > W:
             raise ValueError(
                 f"Patch size ({patch_h}x{patch_w}) cannot be larger than image size ({H}x{W}).")
-
         # Check divisibility
         if H % patch_h != 0 or W % patch_w != 0:
             raise ValueError(

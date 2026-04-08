@@ -3,19 +3,22 @@ import torch.nn as nn
 
 class PatchEmbedding(nn.Module):
     """
-    Minimal Patch Embedding layer for Vision Transformers.
+    Patch embedding layer for Vision Transformers.
 
-    Splits an input image into patches and projects each patch into a
-    vector of size `embed_dim` using a linear layer.
+    Splits an input image into non-overlapping patches, flattens each patch,
+    and projects it into an embedding space of dimension ``embed_dim``.
+    The projection layer can be initialized at construction time or lazily
+    on the first forward pass.
 
     Attributes:
         patch_height (int): Height of each patch.
         patch_width (int): Width of each patch.
-        embed_dim (int): Output embedding dimension for each patch.
-        img_height (int | None): Height of input image (if known at init).
-        img_width (int | None): Width of input image (if known at init).
+        embed_dim (int): Embedding dimension of each patch.
+        img_height (int | None): Input image height, if known.
+        img_width (int | None): Input image width, if known.
+        in_channels (int | None): Number of input channels, inferred or set at initialization.
         n_patches (int | None): Total number of patches per image.
-        patch_projection (nn.Linear | None): Linear layer to project flattened patches.
+        patch_projection (nn.Linear | None): Linear layer projecting flattened patches.
     """
 
     def __init__(
@@ -25,18 +28,19 @@ class PatchEmbedding(nn.Module):
             embed_dim: int = 768,
     ):
         """
-        Initialize PatchEmbedding.
+        Initialize the patch embedding layer.
 
         Args:
-            patch_size (int | tuple[int, int]): Size of each patch (height, width).
-                If int, the patch is square.
-            img_size (tuple[int, int, int] | None): Optional image size (C, H, W).
-                If None, the projection layer will be lazily initialized on the
-                first forward pass.
-            embed_dim (int): Output embedding dimension of each patch. Default: 768.
+            patch_size (int | tuple[int, int]): Patch size as ``int`` for square
+                patches or ``(height, width)`` for rectangular patches.
+            img_size (tuple[int, int, int] | None): Optional input image size as
+                ``(channels, height, width)``. If omitted, the projection layer is
+                initialized lazily on the first forward pass.
+            embed_dim (int): Output embedding dimension for each patch.
 
         Raises:
-            ValueError: If `patch_size` is invalid or `img_size` does not follow (C, H, W).
+            ValueError: If ``patch_size`` is invalid, ``img_size`` is not in
+                ``(C, H, W)`` format, or ``embed_dim`` is not positive.
         """
         super().__init__()
 
@@ -48,7 +52,7 @@ class PatchEmbedding(nn.Module):
         else:
             raise ValueError(
                 f"Patch size must be an int or a tuple (H, W), "
-                f"but got size of {patch_size!r}"
+                f"but got {patch_size!r}"
             )
 
         if embed_dim <= 0:
@@ -61,6 +65,7 @@ class PatchEmbedding(nn.Module):
         # --- Image size & projection ---
         self.img_height: int | None = None
         self.img_width: int | None = None
+        self.in_channels: int | None = None
         self.n_patches: int | None = None
         self.patch_projection: nn.Linear | None = None
 
@@ -69,60 +74,74 @@ class PatchEmbedding(nn.Module):
                 raise ValueError(
                     f"Image size must be a tuple (C, H, W), but got {img_size!r}"
                 )
-            C, self.img_height, self.img_width = img_size
+            self.in_channels, self.img_height, self.img_width = img_size
             
             # Compute number of patches (floor division ensures tiling)
             self.n_patches = (self.img_height // self.patch_height) * \
                              (self.img_width // self.patch_width)
 
             # Initialize projection immediately
-            patch_dim = C * self.patch_height * self.patch_width
+            patch_dim = self.in_channels * self.patch_height * self.patch_width
             self.patch_projection = nn.Linear(patch_dim, self.embed_dim)
 
-
     @staticmethod
-    def _get_input_size(x: torch.Tensor) -> tuple[int, int, int, int]:
+    def _get_input_size(
+            x: torch.Tensor
+    ) -> tuple[torch.Tensor, int, int, int, int]:
         """
-        Ensure input is 4D: (B, C, H, W). Converts 2D or 3D inputs into 4D by adding
-        batch and/or channel dimensions.
+        Convert input to 4D shape (B, C, H, W) if needed and return both the
+        converted tensor and its dimensions.
+
+        Supported inputs:
+            - 2D: (H, W)         -> (1, 1, H, W)
+            - 3D: (C, H, W)      -> (1, C, H, W)
+            - 4D: (B, C, H, W)   -> unchanged
 
         Args:
-            x (torch.Tensor): Input tensor of shape 2D, 3D, or 4D.
+            x (torch.Tensor): Input tensor.
 
         Returns:
-            tuple[int, int, int, int]: 4D tensor shape (B, C, H, W).
+            tuple[torch.Tensor, int, int, int, int]:
+                The reshaped tensor and its dimensions as (x, B, C, H, W).
 
         Raises:
-            ValueError: If input tensor has dimensions other than 2, 3, or 4.
+            ValueError: If the input tensor is not 2D, 3D, or 4D.
         """
         if x.ndim == 4:
             B, C, H, W = x.shape
         elif x.ndim == 3:
-            C, H, W = x.shape
-            B = 1
+            x = x.unsqueeze(0)
+            B, C, H, W = x.shape
         elif x.ndim == 2:
-            H, W = x.shape
-            B, C = 1, 1
+            x = x.unsqueeze(0).unsqueeze(0)
+            B, C, H, W = x.shape
         else:
             raise ValueError(f"Expected 2D, 3D, or 4D input, got {x.ndim}D")
-        return B, C, H, W
 
-    def _initialize_projection(self,
-                               C: int, H: int, W: int,
-                               device: torch.device
+        return x, B, C, H, W
+
+    def _initialize_projection(
+            self,
+            C: int,
+            H: int,
+            W: int,
+            device: torch.device
     ) -> None:
         """
-        Lazily initialize the patch projection layer and related attributes.
-        This should only be called once when the first input is seen.
+        Lazily initialize the projection layer and related image metadata.
+
+        This method sets the expected input dimensions, validates consistency, and
+        creates the linear projection used to embed flattened patches.
 
         Args:
             C (int): Number of input channels.
-            H (int): Height of the input image.
-            W (int): Width of the input image.
-            device (torch.device): Target device for lazy initialization.
+            H (int): Input image height.
+            W (int): Input image width.
+            device (torch.device): Device on which to create the projection layer.
 
         Raises:
-            ValueError: If a mismatch is detected in image size or patch count.
+            ValueError: If the input dimensions are inconsistent with the stored
+                image structure or are incompatible with the patch size.
         """
         # safety check: if already initialized, exit silently
         if self.patch_projection is not None:
@@ -143,7 +162,20 @@ class PatchEmbedding(nn.Module):
                 f"Image width mismatch: expected {self.img_width}, but got {W}"
             )
 
+        if self.in_channels is None:
+            self.in_channels = C
+        elif self.in_channels != C:
+            raise ValueError(
+                f"Input channels mismatch: expected {self.in_channels}, got {C}"
+            )
+
         # --- Compute and validate number of patches ---
+        if H % self.patch_height != 0 or W % self.patch_width != 0:
+            raise ValueError(
+                f"Input image size ({H}x{W}) must be divisible by patch size "
+                f"({self.patch_height}x{self.patch_width})."
+            )
+
         num_patches = (self.img_height // self.patch_height) * \
                       (self.img_width // self.patch_width)
 
@@ -156,27 +188,27 @@ class PatchEmbedding(nn.Module):
             )
 
         # --- Initialize projection layer ---
-        patch_dim = C * self.patch_height * self.patch_width
+        patch_dim = self.in_channels * self.patch_height * self.patch_width
         self.patch_projection = nn.Linear(patch_dim, self.embed_dim).to(device)
-
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
-        Forward pass: split image into patches, flatten, and project each patch.
+        Convert an input image batch into a sequence of patch embeddings.
 
         Args:
-            x (torch.Tensor): Input tensor of shape (B, C, H, W) or convertible
-                              2D/3D tensor.
+            x (torch.Tensor): Input tensor of shape ``(H, W)``, ``(C, H, W)``, or
+                ``(B, C, H, W)``.
 
         Returns:
-            torch.Tensor: Tensor of shape (B, n_patches, embed_dim) containing
-                          the patch embeddings.
+            torch.Tensor: Patch embeddings of shape
+                ``(B, num_patches, embed_dim)``.
 
         Raises:
-            ValueError: If the input image size does not match the initialized size.
+            ValueError: If the input image size does not match the initialized
+                image dimensions.
         """
         # --- Ensure input is 4D ---
-        B, C, H, W = self._get_input_size(x)
+        x, B, C, H, W = self._get_input_size(x)
 
         # --- If not initialized --> Lazy initialization ---
         if self.patch_projection is None:

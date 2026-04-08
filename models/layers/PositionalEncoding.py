@@ -33,40 +33,67 @@ class LearnablePositionalEncoding(nn.Module):
         """
         super().__init__()
 
+        if not isinstance(embed_dim, int) or embed_dim <= 0:
+            raise ValueError(
+                f"embed_dim must be a positive integer, but got {embed_dim!r}"
+            )
         self.embed_dim = embed_dim
+
         self.has_cls_token = has_cls_token
 
-        if num_patches is not None:
+        if num_patches is not None and num_patches <= 0:
+            raise ValueError(
+                f"num_patches must be a positive integer, but got {num_patches}"
+            )
+        elif num_patches is not None:
             self.num_patches = num_patches + 1 if has_cls_token else num_patches
             self.pos_embedding = nn.Parameter(torch.empty(1, self.num_patches, self.embed_dim))
             # Initialize using truncated normal (ViT default)
             nn.init.trunc_normal_(self.pos_embedding, std=0.02)
+
         else:
             # Placeholder for lazy initialization
             self.num_patches = None
             self.pos_embedding: nn.Parameter | None = None
 
-    def _initialize_pos_embedding(self, patches: int, device: torch.device) -> None:
+    def _initialize_pos_embedding(
+            self,
+            patches: int,
+            device: torch.device
+    ) -> None:
         """
-        Lazy initialization of positional embeddings based on actual sequence length.
+        Lazily initialize positional embeddings based on input sequence length.
 
         Args:
-            patches (int): Number of tokens (patches + optional CLS) in input.
+            patches (int): Number of tokens (patches + optional CLS).
+            device (torch.device): Device for parameter initialization.
+
+        Raises:
+            ValueError: If the provided number of patches does not match
+                        the expected value.
         """
+        # Safety: prevent re-initialization
+        if self.pos_embedding is not None:
+            return
+
+        # Validate / set number of patches
         if self.num_patches is None:
             self.num_patches = patches
-        else:
-            if self.num_patches != patches:
-                raise ValueError(
-                    f"Expected {self.num_patches} number of patches, got {patches}"
-                )
+        elif self.num_patches != patches:
+            raise ValueError(
+                f"Expected {self.num_patches} patches, got {patches}"
+            )
 
-        self.pos_embedding = nn.Parameter(torch.empty(1, self.num_patches,
-                                                      self.embed_dim)).to(device)
-        # Initialize using truncated normal (ViT default)
+        # Initialize positional encoding
+        tensor = torch.empty(1, self.num_patches, self.embed_dim, device=device)
+        self.pos_embedding = nn.Parameter(tensor)
+
         nn.init.trunc_normal_(self.pos_embedding, std=0.02)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(
+            self,
+            x: torch.Tensor
+    ) -> torch.Tensor:
         """
         Add learnable positional encoding to input embeddings.
 
@@ -108,7 +135,7 @@ class LearnablePositionalEncoding(nn.Module):
 
 
 
-class PositionalEncoding2D(nn.Module):
+class SinusoidalPositionalEncoding2D(nn.Module):
     """
     2D Sinusoidal Positional Encoding for Vision Transformer (ViT).
 
