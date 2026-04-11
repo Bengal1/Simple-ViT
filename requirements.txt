@@ -1,0 +1,17 @@
+# Core
+torch==2.5.1
+torchvision==0.20.1
+
+# Data & Math
+numpy==2.0.1
+
+# Visualization
+matplotlib==3.10.0
+
+# Image handling
+Pillow==11.1.0
+
+# Utilities
+tqdm==4.67.1
+PyYAML==6.0.2
+
