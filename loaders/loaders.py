@@ -25,7 +25,7 @@ def _get_mnist_dataloaders(
 
     Returns:
         tuple:
-            (train_loader, val_loader, test_loader, image_size)
+            (train_loader, val_loader, test_loader, image_size, num_classes)
 
     Raises:
         ValueError: If ``train_validation_split`` is not in (0, 1).
@@ -85,7 +85,7 @@ def _get_cifar10_dataloaders(
 
     Returns:
         tuple:
-            (train_loader, val_loader, test_loader, image_size)
+            (train_loader, val_loader, test_loader, image_size, num_classes)
 
     Raises:
         ValueError: If ``train_validation_split`` is not in (0, 1).
@@ -148,7 +148,7 @@ def _get_tiny_imagenet_dataloaders(
 
     Returns:
         tuple:
-            (train_loader, val_loader, test_loader, image_size)
+            (train_loader, val_loader, test_loader, image_size, num_classes)
 
     Raises:
         ValueError: If ``train_validation_split`` is not in (0, 1).
@@ -213,7 +213,7 @@ def get_dataloaders(
 
     Returns:
         tuple:
-            (train_loader, val_loader, test_loader, image_size)
+            (train_loader, val_loader, test_loader, image_size, num_classes)
 
     Raises:
         ValueError: If the dataset is not supported.

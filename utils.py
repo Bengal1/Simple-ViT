@@ -72,7 +72,7 @@ def plot_metrics(
     model_name: Optional[str] = None,
     dataset: Optional[str] = None,
     save_dir: str = "results",
-    mode: str = "combined"
+    mode: str = "combined",
 ) -> None:
     """
     Plot training metrics and save the resulting figure.
@@ -91,11 +91,6 @@ def plot_metrics(
                           1. Loss
                           2. Accuracy
                           3. Loss gap
-        - "all"      : Four subplots:
-                          - Train Loss
-                          - Validation Loss
-                          - Train Accuracy
-                          - Validation Accuracy
 
     If both `model_name` and `dataset` are provided, the figure is saved as:
         {model_name}_{dataset}_{mode}_metrics.png
@@ -121,7 +116,7 @@ def plot_metrics(
             Defaults to "results".
         mode (str, optional):
             Visualization mode. Must be one of:
-            {"combined", "loss", "accuracy", "gap", "extended", "all"}.
+            {"combined", "loss", "accuracy", "gap", "extended"}.
             Defaults to "combined".
 
     Raises:
@@ -152,7 +147,7 @@ def plot_metrics(
         mode=mode,
     )
 
-    _plot_metrics_by_mode(
+    fig = _plot_metrics_by_mode(
         mode=mode,
         epochs=epochs,
         train_loss=train_loss,
@@ -161,8 +156,17 @@ def plot_metrics(
         val_acc=val_acc,
     )
 
-    plt.tight_layout()
-    plt.savefig(save_path, dpi=300, bbox_inches="tight")
+    if model_name is not None and dataset is not None:
+        fig.suptitle(
+            f"{model_name.upper()} | {dataset.upper()}",
+            fontsize=18,
+            fontweight="bold",
+        )
+        fig.tight_layout(rect=(0, 0, 1, 0.95))
+    else:
+        fig.tight_layout()
+
+    fig.savefig(save_path, dpi=300, bbox_inches="tight")
     plt.show()
 
 
@@ -215,14 +219,14 @@ def _plot_metrics_by_mode(
     val_loss: list[float],
     train_acc: list[float],
     val_acc: list[float],
-) -> None:
+) -> plt.Figure:
     """
     Plot metrics according to the selected visualization mode.
 
     Args:
         mode (str):
             Visualization mode. Supported values:
-            {"combined", "loss", "accuracy", "gap", "extended", "all"}.
+            {"combined", "loss", "accuracy", "gap", "extended"}.
         epochs (range):
             Epoch indices used for the x-axis.
         train_loss (list[float]):
@@ -233,6 +237,9 @@ def _plot_metrics_by_mode(
             Training accuracy values.
         val_acc (list[float]):
             Validation accuracy values.
+
+    Returns:
+    plt.Figure: The created matplotlib figure.
 
     Raises:
         ValueError:
@@ -259,8 +266,10 @@ def _plot_metrics_by_mode(
         axes[1].grid(True, linestyle="--", alpha=0.6)
         axes[1].legend()
 
+        return fig
+
     elif mode == "loss":
-        plt.figure(figsize=(7, 5), dpi=150)
+        fig = plt.figure(figsize=(7, 5), dpi=150)
 
         plt.plot(epochs, train_loss, label="Train Loss", linewidth=2)
         plt.plot(epochs, val_loss, label="Validation Loss", linewidth=2)
@@ -270,8 +279,10 @@ def _plot_metrics_by_mode(
         plt.grid(True, linestyle="--", alpha=0.6)
         plt.legend()
 
+        return fig
+
     elif mode == "accuracy":
-        plt.figure(figsize=(7, 5), dpi=150)
+        fig = plt.figure(figsize=(7, 5), dpi=150)
 
         plt.plot(epochs, train_acc, label="Train Accuracy", linewidth=2)
         plt.plot(epochs, val_acc, label="Validation Accuracy", linewidth=2)
@@ -280,6 +291,8 @@ def _plot_metrics_by_mode(
         plt.ylabel("Accuracy")
         plt.grid(True, linestyle="--", alpha=0.6)
         plt.legend()
+
+        return fig
 
     elif mode == "gap":
         fig, axes = plt.subplots(1, 2, figsize=(14, 5), dpi=150)
@@ -306,6 +319,8 @@ def _plot_metrics_by_mode(
         axes[1].set_ylabel("Loss")
         axes[1].grid(True, linestyle="--", alpha=0.6)
         axes[1].legend()
+
+        return fig
 
     elif mode == "extended":
         fig, axes = plt.subplots(1, 3, figsize=(20, 6), dpi=150)
@@ -334,37 +349,12 @@ def _plot_metrics_by_mode(
         axes[2].grid(True, linestyle="--", alpha=0.6)
         axes[2].legend()
 
-    elif mode == "all":
-        fig, axes = plt.subplots(2, 2, figsize=(12, 10), dpi=150)
-
-        axes[0, 0].plot(epochs, train_loss, linewidth=2)
-        axes[0, 0].set_title("Train Loss", fontsize=14, fontweight="bold")
-        axes[0, 0].set_xlabel("Epoch")
-        axes[0, 0].set_ylabel("Loss")
-        axes[0, 0].grid(True, linestyle="--", alpha=0.6)
-
-        axes[0, 1].plot(epochs, val_loss, linewidth=2)
-        axes[0, 1].set_title("Validation Loss", fontsize=14, fontweight="bold")
-        axes[0, 1].set_xlabel("Epoch")
-        axes[0, 1].set_ylabel("Loss")
-        axes[0, 1].grid(True, linestyle="--", alpha=0.6)
-
-        axes[1, 0].plot(epochs, train_acc, linewidth=2)
-        axes[1, 0].set_title("Train Accuracy", fontsize=14, fontweight="bold")
-        axes[1, 0].set_xlabel("Epoch")
-        axes[1, 0].set_ylabel("Accuracy")
-        axes[1, 0].grid(True, linestyle="--", alpha=0.6)
-
-        axes[1, 1].plot(epochs, val_acc, linewidth=2)
-        axes[1, 1].set_title("Validation Accuracy", fontsize=14, fontweight="bold")
-        axes[1, 1].set_xlabel("Epoch")
-        axes[1, 1].set_ylabel("Accuracy")
-        axes[1, 1].grid(True, linestyle="--", alpha=0.6)
+        return fig
 
     else:
         raise ValueError(
             "mode must be one of: "
-            "'combined', 'loss', 'accuracy', 'gap', 'extended', 'all'"
+            "'combined', 'loss', 'accuracy', 'gap', 'extended'"
         )
 
 
@@ -372,7 +362,9 @@ def save_metrics_to_csv(
             metrics_record: dict[str, list[float]],
             model_name: str,
             dataset: str,
-            save_dir: str = "results"
+            save_dir: str = "results",
+            test_loss: Optional[float] = None,
+            test_acc: Optional[float] = None,
 ) -> None:
     """
     Save training metrics to a CSV file.
@@ -384,6 +376,8 @@ def save_metrics_to_csv(
         model_name (str): Model name (e.g., 'cnn', 'vit').
         dataset (str): Dataset name (e.g., 'mnist', 'cifar10').
         save_dir (str): Directory to save the CSV file.
+        test_loss (Optional[float]): Final test loss.
+        test_acc (Optional[float]): Final test accuracy.
     """
 
     os.makedirs(save_dir, exist_ok=True)
@@ -403,5 +397,16 @@ def save_metrics_to_csv(
         for i in range(num_epochs):
             row = [i + 1] + [metrics_record[k][i] for k in keys]
             writer.writerow(row)
+
+    # ---- Test metrics block ----
+    if test_loss is not None or test_acc is not None:
+        writer.writerow([])  # empty line
+        writer.writerow(["test_metrics"])
+
+        if test_loss is not None:
+            writer.writerow(["test_loss", test_loss])
+
+        if test_acc is not None:
+            writer.writerow(["test_accuracy", test_acc])
 
     print(f"Saved metrics to: {file_path}")
