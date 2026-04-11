@@ -2,7 +2,6 @@ import os
 import csv
 import torch
 import random
-import logging
 import numpy as np
 from typing import Optional
 import matplotlib.pyplot as plt

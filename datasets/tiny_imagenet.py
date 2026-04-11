@@ -1,10 +1,11 @@
 import os
 import zipfile
 import urllib.request
+from PIL import Image
 from typing import Callable, Optional
 
 from torch.utils.data import Dataset
-from PIL import Image
+
 
 
 class TinyImageNetDataset(Dataset):
