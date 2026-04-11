@@ -98,11 +98,13 @@ class Config:
     """
     Global configuration container.
 
-    Defines the selected model, dataset, and aggregates all sub-configurations.
+    Holds runtime selections (model, dataset) and aggregates all
+    sub-configurations for model, training, and optimization.
     """
+
     # --- Runtime selection ---
-    model_name: str = "vit"   # "vit" | "cnn"
-    dataset: str = "mnist"    # "mnist" | "cifar10" | "tiny_imagenet"
+    model_name: str = "vit"   # {"vit", "cnn"}
+    dataset: str = "mnist"    # {"mnist", "cifar10", "tiny_imagenet"}
 
     # --- Model configs ---
     vit: ViTConfig = field(default_factory=ViTConfig)
@@ -111,6 +113,40 @@ class Config:
     # --- Training & optimization ---
     training: TrainingConfig = field(default_factory=TrainingConfig)
     optim: OptimConfig = field(default_factory=OptimConfig)
+
+    def update_from_args(self, args) -> "Config":
+        """
+        Update runtime configuration fields from CLI arguments.
+
+        This method applies user-provided command-line arguments to the
+        configuration instance and validates that the selected options
+        are supported.
+
+        Args:
+            args:
+                Parsed argparse namespace containing at least:
+                    - dataset (str)
+                    - model (str)
+
+        Returns:
+            Config:
+                Updated configuration instance.
+
+        Raises:
+            ValueError:
+                If `model` or `dataset` is not supported.
+        """
+        self.dataset = args.dataset
+        self.model_name = args.model
+
+        if self.model_name not in {"vit", "cnn"}:
+            raise ValueError(f"Invalid model_name: {self.model_name}")
+
+        if self.dataset not in {"mnist", "cifar10", "tiny_imagenet"}:
+            raise ValueError(f"Invalid dataset: {self.dataset}")
+
+        return self
+
 
 
 # ======================================================================

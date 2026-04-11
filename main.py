@@ -7,26 +7,26 @@
 """
 Main training entry point.
 
-Handles:
-    - CLI argument parsing (dataset, model selection)
-    - Data loading
-    - Model initialization (ViT or CNN)
-    - Training and validation loop
-    - Final evaluation and loss visualization
+Orchestrates the full training pipeline:
+    - Parses CLI arguments (dataset, model)
+    - Builds dataloaders
+    - Initializes model, loss, optimizer, and device
+    - Runs training and validation
+    - Evaluates on the test set
+    - Saves metrics and generates plots
 
-The configuration is managed via a centralized dataclass-based system (`config`),
-which can be partially overridden through CLI arguments.
+Configuration is managed via a centralized dataclass (`config`)
+and can be partially overridden through CLI arguments.
 """
 __author__="Bengal1"
 
 
 import argparse
+
+from config import config as cfg
 from loaders import get_dataloaders
-from config import config as cfg, Config
+from utils import set_seed, plot_metrics, save_metrics_to_csv
 from train import train_model, evaluate_model, setup_model_for_training
-from utils import get_device, set_seed, plot_metrics, save_metrics_to_csv
-
-
 
 
 def parse_args() -> argparse.Namespace:
@@ -34,7 +34,8 @@ def parse_args() -> argparse.Namespace:
     Parse command-line arguments for dataset and model selection.
 
     Returns:
-        argparse.Namespace: Parsed arguments.
+        argparse.Namespace:
+            Parsed command-line arguments.
     """
     parser = argparse.ArgumentParser(description="Train image classification models.")
 
@@ -60,9 +61,9 @@ def parse_args() -> argparse.Namespace:
 # --- Main Function ---
 def main():
     set_seed()
+
     args = parse_args()
-    cfg.dataset = args.dataset
-    cfg.model_name = args.model
+    cfg.update_from_args(args)
 
     # Initialize data loaders
     train_loader, val_loader, test_loader, img_size, num_classes = get_dataloaders(
@@ -76,7 +77,7 @@ def main():
         config=cfg,
         num_classes=num_classes,
         img_size=img_size,
-        model_name="cnn" #cfg.model_name
+        model_name=cfg.model_name
     )
 
     # Train & Validation
@@ -87,7 +88,7 @@ def main():
         training_loader=train_loader,
         validation_loader=val_loader,
         device=device,
-        # num_epochs=cfg.training.epochs
+        num_epochs=cfg.training.epochs
     )
 
     # Test
@@ -100,8 +101,19 @@ def main():
     print(f"\nTest Loss: {test_loss:.3f}, Test Accuracy: {test_accuracy:.3f}%")
 
     # Save & Plot Metrics
-    save_metrics_to_csv(metrics_records, cfg.model_name, cfg.dataset)
-    plot_metrics(metrics_records,cfg.model_name, cfg.dataset)
+    save_metrics_to_csv(
+        metrics_record=metrics_records,
+        model_name=cfg.model_name,
+        dataset=cfg.dataset,
+        test_loss=test_loss,
+        test_acc=test_accuracy
+    )
+
+    plot_metrics(
+        statistics=metrics_records,
+        model_name=cfg.model_name,
+        dataset=cfg.dataset
+    )
 
 
 # --- Main Entry Point ---

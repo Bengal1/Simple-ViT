@@ -358,12 +358,12 @@ def _plot_metrics_by_mode(
 
 
 def save_metrics_to_csv(
-            metrics_record: dict[str, list[float]],
-            model_name: str,
-            dataset: str,
-            save_dir: str = "results",
-            test_loss: Optional[float] = None,
-            test_acc: Optional[float] = None,
+        metrics_record: dict[str, list[float]],
+        model_name: str,
+        dataset: str,
+        test_loss: Optional[float] = None,
+        test_acc: Optional[float] = None,
+        save_dir: str = "results",
 ) -> None:
     """
     Save training metrics to a CSV file.
