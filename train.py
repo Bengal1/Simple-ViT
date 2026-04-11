@@ -94,7 +94,9 @@ def train_model(
         ValueError: If ``accumulation_steps`` is not a positive integer.
         ValueError: If ``patience`` is not a positive integer.
     """
-    loss_record = {'train': [], 'validation': []}
+    # loss_records = {'train': [], 'validation': []}
+    stats_records = {"train_loss": [], "val_loss": [],
+                     "train_acc": [], "val_acc": []}
 
     for epoch in range(1, num_epochs + 1):
         train_accuracy, train_loss = _train_epoch(
@@ -106,7 +108,8 @@ def train_model(
             accumulation_steps=accumulation_steps,
             max_gradient_clip=max_gradient_clip
         )
-        loss_record['train'].append(train_loss)
+        stats_records['train_loss'].append(train_loss)
+        stats_records['train_acc'].append(train_accuracy)
 
         validation_accuracy, validation_loss = evaluate_model(
             model=model,
@@ -114,7 +117,8 @@ def train_model(
             criterion=loss_fn,
             device=device
         )
-        loss_record['validation'].append(validation_loss)
+        stats_records['val_loss'].append(validation_loss)
+        stats_records['val_acc'].append(validation_accuracy)
 
         print(f"Epoch {epoch}: Train Loss: {train_loss:.4f}, "
               f"Train Accuracy: {train_accuracy:.2f}% | Validation Loss:"
@@ -122,14 +126,14 @@ def train_model(
               f" {validation_accuracy:.2f}%")
 
         if _early_stopping(
-                metric_record=loss_record['validation'],
+                metric_record=stats_records['val_loss'],
                 patience=patience,
                 best_is_max=False
         ):
             print(f"Early stopping triggered at epoch {epoch}")
             break
 
-    return loss_record
+    return stats_records
 
 
 # --- Training Helper Functions ---

@@ -1,8 +1,10 @@
 import os
+import csv
 import torch
 import random
 import logging
 import numpy as np
+from typing import Optional
 import matplotlib.pyplot as plt
 
 
@@ -10,7 +12,8 @@ import matplotlib.pyplot as plt
 __all__ = [
     "get_device",
     "set_seed",
-    "plot_losses"
+    "plot_metrics",
+    "save_metrics_to_csv"
 ]
 
 
@@ -63,47 +66,342 @@ def set_seed(seed_value: int = 1755900008) -> None:
         torch.cuda.manual_seed_all(seed_value)
 
 
-# ------------------ Visualization ------------------ #
-def plot_losses(statistics: dict[str, list[float]]) -> None:
+# ------------------ Metrics ------------------ #
+def plot_metrics(
+    statistics: dict[str, list[float]],
+    model_name: Optional[str] = None,
+    dataset: Optional[str] = None,
+    save_dir: str = "results",
+    mode: str = "combined"
+) -> None:
     """
-    Plots the training and validation loss on the same graph for direct comparison.
+    Plot training metrics and save the resulting figure.
+
+    This function visualizes training progress using loss and accuracy
+    curves, and optionally analyzes generalization through the loss gap.
+
+    Visualization Modes:
+        - "combined" : Two subplots (Loss and Accuracy).
+        - "loss"     : Single plot of training and validation loss.
+        - "accuracy" : Single plot of training and validation accuracy.
+        - "gap"      : Two subplots:
+                          1. Loss gap (train - validation)
+                          2. Loss curves with shaded gap area
+        - "extended" : Three subplots:
+                          1. Loss
+                          2. Accuracy
+                          3. Loss gap
+        - "all"      : Four subplots:
+                          - Train Loss
+                          - Validation Loss
+                          - Train Accuracy
+                          - Validation Accuracy
+
+    If both `model_name` and `dataset` are provided, the figure is saved as:
+        {model_name}_{dataset}_{mode}_metrics.png
+
+    Otherwise, the figure is saved using the next available filename:
+        metrics_1.png, metrics_2.png, ...
 
     Args:
-        statistics (dict): A dictionary with two keys:
-            - 'train' (list): Training loss values per epoch.
-            - 'validation' (list): Validation loss values per epoch.
-
-    The function creates a single plot:
-    - The x-axis represents epochs.
-    - The y-axis represents the loss values.
-    - Both train and validation losses are plotted with different colors and markers.
+        statistics (dict[str, list[float]]):
+            Dictionary containing per-epoch metrics with the following keys:
+                - "train_loss"
+                - "val_loss"
+                - "train_acc"
+                - "val_acc"
+        model_name (Optional[str], optional):
+            Model name used in the saved figure filename.
+            Defaults to None.
+        dataset (Optional[str], optional):
+            Dataset name used in the saved figure filename.
+            Defaults to None.
+        save_dir (str, optional):
+            Directory in which to save the generated figure.
+            Defaults to "results".
+        mode (str, optional):
+            Visualization mode. Must be one of:
+            {"combined", "loss", "accuracy", "gap", "extended", "all"}.
+            Defaults to "combined".
 
     Raises:
-        ValueError: If `statistics` doesn't hold 'train' or 'validation'.
+        ValueError:
+            If required keys are missing from `statistics`, if metric lists
+            do not share the same length, or if `mode` is invalid.
     """
-    if "train" not in statistics or "validation" not in statistics:
-        logging.error("Input dictionary must contain 'train' and 'validation' keys "
-                      "for _plot_losses.")
-        raise ValueError("Input dictionary must contain 'train' and 'validation' "
-                         "keys.")
-    # --- Data Extraction ---
-    train_loss = statistics['train']
-    validation_loss = statistics['validation']
+    required_keys = {"train_loss", "val_loss", "train_acc", "val_acc"}
+    if not required_keys.issubset(statistics):
+        raise ValueError(f"statistics must contain keys: {required_keys}")
+
+    train_loss = statistics["train_loss"]
+    val_loss = statistics["val_loss"]
+    train_acc = statistics["train_acc"]
+    val_acc = statistics["val_acc"]
+
+    lengths = {len(train_loss), len(val_loss), len(train_acc), len(val_acc)}
+    if len(lengths) != 1:
+        raise ValueError("All metric lists in `statistics` must have the same length.")
+
     epochs = range(1, len(train_loss) + 1)
-    # --- Plotting Configuration ---
-    plt.figure(figsize=(8, 5))
-    plt.plot(epochs, train_loss, linestyle='-', color='#1f77b4',
-             label='Train Loss', linewidth=2)
-    plt.plot(epochs, validation_loss, linestyle='-', color='#d62728',
-             label='Validation Loss', linewidth=2)
-    # --- Chart Customization ---
-    plt.title("Training & Validation Loss Over Epochs",
-              fontsize=18, fontweight='bold')
-    plt.xticks(epochs) # This ensures that xticks are integers
-    plt.xlabel("Epoch", fontsize=12)
-    plt.ylabel("Loss", fontsize=12)
-    plt.legend()
-    plt.grid(True, linestyle='--', alpha=0.6)
-    # --- Display Plot ---
+
+    os.makedirs(save_dir, exist_ok=True)
+    save_path = _build_metrics_save_path(
+        save_dir=save_dir,
+        model_name=model_name,
+        dataset=dataset,
+        mode=mode,
+    )
+
+    _plot_metrics_by_mode(
+        mode=mode,
+        epochs=epochs,
+        train_loss=train_loss,
+        val_loss=val_loss,
+        train_acc=train_acc,
+        val_acc=val_acc,
+    )
+
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=300, bbox_inches="tight")
     plt.show()
 
+
+def _build_metrics_save_path(
+    save_dir: str,
+    model_name: Optional[str],
+    dataset: Optional[str],
+    mode: str,
+) -> str:
+    """
+    Build the output path for a metrics figure.
+
+    If both `model_name` and `dataset` are provided, the filename format is:
+        {model_name}_{dataset}_{mode}_metrics.png
+
+    Otherwise, the function generates the next available sequential filename:
+        metrics_1.png, metrics_2.png, ...
+
+    Args:
+        save_dir (str):
+            Directory in which the figure will be saved.
+        model_name (Optional[str]):
+            Model name for the filename.
+        dataset (Optional[str]):
+            Dataset name for the filename.
+        mode (str):
+            Plot mode included in the filename when names are provided.
+
+    Returns:
+        str:
+            Full path to the output figure file.
+    """
+    if model_name is not None and dataset is not None:
+        file_name = f"{model_name.lower()}_{dataset.lower()}_{mode}_metrics.png"
+        return os.path.join(save_dir, file_name)
+
+    file_index = 1
+    while True:
+        file_name = f"metrics_{file_index}.png"
+        save_path = os.path.join(save_dir, file_name)
+        if not os.path.exists(save_path):
+            return save_path
+        file_index += 1
+
+
+def _plot_metrics_by_mode(
+    mode: str,
+    epochs: range,
+    train_loss: list[float],
+    val_loss: list[float],
+    train_acc: list[float],
+    val_acc: list[float],
+) -> None:
+    """
+    Plot metrics according to the selected visualization mode.
+
+    Args:
+        mode (str):
+            Visualization mode. Supported values:
+            {"combined", "loss", "accuracy", "gap", "extended", "all"}.
+        epochs (range):
+            Epoch indices used for the x-axis.
+        train_loss (list[float]):
+            Training loss values.
+        val_loss (list[float]):
+            Validation loss values.
+        train_acc (list[float]):
+            Training accuracy values.
+        val_acc (list[float]):
+            Validation accuracy values.
+
+    Raises:
+        ValueError:
+            If `mode` is not one of the supported options.
+    """
+    loss_gap = [train - val for train, val in zip(train_loss, val_loss)]
+
+    if mode == "combined":
+        fig, axes = plt.subplots(1, 2, figsize=(14, 6), dpi=150)
+
+        axes[0].plot(epochs, train_loss, label="Train Loss", linewidth=2)
+        axes[0].plot(epochs, val_loss, label="Validation Loss", linewidth=2)
+        axes[0].set_title("Loss", fontsize=16, fontweight="bold")
+        axes[0].set_xlabel("Epoch")
+        axes[0].set_ylabel("Loss")
+        axes[0].grid(True, linestyle="--", alpha=0.6)
+        axes[0].legend()
+
+        axes[1].plot(epochs, train_acc, label="Train Accuracy", linewidth=2)
+        axes[1].plot(epochs, val_acc, label="Validation Accuracy", linewidth=2)
+        axes[1].set_title("Accuracy", fontsize=16, fontweight="bold")
+        axes[1].set_xlabel("Epoch")
+        axes[1].set_ylabel("Accuracy")
+        axes[1].grid(True, linestyle="--", alpha=0.6)
+        axes[1].legend()
+
+    elif mode == "loss":
+        plt.figure(figsize=(7, 5), dpi=150)
+
+        plt.plot(epochs, train_loss, label="Train Loss", linewidth=2)
+        plt.plot(epochs, val_loss, label="Validation Loss", linewidth=2)
+        plt.title("Loss", fontsize=16, fontweight="bold")
+        plt.xlabel("Epoch")
+        plt.ylabel("Loss")
+        plt.grid(True, linestyle="--", alpha=0.6)
+        plt.legend()
+
+    elif mode == "accuracy":
+        plt.figure(figsize=(7, 5), dpi=150)
+
+        plt.plot(epochs, train_acc, label="Train Accuracy", linewidth=2)
+        plt.plot(epochs, val_acc, label="Validation Accuracy", linewidth=2)
+        plt.title("Accuracy", fontsize=16, fontweight="bold")
+        plt.xlabel("Epoch")
+        plt.ylabel("Accuracy")
+        plt.grid(True, linestyle="--", alpha=0.6)
+        plt.legend()
+
+    elif mode == "gap":
+        fig, axes = plt.subplots(1, 2, figsize=(14, 5), dpi=150)
+
+        axes[0].plot(epochs, loss_gap, label="Loss Gap", linewidth=2)
+        axes[0].axhline(0, linestyle="--", linewidth=1)
+        axes[0].set_title("Loss Gap (Train - Val)", fontsize=14, fontweight="bold")
+        axes[0].set_xlabel("Epoch")
+        axes[0].set_ylabel("Gap")
+        axes[0].grid(True, linestyle="--", alpha=0.6)
+        axes[0].legend()
+
+        axes[1].plot(epochs, train_loss, label="Train Loss", linewidth=2)
+        axes[1].plot(epochs, val_loss, label="Validation Loss", linewidth=2)
+        axes[1].fill_between(
+            epochs,
+            train_loss,
+            val_loss,
+            alpha=0.2,
+            label="Gap Area",
+        )
+        axes[1].set_title("Loss with Gap Area", fontsize=14, fontweight="bold")
+        axes[1].set_xlabel("Epoch")
+        axes[1].set_ylabel("Loss")
+        axes[1].grid(True, linestyle="--", alpha=0.6)
+        axes[1].legend()
+
+    elif mode == "extended":
+        fig, axes = plt.subplots(1, 3, figsize=(20, 6), dpi=150)
+
+        axes[0].plot(epochs, train_loss, label="Train Loss", linewidth=2)
+        axes[0].plot(epochs, val_loss, label="Validation Loss", linewidth=2)
+        axes[0].set_title("Loss", fontsize=16, fontweight="bold")
+        axes[0].set_xlabel("Epoch")
+        axes[0].set_ylabel("Loss")
+        axes[0].grid(True, linestyle="--", alpha=0.6)
+        axes[0].legend()
+
+        axes[1].plot(epochs, train_acc, label="Train Accuracy", linewidth=2)
+        axes[1].plot(epochs, val_acc, label="Validation Accuracy", linewidth=2)
+        axes[1].set_title("Accuracy", fontsize=16, fontweight="bold")
+        axes[1].set_xlabel("Epoch")
+        axes[1].set_ylabel("Accuracy")
+        axes[1].grid(True, linestyle="--", alpha=0.6)
+        axes[1].legend()
+
+        axes[2].plot(epochs, loss_gap, label="Loss Gap", linewidth=2)
+        axes[2].axhline(0, linestyle="--", linewidth=1)
+        axes[2].set_title("Loss Gap (Train - Val)", fontsize=16, fontweight="bold")
+        axes[2].set_xlabel("Epoch")
+        axes[2].set_ylabel("Gap")
+        axes[2].grid(True, linestyle="--", alpha=0.6)
+        axes[2].legend()
+
+    elif mode == "all":
+        fig, axes = plt.subplots(2, 2, figsize=(12, 10), dpi=150)
+
+        axes[0, 0].plot(epochs, train_loss, linewidth=2)
+        axes[0, 0].set_title("Train Loss", fontsize=14, fontweight="bold")
+        axes[0, 0].set_xlabel("Epoch")
+        axes[0, 0].set_ylabel("Loss")
+        axes[0, 0].grid(True, linestyle="--", alpha=0.6)
+
+        axes[0, 1].plot(epochs, val_loss, linewidth=2)
+        axes[0, 1].set_title("Validation Loss", fontsize=14, fontweight="bold")
+        axes[0, 1].set_xlabel("Epoch")
+        axes[0, 1].set_ylabel("Loss")
+        axes[0, 1].grid(True, linestyle="--", alpha=0.6)
+
+        axes[1, 0].plot(epochs, train_acc, linewidth=2)
+        axes[1, 0].set_title("Train Accuracy", fontsize=14, fontweight="bold")
+        axes[1, 0].set_xlabel("Epoch")
+        axes[1, 0].set_ylabel("Accuracy")
+        axes[1, 0].grid(True, linestyle="--", alpha=0.6)
+
+        axes[1, 1].plot(epochs, val_acc, linewidth=2)
+        axes[1, 1].set_title("Validation Accuracy", fontsize=14, fontweight="bold")
+        axes[1, 1].set_xlabel("Epoch")
+        axes[1, 1].set_ylabel("Accuracy")
+        axes[1, 1].grid(True, linestyle="--", alpha=0.6)
+
+    else:
+        raise ValueError(
+            "mode must be one of: "
+            "'combined', 'loss', 'accuracy', 'gap', 'extended', 'all'"
+        )
+
+
+def save_metrics_to_csv(
+            metrics_record: dict[str, list[float]],
+            model_name: str,
+            dataset: str,
+            save_dir: str = "results"
+) -> None:
+    """
+    Save training metrics to a CSV file.
+
+    Args:
+        metrics_record (dict):
+            Dictionary containing metric lists per epoch
+            (e.g., 'train_loss', 'val_loss', 'train_acc', 'val_acc').
+        model_name (str): Model name (e.g., 'cnn', 'vit').
+        dataset (str): Dataset name (e.g., 'mnist', 'cifar10').
+        save_dir (str): Directory to save the CSV file.
+    """
+
+    os.makedirs(save_dir, exist_ok=True)
+
+    file_path = os.path.join(save_dir, f"{model_name}_{dataset}.csv")
+
+    keys = list(metrics_record.keys())
+    num_epochs = len(next(iter(metrics_record.values())))
+
+    with open(file_path, mode="w", newline="") as f:
+        writer = csv.writer(f)
+
+        # header
+        writer.writerow(["epoch"] + keys)
+
+        # rows
+        for i in range(num_epochs):
+            row = [i + 1] + [metrics_record[k][i] for k in keys]
+            writer.writerow(row)
+
+    print(f"Saved metrics to: {file_path}")

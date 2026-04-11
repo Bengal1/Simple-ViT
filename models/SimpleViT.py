@@ -32,7 +32,7 @@ import torch.nn as nn
 from collections.abc import Sequence
 
 from .layers import PatchEmbedding, LearnablePositionalEncoding
-from ..config import ViTConfig
+from config import ViTConfig
 
 
 class SimpleViT(nn.Module):

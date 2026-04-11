@@ -26,9 +26,10 @@ import argparse
 
 from models import SimpleViT, SimpleCNN
 from loaders import get_dataloaders
-from train import train_model, evaluate_model
-from utils import get_device, plot_losses, set_seed
 from config import config as cfg, Config
+from train import train_model, evaluate_model
+from utils import get_device, set_seed, plot_metrics, save_metrics_to_csv
+
 
 
 
@@ -154,14 +155,14 @@ def main():
     )
 
     # Train & Validation
-    loss_records = train_model(
+    metrics_records = train_model(
         model=model,
         loss_fn=loss_fn,
         optimizer=optimizer,
         training_loader=train_loader,
         validation_loader=val_loader,
         device=device,
-        num_epochs=cfg.training.epochs
+        # num_epochs=cfg.training.epochs
     )
 
     # Test
@@ -173,8 +174,9 @@ def main():
     )
     print(f"\nTest Loss: {test_loss:.3f}, Test Accuracy: {test_accuracy:.3f}%")
 
-    # Plot Loss
-    plot_losses(loss_records)
+    # Save & Plot Metrics
+    save_metrics_to_csv(metrics_records, cfg.model_name, cfg.dataset)
+    plot_metrics(metrics_records,cfg.model_name, cfg.dataset)
 
 
 # --- Main Entry Point ---
