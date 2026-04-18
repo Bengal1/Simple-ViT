@@ -3,6 +3,10 @@ This repository presents a showcase of the [*Vision Tranformer (ViT)*](https://e
 
 For more information about Transformer Model I recommend [Simple Transformer](https://github.com/Bengal1/Simple-Transformer).
 
+![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python&logoColor=white)
+![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-EE4C2C?logo=pytorch&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
+
 ## Requirements
 - [![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python&logoColor=white)](https://www.python.org/) <br/>
 - [![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/) <br/>
