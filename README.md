@@ -14,8 +14,7 @@ pip install -r requirements.txt
 ```
 ### Run training
 
-####Available options
-
+#### Available options
 Models
 * `vit` - Vision Transformer
 * `cnn` - Convolutional Neural Network
