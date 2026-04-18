@@ -35,7 +35,7 @@ Models
 Datasets
 * `mnist` - MNIST dataset.
 * `cifar10` - CIFAR-10 dataset
-* `tiny_imagenet` = Tiny ImageNet dataset
+* `tiny_imagenet` - Tiny ImageNet dataset
 
 #### Output
 After training:
