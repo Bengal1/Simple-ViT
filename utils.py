@@ -15,7 +15,10 @@ __all__ = [
     "get_device",
     "set_seed",
     "plot_metrics",
-    "save_metrics_to_csv"
+    "save_metrics_to_csv",
+    "save_model",
+    "load_model",
+    "count_parameters"
 ]
 
 

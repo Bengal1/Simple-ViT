@@ -29,7 +29,7 @@ from utils import set_seed, plot_metrics, save_metrics_to_csv
 from train import train_model, evaluate_model, setup_model_for_training
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(args: list[str] | None = None) -> argparse.Namespace:
     """
     Parse command-line arguments for dataset and model selection.
 
@@ -55,38 +55,16 @@ def parse_args() -> argparse.Namespace:
         help="Model architecture to train.",
     )
 
-    return parser.parse_args()
+    return parser.parse_args(args)
 
-import torch.nn as nn
-
-def count_parameters(
-    model: nn.Module,
-    trainable_only: bool = False,
-) -> int:
-    """
-    Count the number of model parameters.
-
-    Args:
-        model (nn.Module):
-            Model to inspect.
-        trainable_only (bool, optional):
-            If True, count only parameters with ``requires_grad=True``.
-
-    Returns:
-        int:
-            Total number of parameters.
-    """
-    if trainable_only:
-        return sum(p.numel() for p in model.parameters() if p.requires_grad)
-
-    return sum(p.numel() for p in model.parameters())
-
+from utils import count_parameters
 
 # --- Main Function ---
-def main():
+def main(args=None):
     set_seed()
 
-    args = parse_args()
+    if args is None:
+        args = parse_args()
     cfg.update_from_args(args)
 
     # Initialize data loaders
@@ -103,9 +81,6 @@ def main():
         img_size=img_size,
         model_name=cfg.model_name
     )
-
-    print("Total params:", count_parameters(model))
-    print("Trainable params:", count_parameters(model, trainable_only=True))
 
     # Train & Validation
     metrics_records = train_model(
