@@ -7,11 +7,11 @@ For more information about Transformer Model I recommend [Simple Transformer](ht
 ![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-EE4C2C?logo=pytorch&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-## Requirements
-- [![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python&logoColor=white)](https://www.python.org/) <br/>
-- [![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/) <br/>
-
-## Training & Execution
+## Quick Start
+Run a training experiment in one command:
+```terminal
+python main.py --model vit --dataset tiny_imagenet
+```
 ### Install dependencies
 First, install the required Python packages:
 ```bash
