@@ -1,9 +1,10 @@
 import os
 import csv
-import torch
 import random
-import numpy as np
 from typing import Optional
+
+import numpy as np
+import torch
 import matplotlib.pyplot as plt
 
 
@@ -16,7 +17,9 @@ __all__ = [
 ]
 
 
-# -------------- Device Configuration --------------- #
+# ===========================================================
+# Device Configuration
+# ===========================================================
 
 def get_device() -> torch.device:
     """
@@ -65,7 +68,10 @@ def set_seed(seed_value: int = 1755900008) -> None:
         torch.cuda.manual_seed_all(seed_value)
 
 
-# ------------------ Metrics ------------------ #
+
+# ===========================================================
+# Metrics
+# ===========================================================
 def plot_metrics(
     statistics: dict[str, list[float]],
     model_name: Optional[str] = None,

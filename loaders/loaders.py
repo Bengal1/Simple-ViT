@@ -61,7 +61,9 @@ def _get_mnist_dataloaders(
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-    return train_loader, val_loader, test_loader, (1, 28, 28), 10
+    img_size, num_classes = get_dataset_info(train_loader)
+
+    return train_loader, val_loader, test_loader, img_size, num_classes
 
 
 # ============================================================
@@ -124,7 +126,9 @@ def _get_cifar10_dataloaders(
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-    return train_loader, val_loader, test_loader, (3, 32, 32), 10
+    img_size, num_classes = get_dataset_info(train_loader)
+
+    return train_loader, val_loader, test_loader, img_size, num_classes
 
 
 # ============================================================
@@ -166,13 +170,13 @@ def _get_tiny_imagenet_dataloaders(
 
     full_train_dataset = TinyImageNetDataset(
         root="./data",
-        split="labeled",
+        split="train",
         transform=transform,
     )
 
     test_dataset = TinyImageNetDataset(
         root="./data",
-        split="test",
+        split="val",
         transform=transform,
     )
 
@@ -185,7 +189,9 @@ def _get_tiny_imagenet_dataloaders(
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-    return train_loader, val_loader, test_loader, (3, 64, 64), 200
+    img_size, num_classes = get_dataset_info(train_loader)
+
+    return train_loader, val_loader, test_loader, img_size, num_classes
 
 
 # ============================================================
@@ -233,3 +239,63 @@ def get_dataloaders(
         f"Unsupported dataset '{dataset}'. "
         "Choose from: 'mnist', 'cifar10', 'tiny_imagenet'."
     )
+
+
+# ============================================================
+# DataLoader Helper Utilities
+# ============================================================
+
+def get_dataset_info(
+    data_loader: DataLoader,
+) -> tuple[tuple[int, int, int], int]:
+    """
+    Extract the input image shape and number of classes from a DataLoader.
+
+    This function inspects a single batch to determine the image shape
+    `(C, H, W)` and resolves the underlying dataset to infer the total
+    number of classes. It supports standard torchvision datasets and
+    wrapped datasets such as `torch.utils.data.Subset`.
+
+    Args:
+        data_loader (DataLoader):
+            DataLoader associated with an image classification dataset.
+
+    Returns:
+        tuple[tuple[int, int, int], int]:
+            A tuple containing:
+                - image_size: Input image shape as `(C, H, W)`
+                - num_classes: Total number of classes in the dataset
+
+    Raises:
+        ValueError:
+            If the DataLoader is empty or the number of classes cannot
+            be determined from the dataset.
+    """
+    try:
+        images, _ = next(iter(data_loader))
+    except StopIteration as exc:
+        raise ValueError("Cannot extract dataset info from an empty DataLoader.") from exc
+
+    if images.ndim != 4:
+        raise ValueError(
+            f"Expected image batch with shape [B, C, H, W], got {tuple(images.shape)}."
+        )
+
+    _, channels, height, width = images.shape
+    image_size = (channels, height, width)
+
+    dataset = data_loader.dataset
+    while hasattr(dataset, "dataset"):
+        dataset = dataset.dataset
+
+    if hasattr(dataset, "classes"):
+        num_classes = len(dataset.classes)
+    elif hasattr(dataset, "targets"):
+        num_classes = len(set(dataset.targets))
+    else:
+        raise ValueError(
+            "Unable to determine the number of classes from the dataset. "
+            "Expected a dataset with either `classes` or `targets`."
+        )
+
+    return image_size, num_classes

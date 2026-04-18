@@ -1,142 +1,173 @@
+from typing import Sequence
+
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from typing import Sequence
 
 
-# --- Public API ---
+# ============================================================
+# Public API
+# ============================================================
+
 __all__ = [
     "evaluate_model",
-    "train_model"
+    "train_model",
 ]
 
 
+# ============================================================
+# Evaluation
+# ============================================================
+
 def evaluate_model(
-        model: nn.Module,
-        data_loader: DataLoader,
-        criterion: nn.modules.loss,
-        device: torch.device) -> tuple[float, float]:
+    model: nn.Module,
+    data_loader: DataLoader,
+    criterion: nn.Module,
+    device: torch.device,
+) -> tuple[float, float]:
     """
-    Evaluates the model on a validation or test set.
+    Evaluate the model on a validation or test set.
 
     Args:
-        model (nn.Module): The neural network model.
-        data_loader (DataLoader): DataLoader for validation/test data.
-        criterion (nn.modules.loss._Loss): The loss function.
-        device (torch.device): The computational device (CPU or GPU).
+        model (nn.Module):
+            Neural network model.
+        data_loader (DataLoader):
+            DataLoader for evaluation data.
+        criterion (nn.Module):
+            Loss function.
+        device (torch.device):
+            Computation device.
 
     Returns:
-        tuple[float, float]: Tuple containing evaluation accuracy (%) and average loss.
+        tuple[float, float]:
+            Evaluation accuracy (%) and average loss.
     """
-    model.eval()  # Evaluation mode
-    total_eval_loss, correct_eval, total_eval = 0, 0, 0
+    model.eval()
+
+    total_loss = 0.0
+    correct, total = 0, 0
 
     with torch.no_grad():
         for inputs, labels in data_loader:
             inputs, labels = inputs.to(device), labels.to(device)
+
             logits = model(inputs)
             loss = criterion(logits, labels)
 
-            # Accuracy calculation
-            total_eval_loss += loss.item()
+            total_loss += loss.item()
+
             _, predicted = logits.max(1)
-            correct_eval += predicted.eq(labels).sum().item()
-            total_eval += labels.size(0)
+            correct += predicted.eq(labels).sum().item()
+            total += labels.size(0)
 
-    eval_accuracy = 100 * correct_eval / total_eval
-    eval_loss = total_eval_loss / len(data_loader)
+    accuracy = 100 * correct / total
+    avg_loss = total_loss / len(data_loader)
 
-    return eval_accuracy, eval_loss
+    return accuracy, avg_loss
 
+
+# ============================================================
+# Training
+# ============================================================
 
 def train_model(
-        model: nn.Module,
-        loss_fn: nn.modules.loss,
-        optimizer: torch.optim,
-        training_loader: DataLoader,
-        validation_loader: DataLoader,
-        device: torch.device,
-        num_epochs: int = 10,
-        accumulation_steps: int = 1,
-        max_gradient_clip: float | None = None,
-        patience: int = 5
+    model: nn.Module,
+    loss_fn: nn.Module,
+    optimizer: torch.optim.Optimizer,
+    training_loader: DataLoader,
+    validation_loader: DataLoader,
+    device: torch.device,
+    num_epochs: int = 10,
+    accumulation_steps: int = 1,
+    max_gradient_clip: float | None = None,
+    patience: int = 5,
 ) -> dict[str, list[float]]:
     """
-    Train a model for multiple epochs with validation and optional early stopping.
+    Train a model with validation and optional early stopping.
 
-    Performs training using mini-batches, supports gradient accumulation and
-    optional gradient clipping, and evaluates the model on a validation set
-    after each epoch. Training may terminate early if the validation loss does
-    not improve within a given patience.
+    Runs multiple training epochs, evaluates on a validation set after each
+    epoch, and tracks loss and accuracy. Training stops early if the
+    validation metric does not improve.
 
     Args:
-        model (nn.Module): The neural network model to train.
-        loss_fn (nn.modules.loss): Loss function used for optimization.
-        optimizer (torch.optim): Optimizer for updating model parameters.
-        training_loader (DataLoader): DataLoader for the training dataset.
-        validation_loader (DataLoader): DataLoader for the validation dataset.
-        device (torch.device): Device to perform training on (CPU or GPU).
-        num_epochs (int, optional): Maximum number of training epochs. Default is 10.
-        accumulation_steps (int, optional): Number of batches to accumulate
-            gradients before performing an optimizer step. Default is 1.
-        max_gradient_clip (float | None, optional): Maximum gradient norm for
-            clipping. If None, gradient clipping is disabled.
-        patience (int, optional): Number of epochs to wait for validation loss
-            improvement before triggering early stopping. Default is 5.
+        model (nn.Module):
+            Model to train.
+        loss_fn (nn.Module):
+            Loss function.
+        optimizer (torch.optim.Optimizer):
+            Optimizer.
+        training_loader (DataLoader):
+            Training data loader.
+        validation_loader (DataLoader):
+            Validation data loader.
+        device (torch.device):
+            Computation device.
+        num_epochs (int, optional):
+            Number of epochs.
+        accumulation_steps (int, optional):
+            Gradient accumulation steps.
+        max_gradient_clip (float | None, optional):
+            Max gradient norm for clipping.
+        patience (int, optional):
+            Early stopping patience.
 
     Returns:
         dict[str, list[float]]:
-            Dictionary containing per-epoch losses:
-            - 'train': Training loss history
-            - 'validation': Validation loss history
-
-    Raises:
-        ValueError: If ``accumulation_steps`` is not a positive integer.
-        ValueError: If ``patience`` is not a positive integer.
+            Training statistics with keys:
+            'train_loss', 'val_loss', 'train_acc', 'val_acc'.
     """
-    # loss_records = {'train': [], 'validation': []}
-    stats_records = {"train_loss": [], "val_loss": [],
-                     "train_acc": [], "val_acc": []}
+    stats = {
+        "train_loss": [],
+        "val_loss": [],
+        "train_acc": [],
+        "val_acc": [],
+    }
 
     for epoch in range(1, num_epochs + 1):
-        train_accuracy, train_loss = _train_epoch(
+        train_acc, train_loss = _train_epoch(
             model=model,
             loss_fn=loss_fn,
             optimizer=optimizer,
             data_loader=training_loader,
             device=device,
             accumulation_steps=accumulation_steps,
-            max_gradient_clip=max_gradient_clip
+            max_gradient_clip=max_gradient_clip,
         )
-        stats_records['train_loss'].append(train_loss)
-        stats_records['train_acc'].append(train_accuracy)
 
-        validation_accuracy, validation_loss = evaluate_model(
+        stats["train_loss"].append(train_loss)
+        stats["train_acc"].append(train_acc)
+
+        val_acc, val_loss = evaluate_model(
             model=model,
             data_loader=validation_loader,
             criterion=loss_fn,
-            device=device
+            device=device,
         )
-        stats_records['val_loss'].append(validation_loss)
-        stats_records['val_acc'].append(validation_accuracy)
 
-        print(f"Epoch {epoch}: Train Loss: {train_loss:.4f}, "
-              f"Train Accuracy: {train_accuracy:.2f}% | Validation Loss:"
-              f" {validation_loss:.4f}, Validation Accuracy:"
-              f" {validation_accuracy:.2f}%")
+        stats["val_loss"].append(val_loss)
+        stats["val_acc"].append(val_acc)
+
+        print(
+            f"Epoch {epoch}: "
+            f"Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.2f}% | "
+            f"Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.2f}%"
+        )
 
         if _early_stopping(
-                metric_record=stats_records['val_loss'],
-                patience=patience,
-                best_is_max=False
+            metric_record=stats["val_loss"],
+            patience=patience,
+            best_is_max=False,
         ):
             print(f"Early stopping triggered at epoch {epoch}")
             break
 
-    return stats_records
+    return stats
 
 
-# --- Training Helper Functions ---
+# ============================================================
+# Training Helpers
+# ============================================================
+
 def _train_epoch(
     model: nn.Module,
     loss_fn: nn.Module,
@@ -144,40 +175,41 @@ def _train_epoch(
     data_loader: DataLoader,
     device: torch.device,
     accumulation_steps: int = 1,
-    max_gradient_clip: float | None = None
+    max_gradient_clip: float | None = None,
 ) -> tuple[float, float]:
     """
-    Perform a single training epoch.
+    Run a single training epoch.
 
-    Executes forward and backward passes over the dataset, supports gradient
-    accumulation to simulate larger batch sizes, and optionally applies gradient
-    clipping before optimizer updates.
+    Performs forward and backward passes over the dataset, supports gradient
+    accumulation, and optionally applies gradient clipping.
 
     Args:
-        model (nn.Module): Model to train.
-        loss_fn (nn.Module): Loss function used for optimization.
-        optimizer (torch.optim.Optimizer): Optimizer.
-        data_loader (DataLoader): Training data loader.
-        device (torch.device): Device to perform training on.
-        accumulation_steps (int, optional): Number of batches to accumulate
-            gradients before performing an optimizer step. Default is 1.
-        max_gradient_clip (float | None, optional): Maximum gradient norm for
-            clipping. If None, gradient clipping is disabled.
+        model (nn.Module):
+            Model to train.
+        loss_fn (nn.Module):
+            Loss function.
+        optimizer (torch.optim.Optimizer):
+            Optimizer.
+        data_loader (DataLoader):
+            Training data loader.
+        device (torch.device):
+            Computation device.
+        accumulation_steps (int, optional):
+            Gradient accumulation steps.
+        max_gradient_clip (float | None, optional):
+            Max gradient norm for clipping.
 
     Returns:
         tuple[float, float]:
-            - epoch_accuracy (float): Training accuracy in percent.
-            - epoch_loss (float): Mean batch loss over the epoch.
-
-    Raises:
-        ValueError: If ``accumulation_steps`` is not a positive integer.
+            Accuracy (%) and average loss.
     """
     if accumulation_steps <= 0:
-        raise ValueError("accumulation_steps must be a positive integer")
+        raise ValueError("accumulation_steps must be positive")
 
     model.train()
-    correct_train, total_train = 0, 0
-    total_train_loss = 0.0
+
+    correct, total = 0, 0
+    total_loss = 0.0
 
     optimizer.zero_grad()
 
@@ -188,77 +220,75 @@ def _train_epoch(
         logits = model(images)
         loss = loss_fn(logits, labels)
 
-        total_train_loss += loss.item()
+        total_loss += loss.item()
 
-        scaled_loss = loss / accumulation_steps
-        scaled_loss.backward()
+        (loss / accumulation_steps).backward()
 
         if (batch_idx + 1) % accumulation_steps == 0:
             if max_gradient_clip is not None:
-                torch.nn.utils.clip_grad_norm_(model.parameters(), max_gradient_clip)
+                torch.nn.utils.clip_grad_norm_(
+                    model.parameters(), max_gradient_clip
+                )
 
             optimizer.step()
             optimizer.zero_grad()
 
         _, predicted = logits.max(1)
-        correct_train += predicted.eq(labels).sum().item()
-        total_train += labels.size(0)
+        correct += predicted.eq(labels).sum().item()
+        total += labels.size(0)
 
     if (batch_idx + 1) % accumulation_steps != 0:
         if max_gradient_clip is not None:
-            torch.nn.utils.clip_grad_norm_(model.parameters(), max_gradient_clip)
+            torch.nn.utils.clip_grad_norm_(
+                model.parameters(), max_gradient_clip
+            )
 
         optimizer.step()
         optimizer.zero_grad()
 
-    epoch_accuracy = 100 * correct_train / total_train
-    epoch_loss = total_train_loss / len(data_loader)
+    accuracy = 100 * correct / total
+    avg_loss = total_loss / len(data_loader)
 
-    return epoch_accuracy, epoch_loss
+    return accuracy, avg_loss
 
 
 def _early_stopping(
     metric_record: Sequence[float],
     patience: int = 5,
     delta: float = 1e-5,
-    best_is_max: bool = True
+    best_is_max: bool = True,
 ) -> bool:
     """
-    Determine whether training should stop early based on a metric's recent performance.
+    Check whether training should stop early.
 
-    This function checks if the monitored metric has failed to improve
-    within the last `patience` epochs, considering a minimum improvement
-    threshold `delta`.
+    Determines if the monitored metric has not improved within the last
+    `patience` epochs, given a minimum improvement threshold.
 
     Args:
-        metric_record (Sequence[float]): Sequence of metric values
-            (e.g., BLEU score or validation loss).
-        patience (int, optional): Number of epochs to wait for improvement
-            before suggesting early stopping. Must be positive. Default is 5.
-        delta (float, optional): Minimum change in the metric to qualify as an
-            improvement. Default is 1e-5.
-        best_is_max (bool, optional): If True, higher metric values are better
-            (e.g., BLEU). If False, lower metric values are better (e.g., loss).
-            Default is True.
+        metric_record (Sequence[float]):
+            History of metric values.
+        patience (int, optional):
+            Number of epochs to wait for improvement.
+        delta (float, optional):
+            Minimum change to qualify as improvement.
+        best_is_max (bool, optional):
+            Whether higher values indicate improvement.
 
     Returns:
-        bool: True if the metric did not improve sufficiently within the
-            last `patience` epochs, indicating that training should stop.
-
-    Raises:
-        ValueError: If `patience` is not a positive integer.
+        bool:
+            True if early stopping should be triggered.
     """
     if patience <= 0:
-        raise ValueError("patience must be a positive integer")
+        raise ValueError("patience must be positive")
 
     if len(metric_record) <= patience:
-        return False  # not enough history yet
+        return False
 
     if best_is_max:
-        best_so_far = max(metric_record[:-patience])
-        recent_best = max(metric_record[-patience:])
-        return recent_best <= best_so_far - delta
-    else:
-        best_so_far = min(metric_record[:-patience])
-        recent_best = min(metric_record[-patience:])
-        return recent_best >= best_so_far + delta
+        best = max(metric_record[:-patience])
+        recent = max(metric_record[-patience:])
+        return recent <= best - delta
+
+    best = min(metric_record[:-patience])
+    recent = min(metric_record[-patience:])
+    return recent >= best + delta
