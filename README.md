@@ -238,6 +238,17 @@ MNIST - 843,850</br>
 CIFAR-10 - 1,204,874</br>
 Tiny ImageNet - 6,545,224</br>
 
+
+| Model | Dataset       | Accuracy (%)| Loss |
+|-------|---------------|-------------|------|
+| ViT   |MNIST          |             |      |
+|       | CIFAR-10      |             |      |
+|       | Tiny ImageNet | 62.3        | 1.45 |
+| CNN   | MNIST         |             |      |
+|       | CIFAR-10      |             |      |
+|       | Tiny ImageNet | 58.7        | 1.62 |
+
+
 ## Reference
 [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/abs/1810.04805?utm_source=chatgpt.com)
 
