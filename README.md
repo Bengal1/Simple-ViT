@@ -18,7 +18,7 @@ Follow the steps below to set up and run the project.
 #### Install dependencies
 Install all required packages:
 ```bash
-pip install -r requirements.txt
+          pip install -r requirements.txt
 ```
 #### Run training
 Launch training with:
