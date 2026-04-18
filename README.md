@@ -7,6 +7,12 @@ For more information about Transformer Model I recommend [Simple Transformer](ht
 - [![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python&logoColor=white)](https://www.python.org/) <br/>
 - [![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/) <br/>
 
+## Training & Execution
+### 1. Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
 ## Vision Transformer
 <img align="right" width="300" alt="ViT Architecture" src="https://github.com/user-attachments/assets/41934e26-ecd0-4aec-89a3-b78fee241ebb" />
 
