@@ -9,7 +9,7 @@ For more information about Transformer Model I recommend [Simple Transformer](ht
 
 ## Quick Start
 Run a training experiment in one command:
-```terminal
+```ruby
 python main.py --model vit --dataset tiny_imagenet
 ```
 ### Install dependencies
