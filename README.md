@@ -30,7 +30,7 @@ Choose a model and dataset: </br>
 ##### Models:
 * `vit` - Vision Transformer.
 * `cnn` - Convolutional Neural Network. </br>
-***Datasets:***
+##### Datasets:
 * `mnist` - MNIST dataset.
 * `cifar10` - CIFAR-10 dataset.
 * `tiny_imagenet` - Tiny ImageNet dataset.
