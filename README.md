@@ -249,6 +249,14 @@ Tiny ImageNet - 6,545,224</br>
 |       | Tiny ImageNet | 58.7        | 1.62 |
 
 
+| Model | Metrics      | MNIST  | CIFAR-10 | Tiny ImageNet |
+|-------|--------------|--------|----------|---------------|
+| ViT   | Accuracy (%) |        |          |               |
+|       | Loss         |        |          |               |
+| CNN   | Accuracy (%) |        |          |               |
+|       | Loss         |        |          |               |
+
+
 ## Reference
 [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/abs/1810.04805?utm_source=chatgpt.com)
 
