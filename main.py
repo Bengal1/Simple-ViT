@@ -18,8 +18,7 @@ Orchestrates the full training pipeline:
 Configuration is managed via a centralized dataclass (`config`)
 and can be partially overridden through CLI arguments.
 """
-__author__="Bengal1"
-
+__author__ = "Bengal1"
 
 import argparse
 
@@ -31,7 +30,12 @@ from train import train_model, evaluate_model, setup_model_for_training
 
 def parse_args(args: list[str] | None = None) -> argparse.Namespace:
     """
-    Parse command-line arguments for dataset and model selection.
+    Parse command-line arguments for runtime dataset and model selection.
+
+    Args:
+        args (list[str] | None, optional):
+            Optional argument list. If None, arguments are read from the
+            command line.
 
     Returns:
         argparse.Namespace:
@@ -57,24 +61,30 @@ def parse_args(args: list[str] | None = None) -> argparse.Namespace:
 
     return parser.parse_args(args)
 
-from utils import count_parameters
 
-# --- Main Function ---
-def main(args=None):
+def main(args: argparse.Namespace | None = None) -> None:
+    """
+    Run the full training, evaluation, and logging pipeline.
+
+    Args:
+        args (argparse.Namespace | None, optional):
+            Parsed command-line arguments. If None, arguments are parsed
+            from the command line.
+    """
     set_seed()
 
     if args is None:
         args = parse_args()
-    cfg.update_from_args(args)
 
-    # Initialize data loaders
+    cfg.update_from_args(args)
+    print(f"Model: {cfg.model_name} | Dataset: {cfg.dataset}")
+
     train_loader, val_loader, test_loader, img_size, num_classes = get_dataloaders(
         dataset=cfg.dataset,
         batch_size=cfg.training.batch_size,
         train_validation_split=cfg.training.validation_split
     )
 
-    # Initialize model, loss function and optimizer
     model, loss_fn, optimizer, device = setup_model_for_training(
         config=cfg,
         num_classes=num_classes,
@@ -82,7 +92,6 @@ def main(args=None):
         model_name=cfg.model_name
     )
 
-    # Train & Validation
     metrics_records = train_model(
         model=model,
         loss_fn=loss_fn,
@@ -93,7 +102,6 @@ def main(args=None):
         num_epochs=cfg.training.epochs
     )
 
-    # Test
     test_accuracy, test_loss = evaluate_model(
         model=model,
         data_loader=test_loader,
@@ -102,7 +110,6 @@ def main(args=None):
     )
     print(f"\nTest Loss: {test_loss:.3f}, Test Accuracy: {test_accuracy:.3f}%")
 
-    # Save & Plot Metrics
     save_metrics_to_csv(
         metrics_record=metrics_records,
         model_name=cfg.model_name,
@@ -118,6 +125,5 @@ def main(args=None):
     )
 
 
-# --- Main Entry Point ---
 if __name__ == "__main__":
     main()
