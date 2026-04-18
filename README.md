@@ -29,7 +29,7 @@ python main.py --model <model> --dataset <dataset>
 Choose a model and dataset: </br>
 ***Models:***
 * `vit` - Vision Transformer.
-* `cnn` - Convolutional Neural Network.
+* `cnn` - Convolutional Neural Network. </br>
 ***Datasets:***
 * `mnist` - MNIST dataset.
 * `cifar10` - CIFAR-10 dataset.
