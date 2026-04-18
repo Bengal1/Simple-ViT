@@ -13,6 +13,9 @@ For more information about Transformer Model I recommend [Simple Transformer](ht
 pip install -r requirements.txt
 ```
 ### Run training
+```bash
+python main.py --model vit --dataset tiny_imagenet
+```
 
 #### Available options
 Models
@@ -20,9 +23,9 @@ Models
 * `cnn` - Convolutional Neural Network
 
 Datasets
-* `mnist`
-* `cifar10`
-* `tiny_imagenet`
+* `mnist` - MNIST Dataset.
+* `cifar10` - CIFAR10 Dataset
+* `tiny_imagenet` = Tiny ImageNet Dataset
 
 ## Vision Transformer
 <img align="right" width="300" alt="ViT Architecture" src="https://github.com/user-attachments/assets/41934e26-ecd0-4aec-89a3-b78fee241ebb" />
