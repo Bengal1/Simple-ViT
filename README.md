@@ -228,7 +228,15 @@ Tiny ImageNet is a scaled-down version of ImageNet, containing 64×64 RGB images
 The three datasets differ primarily in image complexity, resolution, and semantic diversity. MNIST contains simple, centered grayscale digits with minimal variation, making it an easy task dominated by local features. CIFAR-10 introduces color, background noise, and object variability at a small resolution, increasing the difficulty and requiring better feature extraction. Tiny ImageNet further increases resolution and the number of classes, adding significant intra-class variation and global structure, which makes the task more challenging and better suited for models that capture broader contextual relationships.<br/>
 
 ## Evaluation
+ViT parameters: 
+MNIST - 18,955,274
+CIFAR-10 - 18,979,338
+Tiny ImageNet - 19,175,112
 
+CNN parameters:
+MNIST - 843,850
+CIFAR-10 - 1,204,874
+Tiny ImageNet - 6,545,224
 
 ## Reference
 [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/abs/1810.04805?utm_source=chatgpt.com)
