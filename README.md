@@ -27,10 +27,10 @@ python main.py --model <model> --dataset <dataset>
 ```
 #### Configure Options
 Choose a model and dataset: </br>
-***Models***
+***Models:***
 * `vit` - Vision Transformer.
 * `cnn` - Convolutional Neural Network.
-</br>***Datasets***
+***Datasets:***
 * `mnist` - MNIST dataset.
 * `cifar10` - CIFAR-10 dataset.
 * `tiny_imagenet` - Tiny ImageNet dataset.
