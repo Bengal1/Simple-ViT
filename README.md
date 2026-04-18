@@ -228,33 +228,15 @@ Tiny ImageNet is a scaled-down version of ImageNet, containing 64×64 RGB images
 The three datasets differ primarily in image complexity, resolution, and semantic diversity. MNIST contains simple, centered grayscale digits with minimal variation, making it an easy task dominated by local features. CIFAR-10 introduces color, background noise, and object variability at a small resolution, increasing the difficulty and requiring better feature extraction. Tiny ImageNet further increases resolution and the number of classes, adding significant intra-class variation and global structure, which makes the task more challenging and better suited for models that capture broader contextual relationships.<br/>
 
 ## Evaluation
-ViT parameters: </br>
-MNIST - 18,955,274</br>
-CIFAR-10 - 18,979,338</br>
-Tiny ImageNet - 19,175,112</br>
 
-CNN parameters:</br>
-MNIST - 843,850</br>
-CIFAR-10 - 1,204,874</br>
-Tiny ImageNet - 6,545,224</br>
-
-
-| Model | Dataset       | Accuracy (%)| Loss |
-|-------|---------------|-------------|------|
-| ViT   |MNIST          |             |      |
-|       | CIFAR-10      |             |      |
-|       | Tiny ImageNet | 62.3        | 1.45 |
-| CNN   | MNIST         |             |      |
-|       | CIFAR-10      |             |      |
-|       | Tiny ImageNet | 58.7        | 1.62 |
-
-
-| Model | Metrics      | MNIST  | CIFAR-10 | Tiny ImageNet |
-|-------|--------------|--------|----------|---------------|
-| ViT   | Accuracy (%) |        |          |               |
-|       | Loss         |        |          |               |
-| CNN   | Accuracy (%) |        |          |               |
-|       | Loss         |        |          |               |
+| Model | Metrics      | MNIST      | CIFAR-10   | Tiny ImageNet |
+|-------|--------------|------------|------------|---------------|
+| ViT   | Parameters   | 18,955,274 | 18,979,338 |19,175,112     |
+|       | Accuracy (%) |            |            |               |
+|       | Loss         |            |            |               |
+| CNN   | Parameters   | 843,850    | 1,204,874  | 6,545,224     |
+|       | Accuracy (%) |            |            |               |
+|       | Loss         |            |            |               |
 
 
 ## Reference
