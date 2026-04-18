@@ -18,25 +18,22 @@ Follow the steps below to set up and run the project.
 #### Install dependencies
 Install all required packages:
 ```bash
-          pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 #### Run training
 Launch training with:
 ```bash
 python main.py --model <model> --dataset <dataset>
 ```
-
 #### Configure Options
 Choose a model and dataset: </br>
 ***Models***
 * `vit` - Vision Transformer.
 * `cnn` - Convolutional Neural Network.
-
-***Datasets***
+</br>***Datasets***
 * `mnist` - MNIST dataset.
 * `cifar10` - CIFAR-10 dataset.
 * `tiny_imagenet` - Tiny ImageNet dataset.
-
 #### Output
 After training:
 * Metrics are saved to `results/`.
