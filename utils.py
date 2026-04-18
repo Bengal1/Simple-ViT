@@ -364,27 +364,31 @@ def _plot_metrics_by_mode(
 
 
 def save_metrics_to_csv(
-        metrics_record: dict[str, list[float]],
-        model_name: str,
-        dataset: str,
-        test_loss: Optional[float] = None,
-        test_acc: Optional[float] = None,
-        save_dir: str = "results",
+    metrics_record: dict[str, list[float]],
+    model_name: str,
+    dataset: str,
+    test_loss: Optional[float] = None,
+    test_acc: Optional[float] = None,
+    save_dir: str = "results",
 ) -> None:
     """
     Save training metrics to a CSV file.
 
     Args:
-        metrics_record (dict):
+        metrics_record (dict[str, list[float]]):
             Dictionary containing metric lists per epoch
             (e.g., 'train_loss', 'val_loss', 'train_acc', 'val_acc').
-        model_name (str): Model name (e.g., 'cnn', 'vit').
-        dataset (str): Dataset name (e.g., 'mnist', 'cifar10').
-        save_dir (str): Directory to save the CSV file.
-        test_loss (Optional[float]): Final test loss.
-        test_acc (Optional[float]): Final test accuracy.
+        model_name (str):
+            Model name (e.g., 'cnn', 'vit').
+        dataset (str):
+            Dataset name (e.g., 'mnist', 'cifar10').
+        test_loss (Optional[float]):
+            Final test loss.
+        test_acc (Optional[float]):
+            Final test accuracy.
+        save_dir (str):
+            Directory to save the CSV file.
     """
-
     os.makedirs(save_dir, exist_ok=True)
 
     file_path = os.path.join(save_dir, f"{model_name}_{dataset}.csv")
@@ -398,20 +402,72 @@ def save_metrics_to_csv(
         # header
         writer.writerow(["epoch"] + keys)
 
-        # rows
+        # epoch rows
         for i in range(num_epochs):
             row = [i + 1] + [metrics_record[k][i] for k in keys]
             writer.writerow(row)
 
-    # ---- Test metrics block ----
-    if test_loss is not None or test_acc is not None:
-        writer.writerow([])  # empty line
-        writer.writerow(["test_metrics"])
+        # test metrics
+        if test_loss is not None or test_acc is not None:
+            writer.writerow([])
+            writer.writerow(["test_metrics"])
 
-        if test_loss is not None:
-            writer.writerow(["test_loss", test_loss])
+            if test_loss is not None:
+                writer.writerow(["test_loss", test_loss])
 
-        if test_acc is not None:
-            writer.writerow(["test_accuracy", test_acc])
+            if test_acc is not None:
+                writer.writerow(["test_accuracy", test_acc])
 
     print(f"Saved metrics to: {file_path}")
+# def save_metrics_to_csv(
+#         metrics_record: dict[str, list[float]],
+#         model_name: str,
+#         dataset: str,
+#         test_loss: Optional[float] = None,
+#         test_acc: Optional[float] = None,
+#         save_dir: str = "results",
+# ) -> None:
+#     """
+#     Save training metrics to a CSV file.
+#
+#     Args:
+#         metrics_record (dict):
+#             Dictionary containing metric lists per epoch
+#             (e.g., 'train_loss', 'val_loss', 'train_acc', 'val_acc').
+#         model_name (str): Model name (e.g., 'cnn', 'vit').
+#         dataset (str): Dataset name (e.g., 'mnist', 'cifar10').
+#         save_dir (str): Directory to save the CSV file.
+#         test_loss (Optional[float]): Final test loss.
+#         test_acc (Optional[float]): Final test accuracy.
+#     """
+#
+#     os.makedirs(save_dir, exist_ok=True)
+#
+#     file_path = os.path.join(save_dir, f"{model_name}_{dataset}.csv")
+#
+#     keys = list(metrics_record.keys())
+#     num_epochs = len(next(iter(metrics_record.values())))
+#
+#     with open(file_path, mode="w", newline="") as f:
+#         writer = csv.writer(f)
+#
+#         # header
+#         writer.writerow(["epoch"] + keys)
+#
+#         # rows
+#         for i in range(num_epochs):
+#             row = [i + 1] + [metrics_record[k][i] for k in keys]
+#             writer.writerow(row)
+#
+#     # ---- Test metrics block ----
+#     if test_loss is not None or test_acc is not None:
+#         writer.writerow([])  # empty line
+#         writer.writerow(["test_metrics"])
+#
+#         if test_loss is not None:
+#             writer.writerow(["test_loss", test_loss])
+#
+#         if test_acc is not None:
+#             writer.writerow(["test_accuracy", test_acc])
+#
+#     print(f"Saved metrics to: {file_path}")
