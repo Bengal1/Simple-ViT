@@ -39,7 +39,6 @@ After training:
 * Metrics are saved to `results/`.
 * Training and validation plots are generated automatically.
 * GPU will be used if available.
-
 #### Notes
 * Datasets are downloaded automatically if not present.
 * Hyperparameters can be modified in `config.py`.
