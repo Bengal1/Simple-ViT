@@ -8,10 +8,22 @@ For more information about Transformer Model I recommend [Simple Transformer](ht
 - [![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/) <br/>
 
 ## Training & Execution
-### 1. Install dependencies
+### Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
+### Run training
+
+####Available options
+
+Models
+* `vit` - Vision Transformer
+* `cnn` - Convolutional Neural Network
+
+Datasets
+* `mnist`
+* `cifar10`
+* `tiny_imagenet`
 
 ## Vision Transformer
 <img align="right" width="300" alt="ViT Architecture" src="https://github.com/user-attachments/assets/41934e26-ecd0-4aec-89a3-b78fee241ebb" />
