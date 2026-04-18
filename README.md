@@ -9,37 +9,43 @@ For more information about Transformer Model I recommend [Simple Transformer](ht
 
 ## Quick Start
 Run a training experiment in one command:
-```console
-python main.py --model vit --dataset tiny_imagenet
-```
-### Install dependencies
-First, install the required Python packages:
-```bash
-pip install -r requirements.txt
-```
-### Run training
-To train a model, run:
 ```bash
 python main.py --model vit --dataset tiny_imagenet
 ```
 
-#### Available options
-Select the desired model and dataset using the command-line arguments below.
+### Training & Execution
+Follow the steps below to set up and run the project.
+#### Install dependencies
+Install all required packages:
+```bash
+pip install -r requirements.txt
+```
+#### Run training
+Launch training with:
+```bash
+python main.py --model <model> --dataset <dataset>
+```
+
+#### Configure Options
+Choose a model and dataset: </br>
 Models
 * `vit` - Vision Transformer
 * `cnn` - Convolutional Neural Network
 
 Datasets
-* `mnist` - MNIST Dataset.
-* `cifar10` - CIFAR10 Dataset
-* `tiny_imagenet` = Tiny ImageNet Dataset
+* `mnist` - MNIST dataset.
+* `cifar10` - CIFAR-10 dataset
+* `tiny_imagenet` = Tiny ImageNet dataset
 
-### Output
-
+#### Output
 After training:
-* Metrics are saved to results/
-* Training and validation plots are generated automatically
-* GPU will be used if available
+* Metrics are saved to `results/`.
+* Training and validation plots are generated automatically.
+* GPU will be used if available.
+
+#### Notes
+* Datasets are downloaded automatically if not present.
+* Hyperparameters can be modified in `config.py`.
 
 ## Vision Transformer
 <img align="right" width="300" alt="ViT Architecture" src="https://github.com/user-attachments/assets/41934e26-ecd0-4aec-89a3-b78fee241ebb" />
