@@ -57,6 +57,30 @@ def parse_args() -> argparse.Namespace:
 
     return parser.parse_args()
 
+import torch.nn as nn
+
+def count_parameters(
+    model: nn.Module,
+    trainable_only: bool = False,
+) -> int:
+    """
+    Count the number of model parameters.
+
+    Args:
+        model (nn.Module):
+            Model to inspect.
+        trainable_only (bool, optional):
+            If True, count only parameters with ``requires_grad=True``.
+
+    Returns:
+        int:
+            Total number of parameters.
+    """
+    if trainable_only:
+        return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+    return sum(p.numel() for p in model.parameters())
+
 
 # --- Main Function ---
 def main():
@@ -79,6 +103,9 @@ def main():
         img_size=img_size,
         model_name=cfg.model_name
     )
+
+    print("Total params:", count_parameters(model))
+    print("Trainable params:", count_parameters(model, trainable_only=True))
 
     # Train & Validation
     metrics_records = train_model(

@@ -1,10 +1,12 @@
 import os
 import csv
 import random
+from pathlib import Path
 from typing import Optional
 
 import numpy as np
 import torch
+import torch.nn as nn
 import matplotlib.pyplot as plt
 
 
@@ -419,55 +421,83 @@ def save_metrics_to_csv(
                 writer.writerow(["test_accuracy", test_acc])
 
     print(f"Saved metrics to: {file_path}")
-# def save_metrics_to_csv(
-#         metrics_record: dict[str, list[float]],
-#         model_name: str,
-#         dataset: str,
-#         test_loss: Optional[float] = None,
-#         test_acc: Optional[float] = None,
-#         save_dir: str = "results",
-# ) -> None:
-#     """
-#     Save training metrics to a CSV file.
-#
-#     Args:
-#         metrics_record (dict):
-#             Dictionary containing metric lists per epoch
-#             (e.g., 'train_loss', 'val_loss', 'train_acc', 'val_acc').
-#         model_name (str): Model name (e.g., 'cnn', 'vit').
-#         dataset (str): Dataset name (e.g., 'mnist', 'cifar10').
-#         save_dir (str): Directory to save the CSV file.
-#         test_loss (Optional[float]): Final test loss.
-#         test_acc (Optional[float]): Final test accuracy.
-#     """
-#
-#     os.makedirs(save_dir, exist_ok=True)
-#
-#     file_path = os.path.join(save_dir, f"{model_name}_{dataset}.csv")
-#
-#     keys = list(metrics_record.keys())
-#     num_epochs = len(next(iter(metrics_record.values())))
-#
-#     with open(file_path, mode="w", newline="") as f:
-#         writer = csv.writer(f)
-#
-#         # header
-#         writer.writerow(["epoch"] + keys)
-#
-#         # rows
-#         for i in range(num_epochs):
-#             row = [i + 1] + [metrics_record[k][i] for k in keys]
-#             writer.writerow(row)
-#
-#     # ---- Test metrics block ----
-#     if test_loss is not None or test_acc is not None:
-#         writer.writerow([])  # empty line
-#         writer.writerow(["test_metrics"])
-#
-#         if test_loss is not None:
-#             writer.writerow(["test_loss", test_loss])
-#
-#         if test_acc is not None:
-#             writer.writerow(["test_accuracy", test_acc])
-#
-#     print(f"Saved metrics to: {file_path}")
+
+
+# ============================================================
+# Model Utilities
+# ============================================================
+
+def save_model(
+    model: nn.Module,
+    file_path: str | Path,
+) -> None:
+    """
+    Save a model state dictionary to disk.
+
+    Args:
+        model (nn.Module):
+            Model to save.
+        file_path (str | Path):
+            Output path for the checkpoint file.
+    """
+    file_path = Path(file_path)
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+
+    torch.save(model.state_dict(), file_path)
+
+
+def load_model(
+    model: nn.Module,
+    file_path: str | Path,
+    device: torch.device | str = "cpu",
+) -> nn.Module:
+    """
+    Load model weights from disk into an existing model instance.
+
+    Args:
+        model (nn.Module):
+            Model instance to load weights into.
+        file_path (str | Path):
+            Path to the checkpoint file.
+        device (torch.device | str, optional):
+            Target device for loading the checkpoint.
+
+    Returns:
+        nn.Module:
+            Model with loaded weights.
+
+    Raises:
+        FileNotFoundError:
+            If the checkpoint file does not exist.
+    """
+    file_path = Path(file_path)
+    if not file_path.is_file():
+        raise FileNotFoundError(f"Checkpoint file not found: {file_path}")
+
+    state_dict = torch.load(file_path, map_location=device)
+    model.load_state_dict(state_dict)
+
+    return model
+
+
+def count_parameters(
+    model: nn.Module,
+    trainable_only: bool = False,
+) -> int:
+    """
+    Count the number of model parameters.
+
+    Args:
+        model (nn.Module):
+            Model to inspect.
+        trainable_only (bool, optional):
+            If True, count only parameters with ``requires_grad=True``.
+
+    Returns:
+        int:
+            Total number of parameters.
+    """
+    if trainable_only:
+        return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+    return sum(p.numel() for p in model.parameters())
