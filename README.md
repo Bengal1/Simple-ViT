@@ -229,14 +229,14 @@ The three datasets differ primarily in image complexity, resolution, and semanti
 
 ## Evaluation
 
-| Model | Metrics      | MNIST      | CIFAR-10   | Tiny ImageNet |
-|-------|--------------|------------|------------|---------------|
-| ViT   | Parameters   | 18,955,274 | 18,979,338 |19,175,112     |
-|       | Accuracy (%) |            |            |               |
-|       | Loss         |            |            |               |
-| CNN   | Parameters   | 843,850    | 1,204,874  | 6,545,224     |
-|       | Accuracy (%) |            |            |               |
-|       | Loss         |            |            |               |
+| Model | Metrics           | MNIST      | CIFAR-10   | Tiny ImageNet |
+|-------|-------------------|------------|------------|---------------|
+| ViT   | Parameters        | 18,955,274 | 18,979,338 |  19,175,112   |
+|       | Test Accuracy (%) |   93.27    |   62.26    |     27.84     |
+|       | Test Loss         |   0.6838   |  1.40396   |    3.6533     |
+| CNN   | Parameters        |  843,850   | 1,204,874  |   6,545,224   |
+|       | Test Accuracy (%) |   99.35    |    72.28   |     22.67     |
+|       | Test Loss         |   0.5305   |   1.1652   |    3.9591     |
 
 
 ## Reference
