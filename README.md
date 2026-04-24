@@ -16,7 +16,7 @@ Run a training experiment in one command:
 python main.py --model vit --dataset tiny_imagenet
 ```
 
-## Results
+## 📊 Results
 
 | Model | Metrics           | MNIST      | CIFAR-10   | Tiny ImageNet |
 |-------|-------------------|------------|------------|---------------|
@@ -64,7 +64,7 @@ After training:
 - Hyperparameters can be modified in `config.py`
 
 
-## Vision Transformer
+## 🧠 Vision Transformer
 <img align="right" width="300" alt="ViT Architecture" src="https://github.com/user-attachments/assets/41934e26-ecd0-4aec-89a3-b78fee241ebb" />
 
 The Vision Transformer (ViT) is a deep learning architecture that adapts the Transformer, originally developed for natural language processing, to image recognition tasks. Introduced by Dosovitskiy et al. in “An Image is Worth 16x16 Words” (2020), ViT replaces traditional convolutional feature extractors with a sequence of image patches processed by self-attention. This approach demonstrated that, with sufficient data and compute, Transformers can outperform convolutional neural networks (CNNs) in computer vision benchmarks, paving the way for a broad family of vision transformer models.<br/>
