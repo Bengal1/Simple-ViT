@@ -6,7 +6,6 @@
 
 A comparative study of Vision Transformers (ViT) and CNNs on image classification tasks of increasing complexity. The project highlights how performance shifts from CNN dominance on simple datasets to ViT advantages on more complex visual tasks.
 
----
 
 ## 🚀 Quick Start
 
