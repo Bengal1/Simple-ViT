@@ -21,7 +21,7 @@ Follow the steps below to set up and run the project.
 pip install -r requirements.txt
 ```
 
-`---`
+---
 
 ### Run training
 Launch training with:
