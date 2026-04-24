@@ -22,7 +22,6 @@ pip install -r requirements.txt
 ```
 
 ### Run training
-Launch training with:
 ```bash
 python main.py --model <model> --dataset <dataset>
 ```
