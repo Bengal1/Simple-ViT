@@ -4,9 +4,9 @@
 ![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-EE4C2C?logo=pytorch&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-This repository presents a comparative study of Vision Transformers (ViT) and Convolutional Neural Networks (CNNs) for image classification. The primary goal is to examine how model performance evolves across datasets of increasing complexity, highlighting the transition from CNN dominance on simpler tasks to ViT advantages on more challenging visual data.
+A comparative study of Vision Transformers (ViT) and Convolutional Neural Networks (CNNs) for image classification. This project explores how model performance evolves across datasets of increasing complexity, highlighting the transition from CNN dominance on simple tasks to ViT advantages on more challenging visual data.
 
-In addition to the comparison, the project also serves as a showcase of the [*Vision Transformer (ViT)*](https://en.wikipedia.org/wiki/Vision_transformer), providing insight into its core architectural ideas, training dynamics, and its ability to capture global relationships through self-attention. The repository offers a practical view of both the strengths and limitations of ViTs, and how they differ from traditional convolutional approaches.
+This repository also showcases the [*Vision Transformer (ViT)*](https://en.wikipedia.org/wiki/Vision_transformer), providing insight into its core architectural ideas, training dynamics, and its ability to capture global relationships through self-attention. It offers a practical view of the strengths and limitations of ViTs, and how they differ from traditional convolutional approaches.
 
 
 ## 🚀 Quick Start
