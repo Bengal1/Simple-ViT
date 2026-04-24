@@ -15,6 +15,57 @@ Run a training experiment in one command:
 python main.py --model vit --dataset tiny_imagenet
 ```
 
+## Results (ViT vs CNN)
+
+| Model | Metrics           | MNIST      | CIFAR-10   | Tiny ImageNet |
+|-------|-------------------|------------|------------|---------------|
+| ViT   | Parameters        | 18,955,274 | 18,979,338 |  19,175,112   |
+|       | Test Accuracy (%) |   93.27    |   62.26    |     27.84     |
+|       | Test Loss         |   0.6838   |  1.40396   |    3.6533     |
+| CNN   | Parameters        |  843,850   | 1,204,874  |   6,545,224   |
+|       | Test Accuracy (%) |   99.35    |    72.28   |     22.67     |
+|       | Test Loss         |   0.5305   |   1.1652   |    3.9591     |
+
+
+## Training & Execution
+Follow the steps below to set up and run the project.
+
+### Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### Run training
+```bash
+python main.py --model <model> --dataset <dataset>
+```
+
+### Configuration
+Choose a model and dataset:
+
+**Models:**
+- `vit` — Vision Transformer
+- `cnn` — Convolutional Neural Network
+
+**Datasets:**
+- `mnist` — MNIST dataset
+- `cifar10` — CIFAR-10 dataset
+- `tiny_imagenet` — Tiny ImageNet dataset
+
+### Output
+After training:
+- Metrics are saved to `results/`
+- Training and validation plots are generated automatically
+- GPU is used if available
+
+### Notes
+- Datasets are downloaded automatically if not present
+- Hyperparameters can be modified in `config.py`
+
+
+---
+
+
 This repository presents a showcase of the [*Vision Tranformer (ViT)*](https://en.wikipedia.org/wiki/Vision_transformer), highlighting its core architectural ideas and training dynamics. ViTs mark a turning point in computer vision, leveraging self-attention to capture global relationships in images without relying on convolutional filters. The project provides an accessible yet thorough presentation of how ViTs operate, their advantages and limitations, and how they achieve state-of-the-art results on large-scale image recognition tasks. In addition, we include a comparison with Convolutional Neural Networks (CNNs) to illustrate their differences and relative strengths.
 
 For more information about Transformer Model I recommend [Simple Transformer](https://github.com/Bengal1/Simple-Transformer).
