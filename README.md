@@ -29,7 +29,7 @@ Launch training with:
 python main.py --model <model> --dataset <dataset>
 ```
 
-`---`
+---
 
 ### Configuration
 Choose a model and dataset:
@@ -43,7 +43,7 @@ Choose a model and dataset:
 - `cifar10` — CIFAR-10 dataset
 - `tiny_imagenet` — Tiny ImageNet dataset
 
-`---`
+---
 
 ### Output
 After training:
@@ -51,7 +51,7 @@ After training:
 - Training and validation plots are generated automatically
 - GPU is used if available
 
-`---`
+---
 
 ### Notes
 - Datasets are downloaded automatically if not present
