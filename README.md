@@ -4,8 +4,7 @@
 ![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-EE4C2C?logo=pytorch&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-A comparative study of Vision Transformers (ViT) and CNNs on image classification tasks of increasing complexity. The project highlights how performance shifts from CNN dominance on simple datasets to ViT advantages on more complex visual tasks.
-
+A structured comparison between Vision Transformers (ViT) and Convolutional Neural Networks (CNNs) on image classification tasks of increasing complexity. This project evaluates performance across MNIST, CIFAR-10, and Tiny ImageNet, highlighting how the balance shifts from CNN dominance on simpler datasets to ViT advantages on more complex ones. The CNN baseline is implemented in a companion repository: [SimpleCNN](https://github.com/Bengal1/Simple-CNN).
 
 ## 🚀 Quick Start
 
