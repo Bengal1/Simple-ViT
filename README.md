@@ -28,7 +28,7 @@ python main.py --model vit --dataset tiny_imagenet
 |       | Test Loss         |   0.5305   |   1.1652   |    3.9591     |
 
 
-## Training & Execution
+## ⚙️ Training & Execution
 Follow the steps below to set up and run the project.
 
 ### Install dependencies
