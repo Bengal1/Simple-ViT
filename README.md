@@ -71,8 +71,6 @@ The Vision Transformer (ViT) is a deep learning architecture that adapts the Tra
 
 In practice, ViT transforms an image into a sequence of smaller patches, which are then processed using the same self-attention mechanism that made Transformers successful in language tasks. By modeling relationships between patches directly, ViT captures both local details and long-range dependencies within an image, offering a flexible alternative to the strictly hierarchical representations of CNNs. Positional information is incorporated to maintain awareness of spatial structure, and a dedicated representation is used for classification. This design shifts the focus from handcrafted inductive biases toward a more data-driven approach, where the model learns to interpret visual structure primarily from large-scale training data.
 
-For more information about Transformer Model I recommend [Simple Transformer](https://github.com/Bengal1/Simple-Transformer).
-
 ### Patch Embedding
 <img align="right" width="400" alt="patch_embedding_data" src="https://github.com/user-attachments/assets/49aa0282-b19e-4fab-a494-de5e708b8478" />
 
