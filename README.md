@@ -29,23 +29,23 @@ python main.py --model <model> --dataset <dataset>
 ### Configuration
 Choose a model and dataset:
 **Models:**
-* `vit` — Vision Transformer
-* `cnn` — Convolutional Neural Network
+- `vit` — Vision Transformer
+- `cnn` — Convolutional Neural Network
 
 **Datasets:**
-* `mnist` — MNIST dataset
-* `cifar10` — CIFAR-10 dataset
-* `tiny_imagenet` — Tiny ImageNet dataset
+- `mnist` — MNIST dataset
+- `cifar10` — CIFAR-10 dataset
+- `tiny_imagenet` — Tiny ImageNet dataset
 
 ### Output
 After training:
-* Metrics are saved to `results/`
-* Training and validation plots are generated automatically
-* GPU is used if available
+- Metrics are saved to `results/`
+- Training and validation plots are generated automatically
+- GPU is used if available
 
 ### Notes
-* Datasets are downloaded automatically if not present
-* Hyperparameters can be modified in `config.py`
+- Datasets are downloaded automatically if not present
+- Hyperparameters can be modified in `config.py`
 
 ## Vision Transformer
 <img align="right" width="300" alt="ViT Architecture" src="https://github.com/user-attachments/assets/41934e26-ecd0-4aec-89a3-b78fee241ebb" />
