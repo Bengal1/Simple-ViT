@@ -68,66 +68,6 @@ This repository presents a showcase of the [*Vision Tranformer (ViT)*](https://e
 
 For more information about Transformer Model I recommend [Simple Transformer](https://github.com/Bengal1/Simple-Transformer).
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python&logoColor=white)
-![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-EE4C2C?logo=pytorch&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green)
-
-## Quick Start
-Run a training experiment in one command:
-```bash
-python main.py --model vit --dataset tiny_imagenet
-
-```
-
-## Training & Execution
-Follow the steps below to set up and run the project.
-
-### Install dependencies
-```bash
-pip install -r requirements.txt
-```
-
-### Run training
-```bash
-python main.py --model <model> --dataset <dataset>
-```
-
-### Configuration
-Choose a model and dataset:
-
-**Models:**
-- `vit` — Vision Transformer
-- `cnn` — Convolutional Neural Network
-
-**Datasets:**
-- `mnist` — MNIST dataset
-- `cifar10` — CIFAR-10 dataset
-- `tiny_imagenet` — Tiny ImageNet dataset
-
-### Output
-After training:
-- Metrics are saved to `results/`
-- Training and validation plots are generated automatically
-- GPU is used if available
-
-### Notes
-- Datasets are downloaded automatically if not present
-- Hyperparameters can be modified in `config.py`
-
-
-## Evaluation
-
-| Model | Metrics           | MNIST      | CIFAR-10   | Tiny ImageNet |
-|-------|-------------------|------------|------------|---------------|
-| ViT   | Parameters        | 18,955,274 | 18,979,338 |  19,175,112   |
-|       | Test Accuracy (%) |   93.27    |   62.26    |     27.84     |
-|       | Test Loss         |   0.6838   |  1.40396   |    3.6533     |
-| CNN   | Parameters        |  843,850   | 1,204,874  |   6,545,224   |
-|       | Test Accuracy (%) |   99.35    |    72.28   |     22.67     |
-|       | Test Loss         |   0.5305   |   1.1652   |    3.9591     |
-
-
-
 ## Vision Transformer
 <img align="right" width="300" alt="ViT Architecture" src="https://github.com/user-attachments/assets/41934e26-ecd0-4aec-89a3-b78fee241ebb" />
 
