@@ -106,7 +106,7 @@ In terms of architecture, CNNs build hierarchical representations through stacke
 
 This difference leads to distinct trade-offs: CNNs benefit from strong inductive biases, making them data-efficient and effective on smaller datasets, while ViTs rely more on large-scale data to learn spatial relationships. As a result, CNNs tend to perform well in data-limited settings, whereas ViTs scale more effectively with increased data and model size, often achieving superior performance on more complex tasks.
 
-## Data
+## 🗂️ Data
 The experiments are conducted on three standard image classification datasets of increasing complexity: MNIST, CIFAR-10, and Tiny ImageNet. MNIST consists of simple grayscale handwritten digits, CIFAR-10 introduces low-resolution RGB images of natural objects, and Tiny ImageNet provides higher-resolution images with a large number of classes and greater visual diversity. Together, these datasets enable a progressive evaluation of model performance from simple to more complex visual recognition tasks.
 
 ### MNIST
@@ -124,7 +124,7 @@ Tiny ImageNet is a scaled-down version of ImageNet, containing 64×64 RGB images
 
 The three datasets differ primarily in image complexity, resolution, and semantic diversity. MNIST contains simple, centered grayscale digits with minimal variation, making it an easy task dominated by local features. CIFAR-10 introduces color, background noise, and object variability at a small resolution, increasing the difficulty and requiring better feature extraction. Tiny ImageNet further increases resolution and the number of classes, adding significant intra-class variation and global structure, which makes the task more challenging and better suited for models that capture broader contextual relationships.<br/>
 
-## Reference
+## 📚 Reference
 [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/abs/1810.04805?utm_source=chatgpt.com)
 
 [An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929?utm_source=chatgpt.com)
