@@ -85,7 +85,7 @@ The [CLS] token is a learnable embedding prepended to the sequence of patch embe
 Since Transformers process input sequences without any inherent notion of order, it is necessary to provide information about the position of each patch in the image. In the Vision Transformer, this is achieved through positional encoding, which adds a vector to each patch embedding to indicate its location within the image. Unlike the fixed sinusoidal encodings used in the original Transformer for NLP, ViT often uses learnable positional embeddings, which are initialized randomly and updated during training. These learnable embeddings allow the model to adaptively encode spatial relationships between patches, helping the self-attention mechanism capture both local and global structure in the image.
 
 ### Transformer Encoder
-<img align="right" width="300" alt="Encoder" src="https://github.com/user-attachments/assets/ce78de70-696e-4968-bf7d-345d23c2bbc1" />
+<img align="right" width="280" alt="Encoder" src="https://github.com/user-attachments/assets/ce78de70-696e-4968-bf7d-345d23c2bbc1" />
 
 The Vision Transformer (ViT) is built on the Transformer encoder architecture, which processes images as a sequence of patch embeddings. Each encoder block combines multi-head self-attention and a feed-forward network, with normalization and residual connections to stabilize training.
 
