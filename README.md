@@ -85,7 +85,7 @@ The [CLS] token is a learnable embedding prepended to the sequence of patch embe
 Since Transformers process input sequences without any inherent notion of order, it is necessary to provide information about the position of each patch in the image. In the Vision Transformer, this is achieved through positional encoding, which adds a vector to each patch embedding to indicate its location within the image. Unlike the fixed sinusoidal encodings used in the original Transformer for NLP, ViT often uses learnable positional embeddings, which are initialized randomly and updated during training. These learnable embeddings allow the model to adaptively encode spatial relationships between patches, helping the self-attention mechanism capture both local and global structure in the image.
 
 ### Transformer Encoder
-<img align="right" width="340" alt="Encoder" src="https://github.com/user-attachments/assets/ce78de70-696e-4968-bf7d-345d23c2bbc1" />
+<img align="right" width="320" alt="Encoder" src="https://github.com/user-attachments/assets/ce78de70-696e-4968-bf7d-345d23c2bbc1" />
 
 The Vision Transformer (ViT) is built on the Transformer encoder architecture, which processes images as a sequence of patch embeddings. Each encoder block combines multi-head self-attention and a feed-forward network, with normalization and residual connections to stabilize training.
 
@@ -96,79 +96,6 @@ By stacking multiple encoder blocks, ViT builds increasingly rich representation
 For a deeper explanation of the Transformer architecture, see:
 [Simple Transformer](https://github.com/Bengal1/Simple-Transformer)
 
-
-
-
-
----
-
-
-### Transformer Encoder
-<img align="right" width="340" alt="Encoder" src="https://github.com/user-attachments/assets/ce78de70-696e-4968-bf7d-345d23c2bbc1" />
-
-The Transformer encoder is a fundamental component of the Vision Transformer (ViT), responsible for processing the sequence of patch embeddings and capturing relationships between them. Each encoder block contains a multi-head self-attention layer, which allows the model to weigh the importance of each patch relative to all others, followed by a feed-forward network (MLP) that transforms the representations. Residual connections and layer normalization are applied throughout to stabilize training and improve gradient flow. By stacking multiple encoder blocks, the Transformer encoder can build complex, high-level representations of the image, integrating both local and global information for downstream tasks such as classification.
-
-#### Attention
-Attention is a core mechanism in transformers that allows the model to selectively focus on the most relevant parts of an input sequence when making predictions. Instead of processing information uniformly, attention assigns weights to different elements, enabling the network to capture both local and long-range dependencies. In the context of Vision Transformers (ViTs), self-attention is applied directly to image patches, treating them as a sequence of tokens similar to words in natural language processing. This mechanism allows each patch to attend to every other patch, capturing global spatial relationships across the image. Unlike convolutional operations, which have a fixed receptive field, self-attention provides a flexible and adaptive way of modeling dependencies, making it particularly powerful for understanding complex visual structures. In Vision Transformer we apply Multi-Head Self Attention
-Given an input sequence of tokens (patch embeddings) $`X∈ℝ^{N×D}`$ where $`N`$ is the number of patches and $`D`$ is the embedding dimension, self-attention computes interactions between all tokens as follows:
-1. **Linear projections for queries, keys, and values:**
-   
-$$
-  X·W_{Q} = Q &ensp; ; &ensp; X·W_{K} = K &ensp; ; &ensp; X·W_{V} = V
-$$
-
-where $`W_{Q}, W_{K}, W_{V} ∈ℝ^{D×d}`$ are learnable weight matrices, and $`d`$ is the attention head dimension.<br/>
-
-2. **Scaled dot-product attention:**
-
-```math
-Attention(Q,K,V) = Softmax \Bigg(\frac{Q K^{T}}{\sqrt{d}} \Bigg)·V
-```
-* $`Q K^{T}∈ℝ^{N×N}`$ computes similarity between every pair of tokens.
-* $`\sqrt{d}`$ is a scaling factor to stabilize gradients.
-* The softmax converts similarities into attention weights.
-  
-3. **Multi-head attention (concatenation of the heads):**
-```math
-MultiHead-Attention = Concat(head_1,...,head_h)·W_{O}
-```
-* Multiple attention heads allow the model to capture different types of interactions.
-* $`W_{O} ∈ℝ^{hd×D}`$ projects concatenated outputs back to the embedding dimension.
-
-For more details information about *Attention Mechanism* see [Simple Transformer](https://github.com/Bengal1/Simple-Transformer).
-
-#### Feed-Forward Network
-<img align="right" width="400" alt="feedforward_vit" src="https://github.com/user-attachments/assets/e7862e3b-9039-46bb-a428-1bcebbd8bad0" />
-
-The *Feed-Forward Network* (FFN) in the Vision Transformer (ViT) is a crucial component of each encoder block. It consists of two fully connected layers with a non-linear activation function, often GELU (Gaussian Error Linear Unit), applied between them. Unlike self-attention, which enables tokens to exchange information globally, the FFN operates on each token independently, refining and transforming its representation in a higher-dimensional space. This allows the model to capture more complex, non-linear relationships within the data. In ViT, the FFN complements self-attention by enhancing the expressive power of the patch embeddings, ensuring that both global context and token-wise transformations contribute to the learned image representation.
-
-```math
-y = f(W_{1}·x+b_{1})·W_{2} + b_{2}
-```
-Where:
-* ***$`x`$*** is the input vector.
-* ***$`W_i`$*** is the weight matrix of layer *i*.
-* ***$`b_i`$*** is the bias vector of layer *i*.
-* ***$`f`$*** is the activation function - GELU.
-
-
-#### Layer Normalization
-<img align="right" width="250"  src="https://github.com/user-attachments/assets/a1434118-a1d7-4a40-a35e-14b922ee0db4">
-
-*Layer Normalization* is used to stabilize and accelerate training by normalizing the inputs to each layer.<br/>
-For each input vector (for each token in a sequence), subtract the mean and divide by the standard deviation of the vector's values. This centers the data around 0 with unit variance:
-```math
-\hat{x} = \frac{(x - μ)}{\sqrt{σ^{2} + ε}}
-```
-where *μ* is the mean and *σ* is the standard deviation of the input vector.<br/><br/>
-Then apply scaling (gamma) and shifting (beta) parameters (trainable):
-
-* *γ* (scale): A parameter to scale the normalized output.<br/>
-* *β* (shift): A parameter to shift the normalized output.<br/>
-
-```math
-⇨  y = γ·\hat{x} + β
-```
 
 ## ViT vs CNN
 Convolutional Neural Networks (CNNs), first demonstrated in LeNet-5 (LeCun et al., 1998) and popularized by AlexNet (2012), dominated computer vision for decades. They rely on convolutional filters applied to local receptive fields, pooling for downsampling, and fully connected layers for classification. This design encodes strong inductive biases: locality (features are learned from neighboring pixels) and translation equivariance (patterns can be recognized regardless of position). Variants like VGG, ResNet, and DenseNet advanced CNNs by increasing depth and introducing innovations such as residual connections.<br/>
