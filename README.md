@@ -48,6 +48,20 @@ After training:
 - Datasets are downloaded automatically if not present
 - Hyperparameters can be modified in `config.py`
 
+
+## Evaluation
+
+| Model | Metrics           | MNIST      | CIFAR-10   | Tiny ImageNet |
+|-------|-------------------|------------|------------|---------------|
+| ViT   | Parameters        | 18,955,274 | 18,979,338 |  19,175,112   |
+|       | Test Accuracy (%) |   93.27    |   62.26    |     27.84     |
+|       | Test Loss         |   0.6838   |  1.40396   |    3.6533     |
+| CNN   | Parameters        |  843,850   | 1,204,874  |   6,545,224   |
+|       | Test Accuracy (%) |   99.35    |    72.28   |     22.67     |
+|       | Test Loss         |   0.5305   |   1.1652   |    3.9591     |
+
+
+
 ## Vision Transformer
 <img align="right" width="300" alt="ViT Architecture" src="https://github.com/user-attachments/assets/41934e26-ecd0-4aec-89a3-b78fee241ebb" />
 
@@ -230,18 +244,6 @@ CIFAR-10 is a dataset of 32×32 RGB images across 10 object classes such as anim
 Tiny ImageNet is a scaled-down version of ImageNet, containing 64×64 RGB images across 200 classes, with 100,000 training samples and 10,000 validation samples. It introduces higher resolution, greater class diversity, and increased semantic complexity compared to CIFAR-10. This makes it a more challenging dataset where models that capture global context, such as Vision Transformers, begin to show advantages.<br/><br/>
 
 The three datasets differ primarily in image complexity, resolution, and semantic diversity. MNIST contains simple, centered grayscale digits with minimal variation, making it an easy task dominated by local features. CIFAR-10 introduces color, background noise, and object variability at a small resolution, increasing the difficulty and requiring better feature extraction. Tiny ImageNet further increases resolution and the number of classes, adding significant intra-class variation and global structure, which makes the task more challenging and better suited for models that capture broader contextual relationships.<br/>
-
-## Evaluation
-
-| Model | Metrics           | MNIST      | CIFAR-10   | Tiny ImageNet |
-|-------|-------------------|------------|------------|---------------|
-| ViT   | Parameters        | 18,955,274 | 18,979,338 |  19,175,112   |
-|       | Test Accuracy (%) |   93.27    |   62.26    |     27.84     |
-|       | Test Loss         |   0.6838   |  1.40396   |    3.6533     |
-| CNN   | Parameters        |  843,850   | 1,204,874  |   6,545,224   |
-|       | Test Accuracy (%) |   99.35    |    72.28   |     22.67     |
-|       | Test Loss         |   0.5305   |   1.1652   |    3.9591     |
-
 
 ## Reference
 [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/abs/1810.04805?utm_source=chatgpt.com)
