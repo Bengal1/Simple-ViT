@@ -106,11 +106,6 @@ In terms of architecture, CNNs build hierarchical representations through stacke
 
 This difference leads to distinct trade-offs: CNNs benefit from strong inductive biases, making them data-efficient and effective on smaller datasets, while ViTs rely more on large-scale data to learn spatial relationships. As a result, CNNs tend to perform well in data-limited settings, whereas ViTs scale more effectively with increased data and model size, often achieving superior performance on more complex tasks.
 
-
-
-In architecture, CNNs build hierarchical representations through stacked convolutions, gradually expanding their receptive fields and excelling at capturing local patterns such as edges and textures. ViTs, on the other hand, operate directly in patch-embedding space, where self-attention provides a global receptive field from the very first layer. This fundamental difference means CNNs have built-in biases for vision, making them data-efficient and effective on smaller datasets, while ViTs rely more heavily on large-scale data to learn spatial relationships that CNNs encode naturally. Consequently, CNNs tend to be more efficient and perform strongly when training data is limited, benefiting from their inductive biases, whereas ViTs scale more effectively with increased model size and dataset availability, often surpassing CNNs in accuracy and adaptability. Additionally, CNNs naturally form structured feature hierarchies that emphasize local detail and are relatively easy to interpret, making them well-suited for tasks like object detection or medical imaging. ViTs, by modeling long-range dependencies from the start, offer greater flexibility in capturing global context, which can lead to stronger performance in complex recognition challenges and transfer learning scenarios.
-
-
 ## Data
 The experiments are conducted on three standard image classification datasets of increasing complexity: MNIST, CIFAR-10, and Tiny ImageNet. MNIST consists of simple grayscale handwritten digits, CIFAR-10 introduces low-resolution RGB images of natural objects, and Tiny ImageNet provides higher-resolution images with a large number of classes and greater visual diversity. Together, these datasets enable a progressive evaluation of model performance from simple to more complex visual recognition tasks.<br/>
 
