@@ -87,6 +87,25 @@ Since Transformers process input sequences without any inherent notion of order,
 ### Transformer Encoder
 <img align="right" width="340" alt="Encoder" src="https://github.com/user-attachments/assets/ce78de70-696e-4968-bf7d-345d23c2bbc1" />
 
+The Vision Transformer (ViT) is built on the Transformer encoder architecture, which processes images as a sequence of patch embeddings. Each encoder block combines multi-head self-attention and a feed-forward network, with normalization and residual connections to stabilize training.
+
+The key component is self-attention, which allows each image patch to interact with every other patch. Unlike convolutional layers that focus on local neighborhoods, self-attention captures global relationships across the entire image. This enables the model to learn long-range dependencies and complex visual patterns more effectively.
+
+By stacking multiple encoder blocks, ViT builds increasingly rich representations of the input, integrating both local details and global context for tasks such as image classification.
+
+For a deeper explanation of the Transformer architecture, see:
+[Simple Transformer](https://github.com/Bengal1/Simple-Transformer)
+
+
+
+
+
+---
+
+
+### Transformer Encoder
+<img align="right" width="340" alt="Encoder" src="https://github.com/user-attachments/assets/ce78de70-696e-4968-bf7d-345d23c2bbc1" />
+
 The Transformer encoder is a fundamental component of the Vision Transformer (ViT), responsible for processing the sequence of patch embeddings and capturing relationships between them. Each encoder block contains a multi-head self-attention layer, which allows the model to weigh the importance of each patch relative to all others, followed by a feed-forward network (MLP) that transforms the representations. Residual connections and layer normalization are applied throughout to stabilize training and improve gradient flow. By stacking multiple encoder blocks, the Transformer encoder can build complex, high-level representations of the image, integrating both local and global information for downstream tasks such as classification.
 
 #### Attention
