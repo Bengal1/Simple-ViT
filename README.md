@@ -20,6 +20,7 @@ Follow the steps below to set up and run the project.
 ```bash
 pip install -r requirements.txt
 ```
+
 `---`
 
 ### Run training
@@ -27,6 +28,7 @@ Launch training with:
 ```bash
 python main.py --model <model> --dataset <dataset>
 ```
+
 `---`
 
 ### Configuration
@@ -40,6 +42,7 @@ Choose a model and dataset:
 - `mnist` — MNIST dataset
 - `cifar10` — CIFAR-10 dataset
 - `tiny_imagenet` — Tiny ImageNet dataset
+
 `---`
 
 ### Output
@@ -47,6 +50,7 @@ After training:
 - Metrics are saved to `results/`
 - Training and validation plots are generated automatically
 - GPU is used if available
+
 `---`
 
 ### Notes
