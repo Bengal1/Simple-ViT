@@ -64,20 +64,13 @@ After training:
 - Hyperparameters can be modified in `config.py`
 
 
----
-
-
-This repository presents a showcase of the [*Vision Tranformer (ViT)*](https://en.wikipedia.org/wiki/Vision_transformer), highlighting its core architectural ideas and training dynamics. ViTs mark a turning point in computer vision, leveraging self-attention to capture global relationships in images without relying on convolutional filters. The project provides an accessible yet thorough presentation of how ViTs operate, their advantages and limitations, and how they achieve state-of-the-art results on large-scale image recognition tasks. In addition, we include a comparison with Convolutional Neural Networks (CNNs) to illustrate their differences and relative strengths.
-
-For more information about Transformer Model I recommend [Simple Transformer](https://github.com/Bengal1/Simple-Transformer).
-
 ## Vision Transformer
 <img align="right" width="300" alt="ViT Architecture" src="https://github.com/user-attachments/assets/41934e26-ecd0-4aec-89a3-b78fee241ebb" />
 
 The Vision Transformer (ViT) is a deep learning architecture that adapts the Transformer, originally developed for natural language processing, to image recognition tasks. Introduced by Dosovitskiy et al. in “An Image is Worth 16x16 Words” (2020), ViT replaces traditional convolutional feature extractors with a sequence of image patches processed by self-attention. This approach demonstrated that, with sufficient data and compute, Transformers can outperform convolutional neural networks (CNNs) in computer vision benchmarks, paving the way for a broad family of vision transformer models.<br/>
 
 In practice, ViT transforms an image into a sequence of smaller patches, which are then processed using the same self-attention mechanism that made Transformers successful in language tasks. By modeling relationships between patches directly, ViT captures both local details and long-range dependencies within an image, offering a flexible alternative to the strictly hierarchical representations of CNNs. Positional information is incorporated to maintain awareness of spatial structure, and a dedicated representation is used for classification. This design shifts the focus from handcrafted inductive biases toward a more data-driven approach, where the model learns to interpret visual structure primarily from large-scale training data.
-
+For more information about Transformer Model I recommend [Simple Transformer](https://github.com/Bengal1/Simple-Transformer).
 ### Patch Embedding
 <img align="right" width="400" alt="patch_embedding_data" src="https://github.com/user-attachments/assets/49aa0282-b19e-4fab-a494-de5e708b8478" />
 
