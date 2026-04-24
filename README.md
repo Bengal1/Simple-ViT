@@ -97,7 +97,7 @@ For a deeper explanation of the Transformer architecture, see:
 
 ## ViT vs CNN
 Convolutional Neural Networks (CNNs), introduced with LeNet-5 and popularized by AlexNet, have long been the dominant approach in computer vision. They use convolutional filters over local receptive fields, along with pooling and fully connected layers, to build hierarchical representations. This design encodes strong inductive biases such as locality and translation equivariance, making CNNs highly effective and data-efficient for many visual tasks.  
-To learn more, see [Simple CNN Guide](https://github.com/Bengal1/Simple-CNN-Guide).
+To learn more about CNNs, see [Simple CNN Guide](https://github.com/Bengal1/Simple-CNN-Guide).
 
 The Vision Transformer (ViT), introduced by Dosovitskiy et al. (2020), replaces convolutions with a Transformer encoder. It represents an image as a sequence of fixed-size patches, which are embedded and processed using multi-head self-attention. This allows the model to capture global relationships between all patches directly, with a [CLS] token used to aggregate information for classification.
 
