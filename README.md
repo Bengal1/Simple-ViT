@@ -28,6 +28,7 @@ python main.py --model <model> --dataset <dataset>
 ```
 ### Configuration
 Choose a model and dataset:
+
 **Models:**
 - `vit` — Vision Transformer
 - `cnn` — Convolutional Neural Network
