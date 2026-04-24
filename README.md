@@ -16,7 +16,7 @@ Run a training experiment in one command:
 python main.py --model vit --dataset tiny_imagenet
 ```
 
-## Results (ViT vs CNN)
+## Results
 
 | Model | Metrics           | MNIST      | CIFAR-10   | Tiny ImageNet |
 |-------|-------------------|------------|------------|---------------|
