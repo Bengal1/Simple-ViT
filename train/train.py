@@ -1,9 +1,12 @@
+import os
 from typing import Sequence
 
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
+from config import config as cfg
+from utils import save_checkpoint
 
 # ============================================================
 # Public API
@@ -122,6 +125,7 @@ def train_model(
         "train_acc": [],
         "val_acc": [],
     }
+    best_val_loss = float("inf")
 
     for epoch in range(1, num_epochs + 1):
         train_acc, train_loss = _train_epoch(
@@ -143,6 +147,10 @@ def train_model(
             criterion=loss_fn,
             device=device,
         )
+
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            save_checkpoint(model, cfg.best_checkpoint_path)
 
         stats["val_loss"].append(val_loss)
         stats["val_acc"].append(val_acc)

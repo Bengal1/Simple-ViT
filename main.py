@@ -24,7 +24,7 @@ import argparse
 
 from config import config as cfg
 from loaders import get_dataloaders
-from utils import set_seed, plot_metrics, save_metrics_to_csv
+from utils import set_seed, plot_metrics, save_metrics_to_csv, load_checkpoint
 from train import train_model, evaluate_model, setup_model_for_training
 
 
@@ -101,6 +101,8 @@ def main(args: argparse.Namespace | None = None) -> None:
         device=device,
         num_epochs=cfg.training.epochs
     )
+
+    load_checkpoint(model, cfg.best_checkpoint_path)
 
     test_accuracy, test_loss = evaluate_model(
         model=model,

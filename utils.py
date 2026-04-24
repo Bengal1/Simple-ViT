@@ -16,8 +16,8 @@ __all__ = [
     "set_seed",
     "plot_metrics",
     "save_metrics_to_csv",
-    "save_model",
-    "load_model",
+    "save_checkpoint",
+    "load_checkpoint",
     "count_parameters"
 ]
 
@@ -430,57 +430,100 @@ def save_metrics_to_csv(
 # Model Utilities
 # ============================================================
 
-def save_model(
+def save_checkpoint(
     model: nn.Module,
     file_path: str | Path,
+    optimizer: torch.optim.Optimizer | None = None,
+    epoch: int | None = None,
+    val_loss: float | None = None,
+    full: bool = False,
 ) -> None:
     """
-    Save a model state dictionary to disk.
+    Save a model checkpoint to disk.
+
+    Supports two modes:
+    - Quick save (default): saves only the model state_dict.
+    - Full save: saves model, optimizer, epoch, and validation loss.
 
     Args:
         model (nn.Module):
             Model to save.
         file_path (str | Path):
             Output path for the checkpoint file.
+        optimizer (torch.optim.Optimizer, optional):
+            Optimizer to save (required if full=True).
+        epoch (int, optional):
+            Current training epoch (used if full=True).
+        val_loss (float, optional):
+            Validation loss at save time (used if full=True).
+        full (bool, optional):
+            If True, saves full training checkpoint. Otherwise saves only model.
     """
     file_path = Path(file_path)
     file_path.parent.mkdir(parents=True, exist_ok=True)
 
-    torch.save(model.state_dict(), file_path)
+    if full:
+        if optimizer is None:
+            raise ValueError("optimizer must be provided when full=True")
+
+        torch.save({
+            "model": model.state_dict(),
+            "optimizer": optimizer.state_dict(),
+            "epoch": epoch,
+            "val_loss": val_loss,
+        }, file_path)
+    else:
+        torch.save(model.state_dict(), file_path)
 
 
-def load_model(
+def load_checkpoint(
     model: nn.Module,
     file_path: str | Path,
-    device: torch.device | str = "cpu",
-) -> nn.Module:
+    optimizer: torch.optim.Optimizer | None = None,
+    full: bool = False,
+    map_location: str | torch.device | None = None,
+) -> dict | None:
     """
-    Load model weights from disk into an existing model instance.
+    Load a checkpoint from disk.
+
+    Loads model weights in all cases. If `full=True`, also restores the optimizer
+    state and returns training metadata.
 
     Args:
         model (nn.Module):
-            Model instance to load weights into.
+            Model to load weights into.
         file_path (str | Path):
             Path to the checkpoint file.
-        device (torch.device | str, optional):
-            Target device for loading the checkpoint.
+        optimizer (torch.optim.Optimizer, optional):
+            Optimizer to restore state into (required if full=True).
+        full (bool, optional):
+            If True, expects a full checkpoint (model + optimizer + metadata).
+        map_location (str | torch.device, optional):
+            Device mapping for loading.
 
     Returns:
-        nn.Module:
-            Model with loaded weights.
-
-    Raises:
-        FileNotFoundError:
-            If the checkpoint file does not exist.
+        dict | None:
+            Metadata dictionary (e.g., {"epoch", "val_loss"}) if available,
+            otherwise None.
     """
     file_path = Path(file_path)
-    if not file_path.is_file():
-        raise FileNotFoundError(f"Checkpoint file not found: {file_path}")
+    checkpoint = torch.load(file_path, map_location=map_location)
 
-    state_dict = torch.load(file_path, map_location=device)
-    model.load_state_dict(state_dict)
+    if full:
+        if optimizer is None:
+            raise ValueError("optimizer must be provided when full=True")
 
-    return model
+        model.load_state_dict(checkpoint["model"])
+        optimizer.load_state_dict(checkpoint["optimizer"])
+
+        return {
+            "epoch": checkpoint.get("epoch"),
+            "val_loss": checkpoint.get("val_loss"),
+        }
+
+    else:
+        model.load_state_dict(checkpoint)
+        return None
 
 
 def count_parameters(

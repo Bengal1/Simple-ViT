@@ -20,6 +20,7 @@ Components:
 """
 __author__ = "Bengal1"
 
+from pathlib import Path
 from dataclasses import dataclass, field
 
 
@@ -106,6 +107,10 @@ class Config:
     model_name: str = "vit"   # {"vit", "cnn"}
     dataset: str = "mnist"    # {"mnist", "cifar10", "tiny_imagenet"}
 
+    # --- Paths ---
+    checkpoint_dir: str = "checkpoints"
+    run_name: str = "default"
+
     # --- Model configs ---
     vit: ViTConfig = field(default_factory=ViTConfig)
     cnn: CNNConfig = field(default_factory=CNNConfig)
@@ -113,6 +118,27 @@ class Config:
     # --- Training & optimization ---
     training: TrainingConfig = field(default_factory=TrainingConfig)
     optim: OptimConfig = field(default_factory=OptimConfig)
+
+    @property
+    def checkpoint_path(self) -> Path:
+        """
+        Path to the default checkpoint file for the current run.
+        """
+        return Path(self.checkpoint_dir) / f"{self.model_name}_{self.dataset}_{self.run_name}.pth"
+
+    @property
+    def best_checkpoint_path(self) -> Path:
+        """
+        Path to the best-performing checkpoint (based on validation).
+        """
+        return Path(self.checkpoint_dir) / f"{self.model_name}_{self.dataset}_{self.run_name}_best.pth"
+
+    @property
+    def last_checkpoint_path(self) -> Path:
+        """
+        Path to the last checkpoint (latest training state).
+        """
+        return Path(self.checkpoint_dir) / f"{self.model_name}_{self.dataset}_{self.run_name}_last.pth"
 
     def update_from_args(self, args) -> "Config":
         """
@@ -146,7 +172,6 @@ class Config:
             raise ValueError(f"Invalid dataset: {self.dataset}")
 
         return self
-
 
 
 # ======================================================================
