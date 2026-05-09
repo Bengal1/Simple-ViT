@@ -81,6 +81,7 @@ def train_model(
     validation_loader: DataLoader,
     device: torch.device,
     num_epochs: int = 10,
+    scheduler: torch.optim.lr_scheduler.LRScheduler | None = None,
     accumulation_steps: int = 1,
     max_gradient_clip: float | None = None,
     patience: int = 5,
@@ -107,6 +108,8 @@ def train_model(
             Computation device.
         num_epochs (int, optional):
             Number of epochs.
+        scheduler (torch.optim.lr_scheduler.LRScheduler | None, optional):
+            Learning-rate scheduler stepped once after each epoch.
         accumulation_steps (int, optional):
             Gradient accumulation steps.
         max_gradient_clip (float | None, optional):
@@ -160,6 +163,9 @@ def train_model(
             f"Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.2f}% | "
             f"Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.2f}%"
         )
+
+        if scheduler is not None:
+            scheduler.step()
 
         if _early_stopping(
             metric_record=stats["val_loss"],

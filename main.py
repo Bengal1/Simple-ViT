@@ -85,11 +85,10 @@ def main(args: argparse.Namespace | None = None) -> None:
         train_validation_split=cfg.training.validation_split
     )
 
-    model, loss_fn, optimizer, device = setup_model_for_training(
+    model, loss_fn, optimizer, device, scheduler = setup_model_for_training(
         config=cfg,
         num_classes=num_classes,
-        img_size=img_size,
-        model_name=cfg.model_name
+        img_size=img_size
     )
 
     metrics_records = train_model(
@@ -99,7 +98,8 @@ def main(args: argparse.Namespace | None = None) -> None:
         training_loader=train_loader,
         validation_loader=val_loader,
         device=device,
-        num_epochs=cfg.training.epochs
+        num_epochs=cfg.training.epochs,
+        scheduler=scheduler
     )
 
     load_checkpoint(model, cfg.best_checkpoint_path)

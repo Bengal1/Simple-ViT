@@ -76,6 +76,14 @@ class TrainingConfig:
     # --- Early stopping ---
     patience: int = 5
 
+    # --- Scheduler ---
+    use_scheduler: bool = True
+
+    warmup_epochs: int = 5
+    warmup_start_factor: float = 0.1
+
+    cosine_eta_min: float = 1e-6
+
 
 # ======================================================================
 # Optimizer Configuration
