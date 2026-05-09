@@ -1,16 +1,35 @@
-import os
+# ----------------------------------------------------------------------
+# Copyright (c) 2025, Bengal1
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+# ----------------------------------------------------------------------
+"""
+General utility functions for training and evaluation.
+
+This module provides reusable helpers for:
+    - Device selection
+    - Reproducibility
+    - Metric plotting and CSV export
+    - Model checkpoint saving/loading
+    - Parameter counting
+
+The functions are intentionally lightweight and framework-specific to the
+PyTorch training pipeline used in the ViT vs CNN comparison project.
+"""
+
 import csv
+import os
 import random
 from pathlib import Path
 from typing import Optional
 
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.nn as nn
-import matplotlib.pyplot as plt
 
-
-# --- Public API ---
+__author__ = "Bengal1"
 __all__ = [
     "get_device",
     "set_seed",
@@ -18,7 +37,7 @@ __all__ = [
     "save_metrics_to_csv",
     "save_checkpoint",
     "load_checkpoint",
-    "count_parameters"
+    "count_parameters",
 ]
 
 
@@ -28,16 +47,13 @@ __all__ = [
 
 def get_device() -> torch.device:
     """
-    Selects and returns the optimal device (GPU or CPU) for computation.
+    Return the best available computation device.
 
-    This function first checks for the availability of a NVIDIA GPU with
-    CUDA support. If a GPU is found, it's chosen as the computation device.
-    Otherwise, it defaults to the CPU. A descriptive message is printed to
-    inform the user which device has been selected. This helps in verifying
-    that the hardware is correctly recognized for accelerated computations.
+    CUDA is selected when available; otherwise CPU is used.
 
     Returns:
-        torch.device: The selected device, either 'cuda' or 'cpu'.
+        torch.device:
+            Selected computation device.
     """
     if torch.cuda.is_available():
         device = torch.device('cuda')
@@ -52,17 +68,13 @@ def get_device() -> torch.device:
 
 def set_seed(seed_value: int = 1755900008) -> None:
     """
-    Sets the random seed for reproducibility across multiple libraries.
+    Set random seeds for reproducible experiments.
 
-    This function ensures that the random number generators in Python's
-    built-in `random` module, NumPy, and PyTorch are all initialized
-    with the same seed. This is crucial for creating reproducible
-    experiments in machine learning, as it guarantees that operations
-    involving randomness (like data shuffling, weight initialization,
-    and dropout) will yield the same results every time the code is run.
+    Seeds Python, NumPy, PyTorch, and CUDA random number generators.
 
     Args:
-        seed_value (int): The integer value to use as the seed. Defaults to 1755900008.
+        seed_value (int, optional):
+            Seed value used for reproducibility.
     """
     random.seed(seed_value)
     np.random.seed(seed_value)

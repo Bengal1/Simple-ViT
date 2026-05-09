@@ -1,5 +1,27 @@
+# ----------------------------------------------------------------------
+# Copyright (c) 2025, Bengal1
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+# ----------------------------------------------------------------------
+"""
+Patch embedding layer for Vision Transformer models.
+
+This module defines `PatchEmbedding`, which splits an image into
+non-overlapping patches and projects each flattened patch into an embedding
+space.
+
+The layer can be initialized eagerly when `img_size` is provided, or lazily
+during the first forward pass.
+"""
+
 import torch
 import torch.nn as nn
+
+
+__author__ = "Bengal1"
+__all__ = ["PatchEmbedding"]
+
 
 class PatchEmbedding(nn.Module):
     """
@@ -55,6 +77,12 @@ class PatchEmbedding(nn.Module):
                 f"but got {patch_size!r}"
             )
 
+        if self.patch_height <= 0 or self.patch_width <= 0:
+            raise ValueError(
+                f"patch_size dimensions must be positive, "
+                f"got ({self.patch_height}, {self.patch_width})."
+            )
+
         if embed_dim <= 0:
             raise ValueError(
                 f"embed_dim must be positive number, "
@@ -84,41 +112,43 @@ class PatchEmbedding(nn.Module):
             patch_dim = self.in_channels * self.patch_height * self.patch_width
             self.patch_projection = nn.Linear(patch_dim, self.embed_dim)
 
+
     @staticmethod
     def _get_input_size(
-            x: torch.Tensor
+        x: torch.Tensor,
     ) -> tuple[torch.Tensor, int, int, int, int]:
         """
-        Convert input to 4D shape (B, C, H, W) if needed and return both the
-        converted tensor and its dimensions.
+        Convert input to 4D shape `(B, C, H, W)` and return its dimensions.
 
         Supported inputs:
-            - 2D: (H, W)         -> (1, 1, H, W)
-            - 3D: (C, H, W)      -> (1, C, H, W)
-            - 4D: (B, C, H, W)   -> unchanged
+            - `(H, W)`       -> `(1, 1, H, W)`
+            - `(C, H, W)`    -> `(1, C, H, W)`
+            - `(B, C, H, W)` -> unchanged
 
         Args:
-            x (torch.Tensor): Input tensor.
+            x (torch.Tensor):
+                Input image tensor.
 
         Returns:
             tuple[torch.Tensor, int, int, int, int]:
-                The reshaped tensor and its dimensions as (x, B, C, H, W).
+                Reshaped tensor and dimensions as `(x, B, C, H, W)`.
 
         Raises:
-            ValueError: If the input tensor is not 2D, 3D, or 4D.
+            ValueError:
+                If the input tensor is not 2D, 3D, or 4D.
         """
         if x.ndim == 4:
-            B, C, H, W = x.shape
+            batch_size, channels, height, width = x.shape
         elif x.ndim == 3:
             x = x.unsqueeze(0)
-            B, C, H, W = x.shape
+            batch_size, channels, height, width = x.shape
         elif x.ndim == 2:
             x = x.unsqueeze(0).unsqueeze(0)
-            B, C, H, W = x.shape
+            batch_size, channels, height, width = x.shape
         else:
-            raise ValueError(f"Expected 2D, 3D, or 4D input, got {x.ndim}D")
+            raise ValueError(f"Expected 2D, 3D, or 4D input, got {x.ndim}D.")
 
-        return x, B, C, H, W
+        return x, batch_size, channels, height, width
 
     def _initialize_projection(
             self,

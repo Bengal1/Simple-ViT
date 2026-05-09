@@ -18,10 +18,11 @@ Components:
     - OptimConfig: Optimizer parameters
     - Config: Aggregated configuration container
 """
-__author__ = "Bengal1"
 
 from pathlib import Path
 from dataclasses import dataclass, field
+
+__author__ = "Bengal1"
 
 
 # ======================================================================

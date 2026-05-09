@@ -1,233 +1,159 @@
+# ----------------------------------------------------------------------
+# Copyright (c) 2025, Bengal1
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+# ----------------------------------------------------------------------
+"""
+Positional encoding layers for Vision Transformer models.
+
+This module defines `LearnablePositionalEncoding`, which adds trainable
+positional embeddings to patch-token sequences. It supports an optional CLS
+token and can initialize positional embeddings either eagerly or lazily.
+"""
+
 import torch
 import torch.nn as nn
 
 
+__author__ = "Bengal1"
+__all__ = ["LearnablePositionalEncoding"]
+
+
+# ============================================================
+# Learnable Positional Encoding
+# ============================================================
+
 class LearnablePositionalEncoding(nn.Module):
     """
-    Learnable positional encoding for Vision Transformers (ViT).
+    Learnable positional encoding for Vision Transformers.
 
-    Maintains a trainable positional embedding for each patch
-    (and optional CLS token) and adds it to the input patch embeddings.
+    The layer maintains a trainable positional embedding for each token in
+    the sequence and adds it to the input embeddings.
 
-    Attributes:
-        embed_dim (int): Dimensionality of patch embeddings.
-        num_patches (int | None): Number of image patches (can be inferred lazily).
-        has_cls_token (bool): Whether to include an extra position for a CLS token.
-        pos_embedding (nn.Parameter | None): Learnable positional embeddings.
+    Args:
+        embed_dim (int):
+            Embedding dimension of each token.
+        num_patches (int | None, optional):
+            Number of image patches. If provided, positional embeddings are
+            initialized during construction. If None, they are initialized
+            lazily on the first forward pass.
+        has_cls_token (bool, optional):
+            If True, reserves one additional position for a CLS token.
     """
 
     def __init__(
-            self,
-            embed_dim: int,
-            num_patches: int | None = None,
-            has_cls_token: bool = True
+        self,
+        embed_dim: int,
+        num_patches: int | None = None,
+        has_cls_token: bool = True,
     ):
         """
-        Initialize LearnablePositionalEncoding.
+        Initialize the learnable positional encoding layer.
 
-        Args:
-            num_patches (int | None): Number of image patches. If None, will be
-                                       inferred on first forward pass.
-            embed_dim (int): Embedding dimension of each patch.
-            has_cls_token (bool): If True, includes an extra position for a CLS token.
+        Raises:
+            ValueError:
+                If `embed_dim` or `num_patches` is invalid.
         """
         super().__init__()
 
         if not isinstance(embed_dim, int) or embed_dim <= 0:
             raise ValueError(
-                f"embed_dim must be a positive integer, but got {embed_dim!r}"
+                f"embed_dim must be a positive integer, got {embed_dim!r}."
             )
-        self.embed_dim = embed_dim
-
-        self.has_cls_token = has_cls_token
 
         if num_patches is not None and num_patches <= 0:
             raise ValueError(
-                f"num_patches must be a positive integer, but got {num_patches}"
+                f"num_patches must be a positive integer, got {num_patches!r}."
             )
-        elif num_patches is not None:
-            self.num_patches = num_patches + 1 if has_cls_token else num_patches
-            self.pos_embedding = nn.Parameter(torch.empty(1, self.num_patches, self.embed_dim))
-            # Initialize using truncated normal (ViT default)
+
+        self.embed_dim = embed_dim
+        self.has_cls_token = has_cls_token
+
+        self.num_tokens: int | None = None
+        self.pos_embedding: nn.Parameter | None = None
+
+        if num_patches is not None:
+            self.num_tokens = num_patches + 1 if has_cls_token else num_patches
+            self.pos_embedding = nn.Parameter(
+                torch.empty(1, self.num_tokens, self.embed_dim)
+            )
             nn.init.trunc_normal_(self.pos_embedding, std=0.02)
 
-        else:
-            # Placeholder for lazy initialization
-            self.num_patches = None
-            self.pos_embedding: nn.Parameter | None = None
-
     def _initialize_pos_embedding(
-            self,
-            patches: int,
-            device: torch.device
+        self,
+        num_tokens: int,
+        device: torch.device,
     ) -> None:
         """
-        Lazily initialize positional embeddings based on input sequence length.
+        Lazily initialize positional embeddings.
 
         Args:
-            patches (int): Number of tokens (patches + optional CLS).
-            device (torch.device): Device for parameter initialization.
+            num_tokens (int):
+                Sequence length, including CLS token if present.
+            device (torch.device):
+                Device on which to create the positional embeddings.
 
         Raises:
-            ValueError: If the provided number of patches does not match
-                        the expected value.
+            ValueError:
+                If the sequence length does not match the expected length.
         """
-        # Safety: prevent re-initialization
         if self.pos_embedding is not None:
             return
 
-        # Validate / set number of patches
-        if self.num_patches is None:
-            self.num_patches = patches
-        elif self.num_patches != patches:
+        if num_tokens <= 0:
             raise ValueError(
-                f"Expected {self.num_patches} patches, got {patches}"
+                f"num_tokens must be positive, got {num_tokens}."
             )
 
-        # Initialize positional encoding
-        tensor = torch.empty(1, self.num_patches, self.embed_dim, device=device)
-        self.pos_embedding = nn.Parameter(tensor)
+        if self.num_tokens is None:
+            self.num_tokens = num_tokens
+        elif self.num_tokens != num_tokens:
+            raise ValueError(
+                f"Expected sequence length {self.num_tokens}, got {num_tokens}."
+            )
 
+        self.pos_embedding = nn.Parameter(
+            torch.empty(1, self.num_tokens, self.embed_dim, device=device)
+        )
         nn.init.trunc_normal_(self.pos_embedding, std=0.02)
 
-    def forward(
-            self,
-            x: torch.Tensor
-    ) -> torch.Tensor:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
-        Add learnable positional encoding to input embeddings.
+        Add positional embeddings to input token embeddings.
 
         Args:
-            x (Tensor): Input embeddings of shape (B, N, D)
-                        B = batch size
-                        N = number of tokens (patches + optional CLS)
-                        D = embedding dimension.
+            x (torch.Tensor):
+                Input tensor with shape `(batch_size, num_tokens, embed_dim)`.
 
         Returns:
-            Tensor: Positionally encoded embeddings of shape (B, N, D).
+            torch.Tensor:
+                Positionally encoded tensor with the same shape as input.
 
         Raises:
-            ValueError: If input tensor is not 3-dimensional.
-            ValueError: If input sequence length does not match positional embeddings.
+            ValueError:
+                If the input tensor shape is invalid or incompatible with the
+                initialized positional embeddings.
         """
-        # --- Check input dimension ---
         if x.ndim != 3:
             raise ValueError(
-                f"Expected input tensor with 3 dimensions (B, N, D), got {x.ndim}D"
+                f"Expected input tensor with shape `(B, N, D)`, got {x.ndim}D."
             )
 
-        patches_num = x.size(1)
-
-        # If None -> Lazy initialization
-        if self.pos_embedding is None:
-            self._initialize_pos_embedding(patches_num, x.device)
-
-        # Ensure number of patches matches positional embeddings
-        if patches_num != self.num_patches:
+        if x.size(2) != self.embed_dim:
             raise ValueError(
-                f"Expected sequence length {self.num_patches}, got {patches_num}"
+                f"Expected embedding dimension {self.embed_dim}, got {x.size(2)}."
             )
 
-        # --- Add positional embeddings ---
+        num_tokens = x.size(1)
+
+        if self.pos_embedding is None:
+            self._initialize_pos_embedding(num_tokens, x.device)
+
+        if num_tokens != self.num_tokens:
+            raise ValueError(
+                f"Expected sequence length {self.num_tokens}, got {num_tokens}."
+            )
+
         return x + self.pos_embedding
 
-
-
-
-
-class SinusoidalPositionalEncoding2D(nn.Module):
-    """
-    2D Sinusoidal Positional Encoding for Vision Transformer (ViT).
-
-    Each patch embedding receives a D-dimensional vector:
-        - First half encodes width (columns)
-        - Second half encodes height (rows)
-    """
-    def __init__(
-        self,
-        embedding_dim: int,
-        patch_grid_size: tuple[int, int]
-    ):
-        """
-        Args:
-            embedding_dim (int): Dimension of each patch embedding (D)
-            patch_grid_size (tuple[int, int]): Number of patches along (height, width) -> (H, W)
-        """
-        super().__init__()
-        self.embedding_dim = embedding_dim
-        self.num_patches_height, self.num_patches_width = patch_grid_size
-
-        if embedding_dim % 2 != 0:
-            raise ValueError(
-                "Embedding dimension must be even for 2D positional encoding"
-            )
-
-        # Precompute the positional encoding tensor and register as buffer
-        self.register_buffer(
-            'positional_encoding',
-            self._build_2d_positional_encoding()
-        )
-
-    def _build_1d_sinusoidal_encoding(self, length: int) -> torch.Tensor:
-        """
-        Build 1D sinusoidal positional encoding for a single dimension.
-
-        Args:
-            length (int): Number of positions (H or W)
-
-        Returns:
-            torch.Tensor: Shape (length, embedding_dim // 2)
-        """
-        dim_half = self.embedding_dim // 2
-        positions = torch.arange(length, dtype=torch.float32).unsqueeze(1)  # (length, 1)
-        div_term = torch.exp(
-            torch.arange(0, dim_half, 2, dtype=torch.float32) *
-            -(torch.log(torch.tensor(10000.0)) / dim_half)
-        )
-
-        encoding = torch.zeros(length, dim_half)
-        encoding[:, 0::2] = torch.sin(positions * div_term)
-        encoding[:, 1::2] = torch.cos(positions * div_term)
-
-        return encoding  # (length, dim_half)
-
-    def _build_2d_positional_encoding(self) -> torch.Tensor:
-        """
-        Build the full 2D positional encoding for all patches.
-
-        Returns:
-            torch.Tensor: Shape (1, num_patches_height*num_patches_width, embedding_dim)
-        """
-        # 1D encodings
-        width_encoding = self._build_1d_sinusoidal_encoding(self.num_patches_width)   # (W, D/2)
-        height_encoding = self._build_1d_sinusoidal_encoding(self.num_patches_height) # (H, D/2)
-
-        # Combine into 2D grid
-        grid_encoding = torch.zeros(
-            self.num_patches_height,
-            self.num_patches_width,
-            self.embedding_dim
-        )
-        grid_encoding[:, :, :self.embedding_dim // 2] = width_encoding.unsqueeze(0)    # broadcast along height
-        grid_encoding[:, :, self.embedding_dim // 2:] = height_encoding.unsqueeze(1)   # broadcast along width
-
-        # Flatten grid to sequence: (N, D)
-        grid_encoding = grid_encoding.view(
-            self.num_patches_height * self.num_patches_width,
-            self.embedding_dim
-        )
-
-        # Add batch dimension: (1, N, D)
-        return grid_encoding.unsqueeze(0)
-
-    def forward(self, patch_embeddings: torch.Tensor) -> torch.Tensor:
-        """
-        Add 2D positional encoding to patch embeddings.
-
-        Args:
-            patch_embeddings (torch.Tensor): Shape (batch_size, num_patches, embedding_dim)
-
-        Returns:
-            torch.Tensor: Shape (batch_size, num_patches, embedding_dim)
-        """
-        return patch_embeddings + self.positional_encoding[:, :patch_embeddings.size(1), :]

@@ -10,7 +10,7 @@ Main training entry point.
 Orchestrates the full training pipeline:
     - Parses CLI arguments (dataset, model)
     - Builds dataloaders
-    - Initializes model, loss, optimizer, and device
+    - Initializes model, loss, optimizer, device and scheduler
     - Runs training and validation
     - Evaluates on the test set
     - Saves metrics and generates plots
@@ -18,7 +18,6 @@ Orchestrates the full training pipeline:
 Configuration is managed via a centralized dataclass (`config`)
 and can be partially overridden through CLI arguments.
 """
-__author__ = "Bengal1"
 
 import argparse
 
@@ -26,6 +25,9 @@ from config import config as cfg
 from loaders import get_dataloaders
 from utils import set_seed, plot_metrics, save_metrics_to_csv, load_checkpoint
 from train import train_model, evaluate_model, setup_model_for_training
+
+
+__author__ = "Bengal1"
 
 
 def parse_args(args: list[str] | None = None) -> argparse.Namespace:

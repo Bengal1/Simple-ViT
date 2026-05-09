@@ -1,10 +1,33 @@
+# ----------------------------------------------------------------------
+# Copyright (c) 2025, Bengal1
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+# ----------------------------------------------------------------------
+"""
+Tiny ImageNet dataset utilities.
+
+This module defines a PyTorch-compatible dataset wrapper for Tiny ImageNet.
+It supports the official training, validation, and test splits, as well as
+a combined labeled split used for custom train/validation partitioning.
+
+The dataset is downloaded automatically if it is not found under the given
+root directory.
+"""
+
+from __future__ import annotations
+
 import os
 import urllib.request
 import zipfile
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
 from PIL import Image
 from torch.utils.data import Dataset
+
+
+__author__ = "Bengal1"
+__all__ = ["TinyImageNetDataset"]
 
 
 # ============================================================
@@ -196,7 +219,7 @@ class TinyImageNetDataset(Dataset):
         """
         return len(self.samples)
 
-    def __getitem__(self, index: int):
+    def __getitem__(self, index: int) -> tuple[Any, int]:
         """
         Retrieve a single dataset sample.
 
@@ -261,14 +284,11 @@ def _download_tiny_imagenet(
         return dataset_path
 
     try:
-        print("Downloading Tiny ImageNet...")
         urllib.request.urlretrieve(url, zip_path)
 
-        print("Extracting Tiny ImageNet...")
         with zipfile.ZipFile(zip_path, "r") as zip_ref:
             zip_ref.extractall(save_dir)
 
-        print("Done.")
     except Exception as exc:
         raise RuntimeError(
             "Failed to download or extract Tiny ImageNet."

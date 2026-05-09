@@ -5,133 +5,96 @@
 # LICENSE file in the root directory of this source tree.
 # ----------------------------------------------------------------------
 """
-===========================
-         SimpleViT
-===========================
+Simple Vision Transformer model for image classification.
 
-A lightweight Vision Transformer for image classification.
+This module defines `SimpleViT`, a lightweight Vision Transformer used in
+the ViT vs CNN comparison project.
 
-Architecture:
-    - Patch embedding layer (image → sequence of patches)
-    - Learnable positional encoding
-    - Stacked Transformer encoder blocks (Multi-head Self-Attention + MLP)
-    - Classification head (CLS token or pooled representation)
+The model is dataset-agnostic and accepts image inputs specified as either
+`H`, `(H, W)`, or `(C, H, W)`. Images are divided into fixed-size patches,
+projected into an embedding space, enriched with learnable positional
+encoding, and processed by stacked Transformer encoder layers.
 
-The model is dataset-agnostic and accepts inputs of shape (C, H, W).
-Images are split into fixed-size patches, projected into an embedding
-space, and processed using self-attention.
-
-Outputs raw logits and is intended for use with
+The network outputs raw logits and is intended for use with
 `torch.nn.CrossEntropyLoss`.
 """
-__author__="Bengal1"
 
+from collections.abc import Sequence
 
 import torch
 import torch.nn as nn
-from collections.abc import Sequence
 
-from .layers import PatchEmbedding, LearnablePositionalEncoding
 from config import ViTConfig
+from .layers import LearnablePositionalEncoding, PatchEmbedding
 
+
+__author__ = "Bengal1"
+__all__ = ["SimpleViT"]
+
+
+# ============================================================
+# Simple Vision Transformer
+# ============================================================
 
 class SimpleViT(nn.Module):
     """
-    Simple Vision Transformer (ViT) for image classification.
+    Lightweight Vision Transformer for image classification.
 
-    Processes images into patch embeddings, adds learnable positional encodings,
-    passes through Transformer encoder layers, and outputs class predictions.
+    Architecture:
+        - Patch embedding layer
+        - Learnable CLS token
+        - Learnable positional encoding
+        - Stack of Transformer encoder layers
+        - Layer normalization
+        - Linear classification head
 
-    Attributes:
-        patch_embed (PatchEmbedding): Converts images into patch embeddings.
-        cls_token (nn.Parameter): Learnable CLS token for classification.
-        pos_encode (LearnablePositionalEncoding): Adds positional embeddings to patches.
-        encoder_layers (nn.ModuleList): Stack of TransformerEncoderLayer modules.
-        norm (nn.LayerNorm): Normalizes the output of the Transformer.
-        head (nn.Linear): Projects CLS token output to class logits.
+    Args:
+        cfg (ViTConfig):
+            Vision Transformer configuration.
+        num_classes (int):
+            Number of output classes.
+        img_size (int | tuple[int, int] | tuple[int, int, int]):
+            Input image size as `H`, `(H, W)`, or `(C, H, W)`.
     """
 
     def __init__(
-            self,
-            cfg: ViTConfig,
-            num_classes: int,
-            img_size: int | tuple[int, int] | tuple[int, int, int],
-
+        self,
+        cfg: ViTConfig,
+        num_classes: int,
+        img_size: int | tuple[int, int] | tuple[int, int, int],
     ):
         """
         Initialize the SimpleViT model.
 
-        Args:
-            cfg (ViTConfig): Configuration object containing model hyperparameters.
-            num_classes (int): Number of output classes.
-            img_size (int | tuple[int, int] | tuple[int, int, int]):
-                                                Input image size as H, W or C, H, W.
+        Raises:
+            ValueError:
+                If model configuration values are invalid or the image size
+                is incompatible with the patch size.
         """
         super().__init__()
-        # --- Validate model configuration ---
-        if num_classes <= 0:
-            raise ValueError(
-                f"num_classes must be a positive integer, but got {num_classes}"
-            )
 
-        if cfg.embed_dim <= 0:
-            raise ValueError(
-                f"embed_dim must be a positive integer, but got {cfg.embed_dim}"
-            )
+        self._validate_config(cfg, num_classes)
 
-        if cfg.num_heads <= 0:
-            raise ValueError(
-                f"num_heads must be a positive integer, but got {cfg.num_heads}"
-            )
-
-        if cfg.num_layers <= 0:
-            raise ValueError(
-                f"num_layers must be a positive integer, but got {cfg.num_layers}"
-            )
-
-        if cfg.dim_feedforward <= 0:
-            raise ValueError(
-                f"dim_feedforward must be a positive integer, but got {cfg.dim_feedforward}"
-            )
-
-        if not 0.0 <= cfg.dropout < 1.0:
-            raise ValueError(
-                f"dropout must be in the range [0, 1), but got {cfg.dropout}"
-            )
-
-        if cfg.norm_eps <= 0:
-            raise ValueError(
-                f"norm_eps must be a positive number, but got {cfg.norm_eps}"
-            )
-
-        if cfg.embed_dim % cfg.num_heads != 0:
-            raise ValueError(
-                f"embed_dim ({cfg.embed_dim}) must be divisible by num_heads ({cfg.num_heads})"
-            )
-
-        # Set image size as C, H, W format.
         self.img_size = self._set_input_dimensions(img_size)
-        # Validate image patch size relations
-        self.n_patches = self._get_number_of_patches(self.img_size, cfg.patch_size)
-
-        # --- Patch embedding ---
-        self.patch_embed = PatchEmbedding(
-            cfg.patch_size,
+        self.n_patches = self._get_number_of_patches(
             self.img_size,
-            cfg.embed_dim
+            cfg.patch_size,
         )
 
-        # --- CLS token (learnable) ---
+        self.patch_embed = PatchEmbedding(
+            patch_size=cfg.patch_size,
+            img_size=self.img_size,
+            embed_dim=cfg.embed_dim,
+        )
+
         self.cls_token = nn.Parameter(torch.zeros(1, 1, cfg.embed_dim))
 
-        # --- Positional encoding ---
         self.pos_encode = LearnablePositionalEncoding(
-            cfg.embed_dim,
+            embed_dim=cfg.embed_dim,
             num_patches=self.n_patches,
-            has_cls_token=True
+            has_cls_token=True,
         )
 
-        # --- Transformer encoder layers ---
         self.encoder_layers = nn.ModuleList([
             nn.TransformerEncoderLayer(
                 d_model=cfg.embed_dim,
@@ -139,119 +102,185 @@ class SimpleViT(nn.Module):
                 dim_feedforward=cfg.dim_feedforward,
                 dropout=cfg.dropout,
                 activation="gelu",
-                batch_first=True,  # input shape: (B, N, D)
-                norm_first=True
+                batch_first=True,
+                norm_first=True,
             )
             for _ in range(cfg.num_layers)
         ])
 
-        # --- Layer normalization ---
         self.norm = nn.LayerNorm(cfg.embed_dim, eps=cfg.norm_eps)
-
-        # --- Classification head ---
         self.head = nn.Linear(cfg.embed_dim, num_classes)
 
+    @staticmethod
+    def _validate_config(cfg: ViTConfig, num_classes: int):
+        """
+        Validate Vision Transformer configuration values.
+
+        Args:
+            cfg (ViTConfig):
+                Vision Transformer configuration.
+            num_classes (int):
+                Number of output classes.
+
+        Raises:
+            ValueError:
+                If any configuration value is invalid.
+        """
+        if num_classes <= 0:
+            raise ValueError(
+                f"num_classes must be a positive integer, got {num_classes}."
+            )
+
+        if cfg.embed_dim <= 0:
+            raise ValueError(
+                f"embed_dim must be a positive integer, got {cfg.embed_dim}."
+            )
+
+        if cfg.num_heads <= 0:
+            raise ValueError(
+                f"num_heads must be a positive integer, got {cfg.num_heads}."
+            )
+
+        if cfg.num_layers <= 0:
+            raise ValueError(
+                f"num_layers must be a positive integer, got {cfg.num_layers}."
+            )
+
+        if cfg.dim_feedforward <= 0:
+            raise ValueError(
+                "dim_feedforward must be a positive integer, "
+                f"got {cfg.dim_feedforward}."
+            )
+
+        if not 0.0 <= cfg.dropout < 1.0:
+            raise ValueError(
+                f"dropout must be in the range [0, 1), got {cfg.dropout}."
+            )
+
+        if cfg.norm_eps <= 0:
+            raise ValueError(
+                f"norm_eps must be a positive number, got {cfg.norm_eps}."
+            )
+
+        if cfg.embed_dim % cfg.num_heads != 0:
+            raise ValueError(
+                f"embed_dim ({cfg.embed_dim}) must be divisible by "
+                f"num_heads ({cfg.num_heads})."
+            )
 
     @staticmethod
     def _set_input_dimensions(
-            input_dim: int | Sequence[int]
+        input_dim: int | Sequence[int],
     ) -> tuple[int, int, int]:
         """
-        Normalize the input dimensions into a 3-tuple of positive integers.
-
-        This method accepts either:
-          - a single integer (treated as square dimensions: (1, dim, dim)),
-          - a sequence of two integers (treated as (1, height, width)),
-          - a sequence of three integers (treated as (channels, height, width)).
+        Normalize input dimensions to `(C, H, W)`.
 
         Args:
-            input_dim (int | Sequence[int]): Input dimension specification.
+            input_dim (int | Sequence[int]):
+                Input size as `H`, `(H, W)`, or `(C, H, W)`.
 
         Returns:
-            tuple[int, int, int]: A 3-tuple representing (channels, height, width).
+            tuple[int, int, int]:
+                Normalized image size as `(C, H, W)`.
 
         Raises:
-            ValueError: If any dimension is non-positive, or if the input
-                        is not one, two, or three-dimensional.
+            ValueError:
+                If dimensions are non-positive or have unsupported length.
         """
         if isinstance(input_dim, int):
             if input_dim <= 0:
-                raise ValueError("dimension must be a positive integer")
+                raise ValueError("Input dimension must be positive.")
             return 1, input_dim, input_dim
 
-        elif isinstance(input_dim, (tuple, list)) and len(input_dim) == 2:
-            if input_dim[0] <= 0 or input_dim[1] <= 0:
-                raise ValueError("all dimensions must be positive")
-            return 1, input_dim[0], input_dim[1]
+        if isinstance(input_dim, (tuple, list)) and len(input_dim) == 2:
+            height, width = input_dim
+            if height <= 0 or width <= 0:
+                raise ValueError("Input dimensions must be positive.")
+            return 1, height, width
 
-        elif isinstance(input_dim, (tuple, list)) and len(input_dim) == 3:
-            if input_dim[0] <= 0 or input_dim[1] <= 0 or input_dim[2] <= 0:
-                raise ValueError("all dimensions must be positive")
-            return input_dim[0], input_dim[1], input_dim[2]
+        if isinstance(input_dim, (tuple, list)) and len(input_dim) == 3:
+            channels, height, width = input_dim
+            if channels <= 0 or height <= 0 or width <= 0:
+                raise ValueError("Input dimensions must be positive.")
+            return channels, height, width
 
-        else:
-            raise ValueError("input size must be one, two, or three dimensional")
-
+        raise ValueError(
+            "img_size must be an int, a 2-tuple `(H, W)`, "
+            "or a 3-tuple `(C, H, W)`."
+        )
 
     @staticmethod
     def _get_number_of_patches(
-            image_size: tuple[int, int, int],
-            patch_size: int | tuple[int, int]
+        image_size: tuple[int, int, int],
+        patch_size: int | tuple[int, int],
     ) -> int:
+        """
+        Compute the number of image patches.
 
-        H, W =  image_size[1:]
-        patch_h, patch_w = (patch_size, patch_size) if isinstance(patch_size, int) else patch_size
+        Args:
+            image_size (tuple[int, int, int]):
+                Input image size as `(C, H, W)`.
+            patch_size (int | tuple[int, int]):
+                Patch size as an integer or `(patch_h, patch_w)`.
 
-        # Check patch size positive
+        Returns:
+            int:
+                Number of patches produced from the image.
+
+        Raises:
+            ValueError:
+                If the patch size is invalid or does not divide the image size.
+        """
+        _, height, width = image_size
+
+        if isinstance(patch_size, int):
+            patch_h, patch_w = patch_size, patch_size
+        else:
+            patch_h, patch_w = patch_size
+
         if patch_h <= 0 or patch_w <= 0:
             raise ValueError(
-                f"patch_size dimensions must be positive, but got ({patch_h}, {patch_w})"
+                f"patch_size dimensions must be positive, "
+                f"got ({patch_h}, {patch_w})."
             )
-        # Check patch smaller than image
-        if patch_h > H or patch_w > W:
+
+        if patch_h > height or patch_w > width:
             raise ValueError(
-                f"Patch size ({patch_h}x{patch_w}) cannot be larger than image size ({H}x{W}).")
-        # Check divisibility
-        if H % patch_h != 0 or W % patch_w != 0:
+                f"Patch size ({patch_h}x{patch_w}) cannot be larger than "
+                f"image size ({height}x{width})."
+            )
+
+        if height % patch_h != 0 or width % patch_w != 0:
             raise ValueError(
-                f"Image size ({H}x{W}) must be divisible by patch size ({patch_h}x{patch_w}).")
+                f"Image size ({height}x{width}) must be divisible by "
+                f"patch size ({patch_h}x{patch_w})."
+            )
 
-
-        # Compute number of patches
-        n_patches = (H // patch_h) * (W // patch_w)
-
-        return n_patches
-
-
+        return (height // patch_h) * (width // patch_w)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
-        Forward pass of the Vision Transformer.
+        Run the forward pass.
 
         Args:
-            x (Tensor): Input images, shape (B, C, H, W)
+            x (torch.Tensor):
+                Input batch with shape `(batch_size, C, H, W)`.
 
         Returns:
-            Tensor: Class logits, shape (B, num_classes)
+            torch.Tensor:
+                Class logits with shape `(batch_size, num_classes)`.
         """
-        # Patch embedding
-        x = self.patch_embed(x)  # (B, n_patches, D)
+        x = self.patch_embed(x)
 
-        # CLS token
         cls_token = self.cls_token.expand(x.size(0), -1, -1)
-        x = torch.cat([cls_token, x], dim=1) # (B, n_patches + 1, D)
+        x = torch.cat([cls_token, x], dim=1)
 
-        # Positional encoding
         x = self.pos_encode(x)
 
-        # Transformer encoder
         for layer in self.encoder_layers:
             x = layer(x)
 
-        # Layer norm
         x = self.norm(x)
+        x = self.head(x[:, 0])
 
-        # Classification head on CLS token
-        return self.head(x[:, 0])
-
-
+        return x

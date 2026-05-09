@@ -1,6 +1,26 @@
-from typing import Callable
+# ----------------------------------------------------------------------
+# Copyright (c) 2025, Bengal1
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+# ----------------------------------------------------------------------
+"""
+Dataset transform wrapper.
+
+This module defines `TransformedDataset`, a lightweight wrapper that applies
+input and/or target transforms to samples returned by another dataset.
+
+It is useful when the same underlying dataset or subset must be reused with
+different transform pipelines, such as separate train and validation transforms.
+"""
+
+from typing import Any, Callable
 
 from torch.utils.data import Dataset
+
+
+__author__ = "Bengal1"
+__all__ = ["TransformedDataset"]
 
 
 # ============================================================
@@ -9,17 +29,7 @@ from torch.utils.data import Dataset
 
 class TransformedDataset(Dataset):
     """
-    Dataset wrapper that applies transforms to samples retrieved
-    from another dataset.
-
-    This wrapper enables applying different transforms to the same
-    underlying dataset instance without duplicating dataset loading
-    or metadata.
-
-    Common use cases include:
-        - Different train/validation transforms
-        - Additional augmentation pipelines
-        - Label transformations
+    Wrap a dataset and apply optional transforms to its samples.
 
     Args:
         dataset (Dataset):
@@ -49,29 +59,23 @@ class TransformedDataset(Dataset):
         """
         return len(self.dataset)
 
-    def __getitem__(self, index: int):
+    def __getitem__(self, index: int) -> tuple[Any, Any]:
         """
-        Retrieve and transform a dataset sample.
-
-        The sample is first retrieved from the wrapped dataset, then
-        optional input and target transforms are applied independently.
+        Retrieve a sample and apply optional input/target transforms.
 
         Args:
             index (int):
                 Sample index.
 
         Returns:
-            tuple:
+            tuple[Any, Any]:
                 Transformed input sample and target label.
         """
-        # Retrieve raw sample from the wrapped dataset.
         image, label = self.dataset[index]
 
-        # Apply input transformation if provided.
         if self.transform is not None:
             image = self.transform(image)
 
-        # Apply target transformation if provided.
         if self.target_transform is not None:
             label = self.target_transform(label)
 

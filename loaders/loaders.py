@@ -1,8 +1,44 @@
+# ----------------------------------------------------------------------
+# Copyright (c) 2025, Bengal1
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+# ----------------------------------------------------------------------
+"""
+Dataset loading utilities for image classification experiments.
+
+This module provides a single public function, `get_dataloaders`, for
+constructing train, validation, and test DataLoaders for the supported
+datasets used in the ViT vs CNN comparison project.
+
+Supported datasets:
+    - MNIST
+    - CIFAR-10
+    - Tiny ImageNet
+
+Each dataset loader returns:
+    - train_loader
+    - val_loader
+    - test_loader
+    - image_size: input image shape as (C, H, W)
+    - num_classes: number of target classes
+
+The training split is divided into train/validation subsets using a
+reproducible random split. Official test or validation sets are used as
+the final evaluation split depending on dataset availability.
+"""
+
 import torch
-from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, random_split
+from torchvision import datasets, transforms
 
 from datasets import TinyImageNetDataset, TransformedDataset
+
+
+__author__ = "Bengal1"
+__all__ = ["get_dataloaders"]
+
+DATA_ROOT: str = "./data"
 
 
 # ============================================================
@@ -12,7 +48,7 @@ from datasets import TinyImageNetDataset, TransformedDataset
 def _get_mnist_dataloaders(
     batch_size: int,
     train_validation_split: float,
-    seed :int = 1755900008,
+    seed: int,
 ) -> tuple[
     DataLoader,
     DataLoader,
@@ -30,7 +66,7 @@ def _get_mnist_dataloaders(
         batch_size (int): Number of samples per batch.
         train_validation_split (float): Fraction of the training set used
             for validation.
-        seed (int, optional):
+        seed (int):
             Random seed used for reproducible dataset splitting.
 
     Returns:
@@ -49,14 +85,14 @@ def _get_mnist_dataloaders(
     ])
 
     full_train_dataset = datasets.MNIST(
-        root="./data",
+        root=DATA_ROOT,
         train=True,
         download=True,
         transform=transform,
     )
 
     test_dataset = datasets.MNIST(
-        root="./data",
+        root=DATA_ROOT,
         train=False,
         download=True,
         transform=transform,
@@ -67,14 +103,14 @@ def _get_mnist_dataloaders(
     train_dataset, val_dataset = random_split(
         full_train_dataset,
         [1 - train_validation_split, train_validation_split],
-        generator=generator
+        generator=generator,
     )
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-    img_size, num_classes = get_dataset_info(train_loader)
+    img_size, num_classes = _get_dataset_info(train_loader)
 
     return train_loader, val_loader, test_loader, img_size, num_classes
 
@@ -86,7 +122,7 @@ def _get_mnist_dataloaders(
 def _get_cifar10_dataloaders(
     batch_size: int,
     train_validation_split: float,
-    seed :int = 1755900008,
+    seed: int,
 ) -> tuple[
     DataLoader,
     DataLoader,
@@ -104,7 +140,7 @@ def _get_cifar10_dataloaders(
         batch_size (int): Number of samples per batch.
         train_validation_split (float): Fraction of the training set used
             for validation.
-        seed (int, optional):
+        seed (int):
             Random seed used for reproducible dataset splitting.
 
     Returns:
@@ -126,22 +162,17 @@ def _get_cifar10_dataloaders(
     ])
 
     full_train_dataset = datasets.CIFAR10(
-        root="./data",
+        root=DATA_ROOT,
         train=True,
         download=True,
         transform=transform,
     )
 
     test_dataset = datasets.CIFAR10(
-        root="./data",
+        root=DATA_ROOT,
         train=False,
         download=True,
         transform=transform,
-    )
-
-    train_dataset, val_dataset = random_split(
-        full_train_dataset,
-        [1 - train_validation_split, train_validation_split],
     )
 
     generator = torch.Generator().manual_seed(seed)
@@ -149,14 +180,14 @@ def _get_cifar10_dataloaders(
     train_dataset, val_dataset = random_split(
         full_train_dataset,
         [1 - train_validation_split, train_validation_split],
-        generator=generator
+        generator=generator,
     )
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-    img_size, num_classes = get_dataset_info(train_loader)
+    img_size, num_classes = _get_dataset_info(train_loader)
 
     return train_loader, val_loader, test_loader, img_size, num_classes
 
@@ -168,7 +199,7 @@ def _get_cifar10_dataloaders(
 def _get_tiny_imagenet_dataloaders(
     batch_size: int,
     train_validation_split: float,
-    seed :int = 1755900008,
+    seed: int,
 ) -> tuple[
     DataLoader,
     DataLoader,
@@ -186,7 +217,7 @@ def _get_tiny_imagenet_dataloaders(
         batch_size (int): Number of samples per batch.
         train_validation_split (float): Fraction of the labeled dataset used
             for validation.
-        seed (int, optional):
+        seed (int):
             Random seed used for reproducible dataset splitting.
 
     Returns:
@@ -217,13 +248,13 @@ def _get_tiny_imagenet_dataloaders(
     ])
 
     full_train_dataset = TinyImageNetDataset(
-        root="./data",
+        root=DATA_ROOT,
         split="train",
         transform=None,
     )
 
     test_dataset = TinyImageNetDataset(
-        root="./data",
+        root=DATA_ROOT,
         split="val",
         transform=test_transform,
     )
@@ -233,7 +264,7 @@ def _get_tiny_imagenet_dataloaders(
     train_subset, val_subset = random_split(
         full_train_dataset,
         [1 - train_validation_split, train_validation_split],
-        generator=generator
+        generator=generator,
     )
 
     train_dataset = TransformedDataset(train_subset, train_transform)
@@ -243,68 +274,9 @@ def _get_tiny_imagenet_dataloaders(
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-    img_size, num_classes = get_dataset_info(train_loader)
+    img_size, num_classes = _get_dataset_info(train_loader)
 
     return train_loader, val_loader, test_loader, img_size, num_classes
-
-
-# def _get_tiny_imagenet_dataloaders(
-#     batch_size: int,
-#     train_validation_split: float,
-# ) -> tuple[DataLoader, DataLoader, DataLoader, tuple[int, int, int], int]:
-#     """
-#     Create DataLoaders for Tiny ImageNet.
-#
-#     The labeled dataset (train + val) is split into training and validation
-#     subsets, while the test split is used unchanged.
-#
-#     Args:
-#         batch_size (int): Number of samples per batch.
-#         train_validation_split (float): Fraction of the labeled dataset used
-#             for validation.
-#
-#     Returns:
-#         tuple:
-#             (train_loader, val_loader, test_loader, image_size, num_classes)
-#
-#     Raises:
-#         ValueError: If ``train_validation_split`` is not in (0, 1).
-#     """
-#     if not 0 < train_validation_split < 1:
-#         raise ValueError("train_validation_split must be between 0 and 1.")
-#
-#     transform = transforms.Compose([
-#         transforms.ToTensor(),
-#         transforms.Normalize(
-#             (0.4802, 0.4481, 0.3975),
-#             (0.2302, 0.2265, 0.2262),
-#         ),
-#     ])
-#
-#     full_train_dataset = TinyImageNetDataset(
-#         root="./data",
-#         split="train",
-#         transform=transform,
-#     )
-#
-#     test_dataset = TinyImageNetDataset(
-#         root="./data",
-#         split="val",
-#         transform=transform,
-#     )
-#
-#     train_dataset, val_dataset = random_split(
-#         full_train_dataset,
-#         [1 - train_validation_split, train_validation_split],
-#     )
-#
-#     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-#     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
-#     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-#
-#     img_size, num_classes = get_dataset_info(train_loader)
-#
-#     return train_loader, val_loader, test_loader, img_size, num_classes
 
 
 # ============================================================
@@ -315,7 +287,7 @@ def get_dataloaders(
     dataset: str = "mnist",
     batch_size: int = 128,
     train_validation_split: float = 0.2,
-    seed :int = 1755900008,
+    seed: int = 1755900008,
 ) -> tuple[
     DataLoader,
     DataLoader,
@@ -349,13 +321,25 @@ def get_dataloaders(
     dataset = dataset.lower()
 
     if dataset == "mnist":
-        return _get_mnist_dataloaders(batch_size, train_validation_split, seed)
+        return _get_mnist_dataloaders(
+            batch_size,
+            train_validation_split,
+            seed,
+        )
 
     if dataset == "cifar10":
-        return _get_cifar10_dataloaders(batch_size, train_validation_split, seed)
+        return _get_cifar10_dataloaders(
+            batch_size,
+            train_validation_split,
+            seed,
+        )
 
     if dataset == "tiny_imagenet":
-        return _get_tiny_imagenet_dataloaders(batch_size, train_validation_split, seed)
+        return _get_tiny_imagenet_dataloaders(
+            batch_size,
+            train_validation_split,
+            seed,
+        )
 
     raise ValueError(
         f"Unsupported dataset '{dataset}'. "
@@ -367,7 +351,7 @@ def get_dataloaders(
 # DataLoader Helper Utilities
 # ============================================================
 
-def get_dataset_info(
+def _get_dataset_info(
     data_loader: DataLoader,
 ) -> tuple[tuple[int, int, int], int]:
     """
