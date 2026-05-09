@@ -71,7 +71,7 @@ def main(args: argparse.Namespace | None = None) -> None:
             Parsed command-line arguments. If None, arguments are parsed
             from the command line.
     """
-    set_seed()
+    set_seed(cfg.seed)
 
     if args is None:
         args = parse_args()

@@ -115,6 +115,9 @@ class Config:
     model_name: str = "vit"   # {"vit", "cnn"}
     dataset: str = "mnist"    # {"mnist", "cifar10", "tiny_imagenet"}
 
+    # --- Reproducibility ---
+    seed: int = 1755900008
+
     # --- Paths ---
     checkpoint_dir: str = "checkpoints"
     run_name: str = "default"
