@@ -18,14 +18,14 @@ python main.py --model vit --dataset tiny_imagenet
 
 ## 📊 Results
 
-| Model | Metrics           | MNIST      | CIFAR-10   | Tiny ImageNet |
-|-------|-------------------|------------|------------|---------------|
-| ViT   | Parameters        | 18,955,274 | 18,979,338 |  19,175,112   |
-|       | Test Accuracy (%) |   93.27    |   62.26    |     27.84     |
-|       | Test Loss         |   0.6838   |  1.40396   |    3.6533     |
-| CNN   | Parameters        |  843,850   | 1,204,874  |   6,545,224   |
-|       | Test Accuracy (%) |   99.35    |    72.28   |     22.67     |
-|       | Test Loss         |   0.5305   |   1.1652   |    3.9591     |
+| Dataset | Model | Params | Accuracy (%) | Loss |
+|---------|:-----:|-------:|-------------:|-----:|
+| MNIST | `CNN` | 843,850 | **99.35** | **0.5305** |
+| MNIST | `ViT` | 18,955,274 | 93.27 | 0.6838 |
+| CIFAR-10 | `CNN` | 1,204,874 | **72.28** | **1.1652** |
+| CIFAR-10 | `ViT` | 18,979,338 | 62.26 | 1.4040 |
+| Tiny ImageNet | `CNN` | 6,545,224 | 22.67 | 3.9591 |
+| Tiny ImageNet | `ViT` | 19,175,112 | **...** | **...** |
 
 
 ## ⚙️ Training & Execution
