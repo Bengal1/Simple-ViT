@@ -28,6 +28,18 @@ python main.py --model vit --dataset tiny_imagenet
 | Tiny ImageNet | `ViT` | 19,175,112 | **...** | **...** |
 
 
+| Dataset | Model | Params | Accuracy (%) | Loss |
+|---------|:-----:|-------:|-------------:|-----:|
+| MNIST | `CNN` | 843,850 | **99.35** | **0.5305** |
+| MNIST | `ViT` | 18,955,274 | 93.27 | 0.6838 |
+| **—** | **—** | **—** | **—** | **—** |
+| CIFAR-10 | `CNN` | 1,204,874 | **72.28** | **1.1652** |
+| CIFAR-10 | `ViT` | 18,979,338 | 62.26 | 1.4040 |
+| **—** | **—** | **—** | **—** | **—** |
+| Tiny ImageNet | `CNN` | 6,545,224 | 22.67 | 3.9591 |
+| Tiny ImageNet | `ViT` | 19,175,112 | **39.65** | **2.9620** |
+
+
 ## ⚙️ Training & Execution
 Follow the steps below to set up and run the project.
 
