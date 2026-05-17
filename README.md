@@ -54,7 +54,7 @@ python main.py --model vit --dataset tiny_imagenet
     <td>18,979,338</td>
     <td>62.26</td>
     <td>1.4040</td>
-    <td><b>CNN</b></td>
+    <td><b>CNN 🏆</b></td>
   </tr>
 
   <tr>
