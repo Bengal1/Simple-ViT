@@ -18,6 +18,58 @@ python main.py --model vit --dataset tiny_imagenet
 
 ## 📊 Results
 
+
+<table>
+  <tr>
+    <th rowspan="2">Dataset</th>
+    <th colspan="3"><code>CNN</code></th>
+    <th colspan="3"><code>ViT</code></th>
+    <th rowspan="2">Best Model</th>
+  </tr>
+  <tr>
+    <th>Params</th>
+    <th>Accuracy (%)</th>
+    <th>Loss</th>
+    <th>Params</th>
+    <th>Accuracy (%)</th>
+    <th>Loss</th>
+  </tr>
+
+  <tr>
+    <td><b>MNIST</b></td>
+    <td>843,850</td>
+    <td><b>99.35</b></td>
+    <td><b>0.5305</b></td>
+    <td>18,955,274</td>
+    <td>93.27</td>
+    <td>0.6838</td>
+    <td><b>CNN</b></td>
+  </tr>
+
+  <tr>
+    <td><b>CIFAR-10</b></td>
+    <td>1,204,874</td>
+    <td><b>72.28</b></td>
+    <td><b>1.1652</b></td>
+    <td>18,979,338</td>
+    <td>62.26</td>
+    <td>1.4040</td>
+    <td><b>CNN</b></td>
+  </tr>
+
+  <tr>
+    <td><b>Tiny ImageNet</b></td>
+    <td>6,545,224</td>
+    <td>22.67</td>
+    <td>3.9591</td>
+    <td>19,175,112</td>
+    <td><b>...</b></td>
+    <td><b>...</b></td>
+    <td><b>ViT</b></td>
+  </tr>
+</table>
+
+
 <table>
   <tr>
     <th>Dataset</th>
