@@ -18,36 +18,15 @@ python main.py --model vit --dataset tiny_imagenet
 
 ## 📊 Results
 
-| Dataset | Model | Params | Accuracy (%) | Loss |
-|---------|:-----:|-------:|-------------:|-----:|
-| MNIST | `CNN` | 843,850 | **99.35** | **0.5305** |
-| MNIST | `ViT` | 18,955,274 | 93.27 | 0.6838 |
-| CIFAR-10 | `CNN` | 1,204,874 | **72.28** | **1.1652** |
-| CIFAR-10 | `ViT` | 18,979,338 | 62.26 | 1.4040 |
-| Tiny ImageNet | `CNN` | 6,545,224 | 22.67 | 3.9591 |
-| Tiny ImageNet | `ViT` | 19,175,112 | **...** | **...** |
-
-
-| Dataset | Model | Params | Accuracy (%) | Loss |
-|---------|:-----:|-------:|-------------:|-----:|
-| MNIST | `CNN` | 843,850 | **99.35** | **0.5305** |
-| MNIST | `ViT` | 18,955,274 | 93.27 | 0.6838 |
-| **—** | **—** | **—** | **—** | **—** |
-| CIFAR-10 | `CNN` | 1,204,874 | **72.28** | **1.1652** |
-| CIFAR-10 | `ViT` | 18,979,338 | 62.26 | 1.4040 |
-| **—** | **—** | **—** | **—** | **—** |
-| Tiny ImageNet | `CNN` | 6,545,224 | 22.67 | 3.9591 |
-| Tiny ImageNet | `ViT` | 19,175,112 | **39.65** | **2.9620** |
-
-
 <table>
   <tr>
     <th>Dataset</th>
     <th>Model</th>
-    <th>Params</th>
-    <th>Accuracy (%)</th>
-    <th>Loss</th>
+    <th>Parameters</th>
+    <th>Test Accuracy (%)</th>
+    <th>Test Loss</th>
   </tr>
+
   <tr>
     <td rowspan="2"><b>MNIST</b></td>
     <td><code>CNN</code></td>
@@ -60,6 +39,34 @@ python main.py --model vit --dataset tiny_imagenet
     <td>18,955,274</td>
     <td>93.27</td>
     <td>0.6838</td>
+  </tr>
+
+  <tr>
+    <td rowspan="2"><b>CIFAR-10</b></td>
+    <td><code>CNN</code></td>
+    <td>1,204,874</td>
+    <td><b>72.28</b></td>
+    <td><b>1.1652</b></td>
+  </tr>
+  <tr>
+    <td><code>ViT</code></td>
+    <td>18,979,338</td>
+    <td>62.26</td>
+    <td>1.4040</td>
+  </tr>
+
+  <tr>
+    <td rowspan="2"><b>Tiny ImageNet</b></td>
+    <td><code>CNN</code></td>
+    <td>6,545,224</td>
+    <td>22.67</td>
+    <td>3.9591</td>
+  </tr>
+  <tr>
+    <td><code>ViT</code></td>
+    <td>19,175,112</td>
+    <td><b>...</b></td>
+    <td><b>...</b></td>
   </tr>
 </table>
 
