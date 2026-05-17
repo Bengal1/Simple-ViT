@@ -75,6 +75,63 @@ python main.py --model vit --dataset tiny_imagenet
     <th>Dataset</th>
     <th>Model</th>
     <th>Parameters</th>
+    <th>Accuracy (%)</th>
+    <th>Loss</th>
+    <th>Best Model</th>
+  </tr>
+
+  <tr>
+    <td rowspan="2"><b>MNIST</b></td>
+    <td><code>CNN</code></td>
+    <td>843,850</td>
+    <td><b>99.35</b></td>
+    <td><b>0.5305</b></td>
+    <td rowspan="2"><b>CNN</b></td>
+  </tr>
+  <tr>
+    <td><code>ViT</code></td>
+    <td>18,955,274</td>
+    <td>93.27</td>
+    <td>0.6838</td>
+  </tr>
+
+  <tr>
+    <td rowspan="2"><b>CIFAR-10</b></td>
+    <td><code>CNN</code></td>
+    <td>1,204,874</td>
+    <td><b>72.28</b></td>
+    <td><b>1.1652</b></td>
+    <td rowspan="2"><b>CNN</b></td>
+  </tr>
+  <tr>
+    <td><code>ViT</code></td>
+    <td>18,979,338</td>
+    <td>62.26</td>
+    <td>1.4040</td>
+  </tr>
+
+  <tr>
+    <td rowspan="2"><b>Tiny ImageNet</b></td>
+    <td><code>CNN</code></td>
+    <td>6,545,224</td>
+    <td>22.67</td>
+    <td>3.9591</td>
+    <td rowspan="2"><b>ViT</b></td>
+  </tr>
+  <tr>
+    <td><code>ViT</code></td>
+    <td>19,175,112</td>
+    <td><b>...</b></td>
+    <td><b>...</b></td>
+  </tr>
+</table>
+
+
+<table>
+  <tr>
+    <th>Dataset</th>
+    <th>Model</th>
+    <th>Parameters</th>
     <th>Test Accuracy (%)</th>
     <th>Test Loss</th>
   </tr>
