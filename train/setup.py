@@ -1,11 +1,39 @@
+# ----------------------------------------------------------------------
+# Copyright (c) 2025, Bengal1
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+# ----------------------------------------------------------------------
+"""
+Training setup utilities.
+
+This module builds the core training components:
+    - model
+    - loss function
+    - optimizer
+    - device
+    - optional learning-rate scheduler
+
+It acts as the bridge between the global configuration object and the
+training loop.
+"""
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from models import SimpleViT, SimpleCNN
 from config import Config
+from models import SimpleCNN, SimpleViT
 from utils import get_device
 
+
+__author__ = "Bengal1"
+__all__ = ["setup_model_for_training"]
+
+
+# ============================================================
+# Training Setup
+# ============================================================
 
 def setup_model_for_training(
     config: Config,
@@ -19,29 +47,19 @@ def setup_model_for_training(
     optim.lr_scheduler.LRScheduler | None,
 ]:
     """
-    Initialize the training components for a given model.
-
-    Constructs the model, loss function, optimizer, optional learning-rate
-    scheduler, and selects the appropriate computation device.
+    Initialize model, loss, optimizer, device, and scheduler.
 
     Args:
         config (Config):
-            Global configuration object containing model and training settings.
+            Global configuration object.
         num_classes (int):
             Number of output classes.
         img_size (tuple[int, int, int]):
-            Input image shape as (C, H, W).
+            Input image shape as `(C, H, W)`.
 
     Returns:
-        tuple[
-            nn.Module,
-            nn.Module,
-            optim.Optimizer,
-            torch.device,
-            optim.lr_scheduler.LRScheduler | None,
-        ]:
-            Model, loss function, optimizer, computation device,
-            and optional learning-rate scheduler.
+        tuple:
+            model, loss function, optimizer, device, and optional scheduler.
     """
     device = get_device()
 
@@ -64,28 +82,10 @@ def setup_model_for_training(
         weight_decay=config.optim.weight_decay,
     )
 
-    scheduler = None
-
-    if config.training.use_scheduler:
-
-        warmup_scheduler = torch.optim.lr_scheduler.LinearLR(
-            optimizer,
-            start_factor=config.training.warmup_start_factor,
-            total_iters=config.training.warmup_epochs,
-        )
-
-        cosine_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-            optimizer,
-            T_max=config.training.epochs - config.training.warmup_epochs,
-            eta_min=config.training.cosine_eta_min,
-        )
-
-        scheduler = torch.optim.lr_scheduler.SequentialLR(
-            optimizer,
-            schedulers=[warmup_scheduler, cosine_scheduler],
-            milestones=[config.training.warmup_epochs],
-        )
-
+    scheduler = _build_scheduler(
+        config=config,
+        optimizer=optimizer,
+    )
 
     return model, loss_fn, optimizer, device, scheduler
 
@@ -97,25 +97,25 @@ def _build_model(
     device: torch.device,
 ) -> nn.Module:
     """
-    Create the specified model and move it to the target device.
+    Build the selected model and move it to the target device.
 
     Args:
         config (Config):
-            Configuration containing model-specific parameters.
+            Global configuration object.
         num_classes (int):
             Number of output classes.
         img_size (tuple[int, int, int]):
-            Input image shape as (C, H, W).
+            Input image shape as `(C, H, W)`.
         device (torch.device):
-            Target device.
+            Target computation device.
 
     Returns:
         nn.Module:
-            Instantiated model on the specified device.
+            Initialized model on the selected device.
 
     Raises:
         ValueError:
-            If the model name is not supported.
+            If the configured model name is unsupported.
     """
     if config.model_name == "vit":
         model = SimpleViT(
@@ -130,7 +130,59 @@ def _build_model(
             cfg=config.cnn,
         )
     else:
-        raise ValueError(f"Unsupported model '{config.model_name}'. "
-                         f"Expected one of {'vit', 'cnn'}.")
+        raise ValueError(
+            f"Unsupported model '{config.model_name}'. "
+            "Expected one of: 'vit', 'cnn'."
+        )
 
     return model.to(device)
+
+
+def _build_scheduler(
+    config: Config,
+    optimizer: optim.Optimizer,
+) -> optim.lr_scheduler.LRScheduler | None:
+    """
+    Build the learning-rate scheduler.
+
+    Uses linear warmup followed by cosine annealing when enabled.
+
+    Args:
+        config (Config):
+            Global configuration object.
+        optimizer (optim.Optimizer):
+            Optimizer whose learning rate will be scheduled.
+
+    Returns:
+        optim.lr_scheduler.LRScheduler | None:
+            Scheduler if enabled, otherwise None.
+
+    Raises:
+        ValueError:
+            If scheduler configuration is invalid.
+    """
+    if not config.training.use_scheduler:
+        return None
+
+    if config.training.warmup_epochs >= config.training.epochs:
+        raise ValueError(
+            "warmup_epochs must be smaller than total training epochs."
+        )
+
+    warmup_scheduler = optim.lr_scheduler.LinearLR(
+        optimizer,
+        start_factor=config.training.warmup_start_factor,
+        total_iters=config.training.warmup_epochs,
+    )
+
+    cosine_scheduler = optim.lr_scheduler.CosineAnnealingLR(
+        optimizer,
+        T_max=config.training.epochs - config.training.warmup_epochs,
+        eta_min=config.training.cosine_eta_min,
+    )
+
+    return optim.lr_scheduler.SequentialLR(
+        optimizer,
+        schedulers=[warmup_scheduler, cosine_scheduler],
+        milestones=[config.training.warmup_epochs],
+    )

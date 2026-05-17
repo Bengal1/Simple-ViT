@@ -19,10 +19,20 @@ Components:
     - Config: Aggregated configuration container
 """
 
-from pathlib import Path
 from dataclasses import dataclass, field
+from pathlib import Path
+from argparse import Namespace
+
 
 __author__ = "Bengal1"
+__all__ = [
+    "ViTConfig",
+    "CNNConfig",
+    "TrainingConfig",
+    "OptimConfig",
+    "Config",
+    "config",
+]
 
 
 # ======================================================================
@@ -136,35 +146,38 @@ class Config:
         """
         Path to the default checkpoint file for the current run.
         """
-        return Path(self.checkpoint_dir) / f"{self.model_name}_{self.dataset}_{self.run_name}.pth"
+        return (
+            Path(self.checkpoint_dir)
+            / f"{self.model_name}_{self.dataset}_{self.run_name}.pth"
+        )
 
     @property
     def best_checkpoint_path(self) -> Path:
         """
         Path to the best-performing checkpoint (based on validation).
         """
-        return Path(self.checkpoint_dir) / f"{self.model_name}_{self.dataset}_{self.run_name}_best.pth"
+        return (
+            Path(self.checkpoint_dir)
+            / f"{self.model_name}_{self.dataset}_{self.run_name}_best.pth"
+        )
 
     @property
     def last_checkpoint_path(self) -> Path:
         """
         Path to the last checkpoint (latest training state).
         """
-        return Path(self.checkpoint_dir) / f"{self.model_name}_{self.dataset}_{self.run_name}_last.pth"
+        return (
+            Path(self.checkpoint_dir)
+            / f"{self.model_name}_{self.dataset}_{self.run_name}_last.pth"
+        )
 
-    def update_from_args(self, args) -> "Config":
+    def update_from_args(self, args: Namespace) -> "Config":
         """
         Update runtime configuration fields from CLI arguments.
 
-        This method applies user-provided command-line arguments to the
-        configuration instance and validates that the selected options
-        are supported.
-
         Args:
-            args:
-                Parsed argparse namespace containing at least:
-                    - dataset (str)
-                    - model (str)
+            args (Namespace):
+                Parsed argparse namespace containing `dataset` and `model`.
 
         Returns:
             Config:
@@ -174,8 +187,8 @@ class Config:
             ValueError:
                 If `model` or `dataset` is not supported.
         """
-        self.dataset = args.dataset
-        self.model_name = args.model
+        self.dataset = args.dataset.lower()
+        self.model_name = args.model.lower()
 
         if self.model_name not in {"vit", "cnn"}:
             raise ValueError(f"Invalid model_name: {self.model_name}")
