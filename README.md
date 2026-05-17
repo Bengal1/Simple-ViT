@@ -40,6 +40,30 @@ python main.py --model vit --dataset tiny_imagenet
 | Tiny ImageNet | `ViT` | 19,175,112 | **39.65** | **2.9620** |
 
 
+<table>
+  <tr>
+    <th>Dataset</th>
+    <th>Model</th>
+    <th>Params</th>
+    <th>Accuracy (%)</th>
+    <th>Loss</th>
+  </tr>
+  <tr>
+    <td rowspan="2"><b>MNIST</b></td>
+    <td><code>CNN</code></td>
+    <td>843,850</td>
+    <td><b>99.35</b></td>
+    <td><b>0.5305</b></td>
+  </tr>
+  <tr>
+    <td><code>ViT</code></td>
+    <td>18,955,274</td>
+    <td>93.27</td>
+    <td>0.6838</td>
+  </tr>
+</table>
+
+
 ## ⚙️ Training & Execution
 Follow the steps below to set up and run the project.
 
